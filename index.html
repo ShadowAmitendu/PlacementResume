@@ -493,11 +493,12 @@
 			}
 
 			.links-line {
-				display: flex;
+				display: inline-flex;
 				justify-content: flex-end;
 				align-items: center;
-				flex-wrap: wrap;
-				gap: 6px;
+				flex-wrap: nowrap;
+				white-space: nowrap;
+				gap: 4px;
 				font-size: 10.5pt;
 				color: #333;
 			}
@@ -510,7 +511,7 @@
 			.link-item {
 				display: inline-flex;
 				align-items: center;
-				gap: 4px;
+				gap: 2px;
 			}
 			.link-item:not(:last-of-type)::after {
 				content: "|";
@@ -1814,18 +1815,18 @@
 							Email:
 							<span contenteditable="true">[your.email@example.com]</span>
 						</p>
-						<p class="contact-line">
-							<span style="white-space: nowrap">
-								Mobile:
-								<span
+						<div
+							class="links-line"
+							id="linksContainer"
+							style="margin-top: 2px; flex-wrap: nowrap">
+							<span class="link-item" style="white-space: nowrap">
+								Mobile:&nbsp;<span
 									class="phone-number"
 									contenteditable="true"
-									style="display: inline-block; min-width: 130px"
+									style="display: inline-block; min-width: 110px"
 									>+91 00000 00000</span
 								>
 							</span>
-						</p>
-						<div class="links-line" id="linksContainer">
 							<span class="link-item" data-link-icon="github">
 								<svg
 									viewBox="0 0 24 24"
