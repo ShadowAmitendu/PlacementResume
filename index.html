@@ -10,13 +10,15 @@
 		<link
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&display=swap"
 			rel="stylesheet" />
-
 		<link
 			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/gh/dreampulse/computer-modern-web-font@master/fonts.css" />
+			type="text/css"
+			href="https://cdn.jsdelivr.net/gh/bitmaks/cm-web-fonts@latest/fonts.css" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 
 		<style>
+			/* Computer Modern loaded via reliable CDN (bitmaks fork, uses "Computer Modern Serif" family name) */
+
 			:root {
 				--main-font: "Computer Modern Serif", serif;
 				--section-marker: "➢ ";
@@ -62,14 +64,12 @@
 				border-right: 1px solid var(--ui-border);
 				overflow: hidden;
 			}
-
 			.sidebar-header {
 				padding: 20px 20px 15px;
 				background: var(--ui-surface2);
 				border-bottom: 1px solid var(--ui-border);
 				flex-shrink: 0;
 			}
-
 			.sidebar-header h2 {
 				font-size: 15px;
 				font-weight: 700;
@@ -77,42 +77,34 @@
 				text-transform: uppercase;
 				color: var(--ui-text);
 			}
-
 			.sidebar-header p {
 				font-size: 11px;
 				color: var(--ui-text-dim);
 				margin-top: 3px;
 			}
-
 			.sidebar-body {
 				flex: 1;
 				overflow-y: auto;
 				padding: 16px;
 			}
-
 			.sidebar-body::-webkit-scrollbar {
 				width: 4px;
 			}
-
 			.sidebar-body::-webkit-scrollbar-track {
 				background: transparent;
 			}
-
 			.sidebar-body::-webkit-scrollbar-thumb {
 				background: var(--ui-border);
 				border-radius: 4px;
 			}
-
 			.sidebar-section {
 				margin-bottom: 20px;
 				padding-bottom: 20px;
 				border-bottom: 1px solid var(--ui-border);
 			}
-
 			.sidebar-section:last-child {
 				border-bottom: none;
 			}
-
 			.sidebar-label {
 				font-size: 10px;
 				font-weight: 700;
@@ -122,7 +114,6 @@
 				margin-bottom: 10px;
 				display: block;
 			}
-
 			.sidebar select {
 				width: 100%;
 				padding: 8px 10px;
@@ -139,10 +130,22 @@
 				background-position: right 10px center;
 				cursor: pointer;
 			}
-
 			.sidebar select:focus {
 				outline: none;
 				border-color: var(--ui-accent);
+			}
+			.sidebar-toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 12px;
+				color: var(--ui-text);
+				cursor: pointer;
+			}
+			.sidebar-toggle input {
+				accent-color: var(--ui-accent);
+				width: 14px;
+				height: 14px;
 			}
 
 			/* Color swatches */
@@ -152,7 +155,6 @@
 				flex-wrap: wrap;
 				margin-bottom: 8px;
 			}
-
 			.swatch {
 				width: 32px;
 				height: 32px;
@@ -163,40 +165,31 @@
 					transform 0.15s,
 					border-color 0.15s;
 			}
-
 			.swatch:hover {
 				transform: scale(1.15);
 			}
-
 			.swatch.active {
 				border-color: #333;
 				box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
 			}
-
 			.swatch[data-theme="classic"] {
 				background: #000000;
 			}
-
 			.swatch[data-theme="navy"] {
 				background: #003366;
 			}
-
 			.swatch[data-theme="burgundy"] {
 				background: #660000;
 			}
-
 			.swatch[data-theme="forest"] {
 				background: #004d00;
 			}
-
 			.swatch[data-theme="slate"] {
 				background: #4a4a4a;
 			}
-
 			.swatch[data-theme="teal"] {
 				background: #006666;
 			}
-
 			.swatch[data-theme="purple"] {
 				background: #3d0066;
 			}
@@ -207,7 +200,6 @@
 				align-items: center;
 				gap: 8px;
 			}
-
 			.zoom-row button {
 				width: 28px;
 				height: 28px;
@@ -220,17 +212,14 @@
 				flex-shrink: 0;
 				line-height: 1;
 			}
-
 			.zoom-row button:hover {
 				background: var(--ui-border);
 			}
-
 			.zoom-row input[type="range"] {
 				flex: 1;
 				accent-color: var(--ui-accent);
 				cursor: pointer;
 			}
-
 			.zoom-label {
 				font-size: 12px;
 				color: var(--ui-text-dim);
@@ -244,7 +233,6 @@
 				grid-template-columns: repeat(5, 1fr);
 				gap: 5px;
 			}
-
 			.btn-format {
 				padding: 7px 4px;
 				background: var(--ui-bg);
@@ -259,12 +247,18 @@
 					border-color 0.15s;
 				text-align: center;
 			}
-
 			.btn-format:hover {
 				background: var(--ui-surface2);
 				border-color: var(--ui-accent);
 			}
-
+			.btn-format.active {
+				background: var(--ui-accent);
+				border-color: var(--ui-accent);
+				color: white;
+			}
+			.btn-format.active svg {
+				stroke: white;
+			}
 			.btn-format.code-btn {
 				font-family: "JetBrains Mono", monospace;
 				font-size: 10px;
@@ -276,7 +270,6 @@
 				display: flex;
 				gap: 6px;
 			}
-
 			.add-section-row select {
 				margin-bottom: 0;
 				flex: 1;
@@ -302,12 +295,10 @@
 				align-items: center;
 				gap: 8px;
 			}
-
 			.btn-sidebar:hover {
 				background: var(--ui-surface2);
 				border-color: var(--ui-accent);
 			}
-
 			.btn-sidebar.primary {
 				background: var(--ui-accent);
 				border-color: var(--ui-accent);
@@ -315,11 +306,9 @@
 				font-weight: 600;
 				justify-content: center;
 			}
-
 			.btn-sidebar.primary:hover {
 				background: #004494;
 			}
-
 			.btn-sidebar svg {
 				flex-shrink: 0;
 			}
@@ -329,7 +318,6 @@
 				display: flex;
 				gap: 6px;
 			}
-
 			.undo-row .btn-sidebar {
 				flex: 1;
 				justify-content: center;
@@ -358,7 +346,6 @@
 				pointer-events: none;
 				white-space: nowrap;
 			}
-
 			#toast.show {
 				opacity: 1;
 				transform: translateX(-50%) translateY(0);
@@ -375,7 +362,6 @@
 				justify-content: center;
 				font-family: "Inter", sans-serif;
 			}
-
 			.modal-content {
 				background: var(--ui-surface);
 				padding: 24px;
@@ -384,13 +370,11 @@
 				border: 1px solid var(--ui-border);
 				box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 			}
-
 			.modal-content h3 {
 				color: var(--ui-text);
 				margin-bottom: 16px;
 				font-size: 16px;
 			}
-
 			.modal-content label {
 				font-size: 11px;
 				font-weight: 700;
@@ -400,7 +384,6 @@
 				display: block;
 				margin-bottom: 5px;
 			}
-
 			.modal-content input {
 				width: 100%;
 				padding: 10px 12px;
@@ -412,7 +395,6 @@
 				font-size: 14px;
 				font-family: "Inter", sans-serif;
 			}
-
 			.modal-content input:focus {
 				outline: none;
 				border-color: var(--ui-accent);
@@ -425,7 +407,6 @@
 				gap: 8px;
 				margin-bottom: 14px;
 			}
-
 			.icon-option {
 				display: flex;
 				align-items: center;
@@ -439,17 +420,14 @@
 				transition: all 0.15s;
 				font-family: "Inter", sans-serif;
 			}
-
 			.icon-option:hover {
 				border-color: var(--ui-accent);
 				background: var(--ui-surface2);
 			}
-
 			.icon-option.selected {
 				border-color: var(--ui-accent);
 				background: #e8f0fe;
 			}
-
 			.icon-option svg {
 				width: 16px;
 				height: 16px;
@@ -461,7 +439,6 @@
 				gap: 8px;
 				margin-top: 6px;
 			}
-
 			.btn-modal {
 				padding: 8px 16px;
 				border-radius: 6px;
@@ -472,28 +449,23 @@
 				cursor: pointer;
 				font-family: "Inter", sans-serif;
 			}
-
 			.btn-modal:hover {
 				background: var(--ui-surface2);
 			}
-
 			.btn-modal.save {
 				background: var(--ui-accent);
 				border-color: var(--ui-accent);
 				color: white;
 				font-weight: 600;
 			}
-
 			.btn-modal.save:hover {
 				background: #004494;
 			}
-
 			.btn-modal.danger {
 				background: #c0392b;
 				border-color: #c0392b;
 				color: white;
 			}
-
 			.btn-modal.danger:hover {
 				background: #a93226;
 			}
@@ -505,7 +477,6 @@
 				width: 100%;
 				transform-origin: top center;
 			}
-
 			.print-border {
 				display: none;
 			}
@@ -516,7 +487,6 @@
 				cursor: pointer;
 				padding: 0 2px;
 			}
-
 			.resume-wrapper a:hover {
 				border-bottom: 1px dotted var(--theme-color);
 				background-color: var(--theme-bg-light);
@@ -531,19 +501,22 @@
 				font-size: 10.5pt;
 				color: #333;
 			}
-
+			.links-no-icons .link-item {
+				gap: 0;
+			}
+			.links-no-icons .link-item svg {
+				display: none;
+			}
 			.link-item {
 				display: inline-flex;
 				align-items: center;
 				gap: 4px;
 			}
-
 			.link-item:not(:last-of-type)::after {
 				content: "|";
 				margin-left: 6px;
 				color: #333;
 			}
-
 			.link-item svg {
 				width: 13px;
 				height: 13px;
@@ -566,7 +539,6 @@
 				align-items: center;
 				gap: 4px;
 			}
-
 			.add-link-btn:hover {
 				background: #218838;
 			}
@@ -590,11 +562,9 @@
 				background: #f0f4ff;
 				border-radius: 4px;
 			}
-
 			.section-block.sortable-chosen {
 				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 			}
-
 			.section-block {
 				position: relative;
 				padding: 5px;
@@ -602,7 +572,6 @@
 				border: 1px dashed transparent;
 				transition: border 0.2s;
 			}
-
 			.section-block:hover {
 				border: 1px dashed #bbb;
 				border-radius: 4px;
@@ -621,11 +590,9 @@
 				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 				z-index: 50;
 			}
-
 			.section-block:hover .block-controls {
 				display: flex;
 			}
-
 			.block-controls button {
 				border: none;
 				background: #f0f0f0;
@@ -639,36 +606,29 @@
 				align-items: center;
 				justify-content: center;
 			}
-
 			.block-controls button:hover {
 				background: #d0d0d0;
 			}
-
 			.block-controls button.btn-danger-small {
 				background: #dc3545;
 				color: white;
 			}
-
 			.block-controls button.btn-danger-small:hover {
 				background: #c82333;
 			}
-
 			.block-controls .drag-handle {
 				cursor: grab;
 				color: #aaa;
 				font-size: 14px;
 				padding: 4px 6px;
 			}
-
 			.block-controls .drag-handle:hover {
 				color: #333;
 				background: #e0e0e0;
 			}
-
 			.block-controls .drag-handle:active {
 				cursor: grabbing;
 			}
-
 			.block-controls svg {
 				width: 13px;
 				height: 13px;
@@ -679,32 +639,14 @@
 				border-bottom: 1px dashed transparent;
 				transition: background-color 0.2s;
 			}
-
 			[contenteditable="true"]:hover {
 				background-color: var(--theme-bg-light);
 				border-bottom: 1px dashed #ccc;
 			}
-
 			[contenteditable="true"]:focus {
 				outline: none;
 				background-color: var(--theme-bg-light);
 				border-bottom: 1px dashed var(--theme-color);
-			}
-
-			.country-code {
-				font-family: inherit;
-				font-size: inherit;
-				color: inherit;
-				border: 1px solid #ccc;
-				border-radius: 3px;
-				padding: 1px 2px;
-				background: #fff;
-				cursor: pointer;
-				outline: none;
-			}
-
-			.country-code:hover {
-				background: var(--theme-bg-light);
 			}
 
 			.custom-hr {
@@ -722,7 +664,6 @@
 				padding-bottom: 10px;
 				align-items: center;
 			}
-
 			.photo-box {
 				width: 100px;
 				height: 125px;
@@ -740,24 +681,20 @@
 				font-family: "Inter", sans-serif;
 				transition: background 0.2s;
 			}
-
 			.photo-box:hover {
 				background: #f5f5f5;
 			}
-
 			.photo-box img {
 				width: 100%;
 				height: 100%;
 				object-fit: cover;
 				display: none;
 			}
-
 			.header-details {
 				text-align: right;
 				flex-grow: 1;
 				padding-left: 20px;
 			}
-
 			.header-details h1 {
 				font-size: 24pt;
 				margin-bottom: 4px;
@@ -765,12 +702,10 @@
 				letter-spacing: 1px;
 				color: var(--theme-color);
 			}
-
 			.header-details p {
 				font-size: 11pt;
 				margin-bottom: 4px;
 			}
-
 			.contact-line {
 				font-size: 10.5pt;
 				color: #333;
@@ -784,11 +719,9 @@
 				font-variant: small-caps;
 				color: var(--theme-color);
 			}
-
 			.section-title::before {
 				content: var(--section-marker);
 			}
-
 			.section-text {
 				font-size: 11pt;
 				margin-bottom: 8px;
@@ -802,20 +735,17 @@
 				text-align: center;
 				table-layout: fixed;
 			}
-
 			th,
 			td {
 				padding: 4px;
 				position: relative;
 				word-wrap: break-word;
 			}
-
 			th {
 				font-variant: small-caps;
 				font-weight: normal;
 				font-size: 11pt;
 			}
-
 			.text-left {
 				text-align: left;
 			}
@@ -825,17 +755,14 @@
 			[data-table-style="standard"] td {
 				border: 1px solid var(--theme-color);
 			}
-
 			[data-table-style="standard"] th,
 			[data-table-style="standard"] .profile-table td:first-child {
 				background-color: var(--theme-color) !important;
 				color: var(--theme-text-light) !important;
 			}
-
 			[data-table-style="standard"] table.striped tr:nth-child(even) td {
 				background-color: var(--theme-bg-light) !important;
 			}
-
 			[data-table-style="standard"] .profile-table td:first-child {
 				font-weight: bold;
 				width: 35%;
@@ -848,19 +775,16 @@
 				border-left: none;
 				border-right: none;
 			}
-
 			[data-table-style="latex"] th,
 			[data-table-style="latex"] td {
 				border: none;
 			}
-
 			[data-table-style="latex"] th {
 				border-bottom: 1px solid var(--theme-color);
 				background: transparent !important;
 				color: var(--theme-color) !important;
 				font-weight: bold;
 			}
-
 			[data-table-style="latex"] .profile-table td:first-child {
 				background: transparent !important;
 				color: var(--theme-color) !important;
@@ -873,21 +797,18 @@
 				border-top: 1.5px solid var(--theme-color);
 				border-bottom: 1.5px solid var(--theme-color);
 			}
-
 			[data-table-style="word-clean"] th,
 			[data-table-style="word-clean"] td {
 				border-left: none;
 				border-right: none;
 				border-bottom: 1px solid var(--theme-bg-light);
 			}
-
 			[data-table-style="word-clean"] th {
 				background-color: var(--theme-bg-light) !important;
 				color: #000 !important;
 				border-bottom: 1.5px solid var(--theme-color);
 				font-weight: bold;
 			}
-
 			[data-table-style="word-clean"] .profile-table td:first-child {
 				background-color: var(--theme-bg-light) !important;
 				color: #000 !important;
@@ -900,14 +821,12 @@
 			[data-table-style="invisible"] td {
 				border: none !important;
 			}
-
 			[data-table-style="invisible"] th {
 				background: transparent !important;
 				color: var(--theme-color) !important;
 				border-bottom: 1px dashed var(--theme-color) !important;
 				font-weight: bold;
 			}
-
 			[data-table-style="invisible"] .profile-table td:first-child {
 				background: transparent !important;
 				color: var(--theme-color) !important;
@@ -926,7 +845,6 @@
 				z-index: 10;
 				background: transparent;
 			}
-
 			.resizer:hover,
 			.resizing {
 				background: var(--theme-color);
@@ -938,7 +856,6 @@
 				font-size: 11pt;
 				margin-bottom: 8px;
 			}
-
 			ul.skills-list li::before {
 				content: "• ";
 				font-weight: bold;
@@ -952,7 +869,6 @@
 				margin: 2px 0 10px;
 				flex-wrap: wrap;
 			}
-
 			.add-row-btn,
 			.del-row-btn,
 			.add-col-btn,
@@ -970,36 +886,28 @@
 				align-items: center;
 				gap: 4px;
 			}
-
 			.add-row-btn {
 				background: #28a745;
 			}
-
 			.add-row-btn:hover {
 				background: #218838;
 			}
-
 			.del-row-btn {
 				background: #dc3545;
 			}
-
 			.del-row-btn:hover {
 				background: #c82333;
 			}
-
 			.add-col-btn {
 				background: #17a2b8;
 			}
-
 			.add-col-btn:hover {
 				background: #138496;
 			}
-
 			.del-col-btn {
 				background: #ffc107;
 				color: #212529;
 			}
-
 			.del-col-btn:hover {
 				background: #e0a800;
 			}
@@ -1009,14 +917,12 @@
 				margin-top: 10px;
 				margin-bottom: 25px;
 			}
-
 			.signature-area {
 				display: flex;
 				justify-content: space-between;
 				margin-top: 15px;
 				font-size: 11pt;
 			}
-
 			.signature-line {
 				border-top: 1px solid var(--theme-color);
 				width: 180px;
@@ -1030,7 +936,6 @@
 				@page {
 					margin: 0.5in;
 				}
-
 				html,
 				body {
 					background: white;
@@ -1040,7 +945,6 @@
 					-webkit-print-color-adjust: exact;
 					print-color-adjust: exact;
 				}
-
 				.print-border {
 					display: block;
 					position: fixed;
@@ -1050,7 +954,6 @@
 					pointer-events: none;
 					z-index: 9999;
 				}
-
 				.sidebar,
 				.table-controls,
 				.block-controls,
@@ -1061,13 +964,11 @@
 				#toast {
 					display: none !important;
 				}
-
 				#resumeContainer {
 					transform: scale(1) !important;
 					display: block;
 					width: 100%;
 				}
-
 				.resume-wrapper {
 					box-shadow: none;
 					border: none !important;
@@ -1078,36 +979,20 @@
 					margin: 0 !important;
 					overflow: visible !important;
 				}
-
 				.section-block {
 					border: none !important;
 					padding: 0 !important;
 					margin-bottom: 8px !important;
 				}
-
 				[contenteditable="true"] {
 					border-bottom: none !important;
 				}
-
-				.country-code {
-					border: none;
-					appearance: none;
-					padding: 0;
-					background: transparent;
-					color: black;
-				}
-
-				.country-code::-ms-expand {
-					display: none;
-				}
-
 				#photo-label {
 					display: none;
 				}
 			}
 		</style>
 	</head>
-
 	<body>
 		<div class="print-border"></div>
 
@@ -1260,6 +1145,21 @@
 					<path
 						d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.264 5.633 5.9-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
 				</symbol>
+				<!-- Instagram -->
+				<symbol id="ico-instagram" viewBox="0 0 24 24">
+					<path
+						d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm-5 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm5.75-2.75a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+				</symbol>
+				<!-- YouTube -->
+				<symbol id="ico-youtube" viewBox="0 0 24 24">
+					<path
+						d="M23 7.5a3.5 3.5 0 0 0-2.46-2.48C18.4 4.5 12 4.5 12 4.5s-6.4 0-8.54.52A3.5 3.5 0 0 0 1 7.5 36.1 36.1 0 0 0 .5 12c0 1.5.2 3 .5 4.5a3.5 3.5 0 0 0 2.46 2.48C5.6 19.5 12 19.5 12 19.5s6.4 0 8.54-.52A3.5 3.5 0 0 0 23 16.5c.3-1.5.5-3 .5-4.5s-.2-3-.5-4.5zM10 15V9l5 3-5 3z" />
+				</symbol>
+				<!-- Facebook -->
+				<symbol id="ico-facebook" viewBox="0 0 24 24">
+					<path
+						d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.4V12h2.4V9.7c0-2.4 1.4-3.7 3.6-3.7 1 0 2 .1 2 .1v2.2h-1.1c-1.1 0-1.4.7-1.4 1.4V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z" />
+				</symbol>
 				<!-- Email -->
 				<symbol
 					id="ico-email"
@@ -1324,10 +1224,7 @@
 						class="icon-option selected"
 						data-icon="none"
 						onclick="selectIcon(this)">
-						<svg>
-							<use href="#ico-link" />
-						</svg>
-						None
+						<svg><use href="#ico-link" /></svg> None
 					</div>
 					<div
 						class="icon-option"
@@ -1348,10 +1245,7 @@
 						LinkedIn
 					</div>
 					<div class="icon-option" data-icon="globe" onclick="selectIcon(this)">
-						<svg>
-							<use href="#ico-globe" />
-						</svg>
-						Website
+						<svg><use href="#ico-globe" /></svg> Website
 					</div>
 					<div
 						class="icon-option"
@@ -1362,11 +1256,35 @@
 						</svg>
 						X/Twitter
 					</div>
-					<div class="icon-option" data-icon="email" onclick="selectIcon(this)">
-						<svg>
-							<use href="#ico-email" />
+					<div
+						class="icon-option"
+						data-icon="instagram"
+						onclick="selectIcon(this)">
+						<svg viewBox="0 0 24 24" style="fill: currentColor">
+							<use href="#ico-instagram" />
 						</svg>
-						Email
+						Instagram
+					</div>
+					<div
+						class="icon-option"
+						data-icon="youtube"
+						onclick="selectIcon(this)">
+						<svg viewBox="0 0 24 24" style="fill: currentColor">
+							<use href="#ico-youtube" />
+						</svg>
+						YouTube
+					</div>
+					<div
+						class="icon-option"
+						data-icon="facebook"
+						onclick="selectIcon(this)">
+						<svg viewBox="0 0 24 24" style="fill: currentColor">
+							<use href="#ico-facebook" />
+						</svg>
+						Facebook
+					</div>
+					<div class="icon-option" data-icon="email" onclick="selectIcon(this)">
+						<svg><use href="#ico-email" /></svg> Email
 					</div>
 				</div>
 				<label for="linkTextInput">Display Text</label>
@@ -1468,10 +1386,7 @@
 							title="Undo (Ctrl+Z)"
 							id="undoBtn"
 							aria-label="Undo">
-							<svg width="15" height="15">
-								<use href="#ico-undo" />
-							</svg>
-							Undo
+							<svg width="15" height="15"><use href="#ico-undo" /></svg> Undo
 						</button>
 						<button
 							class="btn-sidebar"
@@ -1479,14 +1394,20 @@
 							title="Redo (Ctrl+Y)"
 							id="redoBtn"
 							aria-label="Redo">
-							<svg width="15" height="15">
-								<use href="#ico-redo" />
-							</svg>
-							Redo
+							<svg width="15" height="15"><use href="#ico-redo" /></svg> Redo
 						</button>
 					</div>
 				</div>
-
+				<div class="sidebar-section">
+					<span class="sidebar-label">Links</span>
+					<label class="sidebar-toggle">
+						<input
+							type="checkbox"
+							id="toggleLinkIcons"
+							onchange="applySettings()" />
+						Hide link icons
+					</label>
+				</div>
 				<div class="sidebar-section">
 					<span class="sidebar-label">Page Zoom</span>
 					<div class="zoom-row">
@@ -1576,6 +1497,90 @@
 				</div>
 
 				<div class="sidebar-section">
+					<span class="sidebar-label">Alignment</span>
+					<div
+						class="format-toolbar"
+						style="grid-template-columns: repeat(4, 1fr)">
+						<button
+							class="btn-format"
+							onclick="alignText('left')"
+							id="align-left"
+							title="Align Left"
+							aria-label="Align Left">
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round">
+								<line x1="3" y1="6" x2="21" y2="6" />
+								<line x1="3" y1="12" x2="15" y2="12" />
+								<line x1="3" y1="18" x2="18" y2="18" />
+							</svg>
+						</button>
+						<button
+							class="btn-format"
+							onclick="alignText('center')"
+							id="align-center"
+							title="Align Center"
+							aria-label="Align Center">
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round">
+								<line x1="3" y1="6" x2="21" y2="6" />
+								<line x1="6" y1="12" x2="18" y2="12" />
+								<line x1="4" y1="18" x2="20" y2="18" />
+							</svg>
+						</button>
+						<button
+							class="btn-format"
+							onclick="alignText('right')"
+							id="align-right"
+							title="Align Right"
+							aria-label="Align Right">
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round">
+								<line x1="3" y1="6" x2="21" y2="6" />
+								<line x1="9" y1="12" x2="21" y2="12" />
+								<line x1="6" y1="18" x2="21" y2="18" />
+							</svg>
+						</button>
+						<button
+							class="btn-format"
+							onclick="alignText('justify')"
+							id="align-justify"
+							title="Justify"
+							aria-label="Justify">
+							<svg
+								width="14"
+								height="14"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round">
+								<line x1="3" y1="6" x2="21" y2="6" />
+								<line x1="3" y1="12" x2="21" y2="12" />
+								<line x1="3" y1="18" x2="21" y2="18" />
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<div class="sidebar-section">
 					<span class="sidebar-label">Color Theme</span>
 					<div class="color-swatches">
 						<button
@@ -1629,7 +1634,6 @@
 						id="fontSelector"
 						onchange="applySettings()"
 						aria-label="Font style">
-						<optgroup label="Serif (Classic)"></optgroup>
 						<optgroup label="Computer Modern (LaTeX)">
 							<option value="'Computer Modern Serif', serif">
 								CM Serif (Regular)
@@ -1649,24 +1653,19 @@
 							<option value="'Computer Modern Bright', sans-serif">
 								CM Bright
 							</option>
-							<option value="'Computer Modern Bright Semibold', sans-serif">
-								CM Bright Semibold
-							</option>
 							<option value="'Computer Modern Sans', sans-serif">
 								CM Sans
-							</option>
-							<option value="'Computer Modern Sans Demi-Condensed', sans-serif">
-								CM Sans Demi-Condensed
 							</option>
 							<option value="'Computer Modern Typewriter', monospace">
 								CM Typewriter
 							</option>
-							<option value="'Computer Modern Typewriter Light', monospace">
-								CM Typewriter Light
+						</optgroup>
+						<optgroup label="Serif (Classic)">
+							<option value="'Times New Roman', Times, serif">
+								Times New Roman
 							</option>
-							<option value="'Computer Modern Typewriter Variable', monospace">
-								CM Typewriter Variable
-							</option>
+							<option value="Georgia, serif">Georgia</option>
+							<option value="Garamond, serif">Garamond</option>
 						</optgroup>
 						<optgroup label="Sans-Serif (Modern)">
 							<option value="Arial, Helvetica, sans-serif">Arial</option>
@@ -1724,9 +1723,7 @@
 								gap: 5px;
 							"
 							onclick="addSection()">
-							<svg width="13" height="13">
-								<use href="#ico-plus" /></svg
-							>Add
+							<svg width="13" height="13"><use href="#ico-plus" /></svg>Add
 						</button>
 					</div>
 				</div>
@@ -1737,37 +1734,29 @@
 						class="btn-sidebar"
 						onclick="clearBrowserSave()"
 						aria-label="Clear browser save">
-						<svg width="15" height="15">
-							<use href="#ico-trash" />
-						</svg>
-						Clear Browser Save
+						<svg width="15" height="15"><use href="#ico-trash" /></svg> Clear
+						Browser Save
 					</button>
 					<button
 						class="btn-sidebar"
 						onclick="saveToBrowser()"
 						aria-label="Save to browser">
-						<svg width="15" height="15">
-							<use href="#ico-save" />
-						</svg>
-						Save to Browser
+						<svg width="15" height="15"><use href="#ico-save" /></svg> Save to
+						Browser
 					</button>
 					<button
 						class="btn-sidebar"
 						onclick="exportData()"
 						aria-label="Export file">
-						<svg width="15" height="15">
-							<use href="#ico-export" />
-						</svg>
-						Export .resumeBuilder
+						<svg width="15" height="15"><use href="#ico-export" /></svg> Export
+						.resumeBuilder
 					</button>
 					<button
 						class="btn-sidebar"
 						onclick="document.getElementById('importFile').click()"
 						aria-label="Import file">
-						<svg width="15" height="15">
-							<use href="#ico-import" />
-						</svg>
-						Import File
+						<svg width="15" height="15"><use href="#ico-import" /></svg> Import
+						File
 					</button>
 					<input
 						type="file"
@@ -1828,20 +1817,11 @@
 						<p class="contact-line">
 							<span style="white-space: nowrap">
 								Mobile:
-								<select class="country-code" aria-label="Country code">
-									<option value="+91">+91</option>
-									<option value="+1">+1</option>
-									<option value="+44">+44</option>
-									<option value="+61">+61</option>
-									<option value="+81">+81</option>
-									<option value="+49">+49</option>
-									<option value="+971">+971</option>
-									<option value="+65">+65</option>
-								</select>
 								<span
+									class="phone-number"
 									contenteditable="true"
-									style="display: inline-block; min-width: 90px"
-									>[0000000000]</span
+									style="display: inline-block; min-width: 130px"
+									>+91 00000 00000</span
 								>
 							</span>
 						</p>
@@ -1876,6 +1856,54 @@
 									onclick="editLink(event, this)"
 									title="Click to edit"
 									>LinkedIn</a
+								>
+							</span>
+							<span class="link-item" data-link-icon="instagram">
+								<svg
+									viewBox="0 0 24 24"
+									width="13"
+									height="13"
+									style="fill: var(--theme-color)">
+									<use href="#ico-instagram" />
+								</svg>
+								<a
+									href="https://instagram.com/"
+									target="_blank"
+									onclick="editLink(event, this)"
+									title="Click to edit"
+									>Instagram</a
+								>
+							</span>
+							<span class="link-item" data-link-icon="youtube">
+								<svg
+									viewBox="0 0 24 24"
+									width="13"
+									height="13"
+									style="fill: var(--theme-color)">
+									<use href="#ico-youtube" />
+								</svg>
+								<a
+									href="https://youtube.com/@"
+									target="_blank"
+									onclick="editLink(event, this)"
+									title="Click to edit"
+									>YouTube</a
+								>
+							</span>
+							<span class="link-item" data-link-icon="facebook">
+								<svg
+									viewBox="0 0 24 24"
+									width="13"
+									height="13"
+									style="fill: var(--theme-color)">
+									<use href="#ico-facebook" />
+								</svg>
+								<a
+									href="https://facebook.com/"
+									target="_blank"
+									onclick="editLink(event, this)"
+									title="Click to edit"
+									>Facebook</a
 								>
 							</span>
 							<span class="link-item" data-link-icon="globe">
@@ -1915,13 +1943,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -1945,13 +1970,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -2010,13 +2032,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -2072,13 +2091,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -2102,13 +2118,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -2168,13 +2181,10 @@
 					<div class="section-block">
 						<div class="block-controls no-print">
 							<span class="drag-handle" title="Drag to reorder"
-								><svg width="14" height="14">
-									<use href="#ico-drag" /></svg
+								><svg width="14" height="14"><use href="#ico-drag" /></svg
 							></span>
 							<button onclick="duplicateBlock(this)" title="Duplicate">
-								<svg>
-									<use href="#ico-dup" />
-								</svg>
+								<svg><use href="#ico-dup" /></svg>
 							</button>
 							<button
 								class="btn-danger-small"
@@ -2244,13 +2254,10 @@
 				<div class="section-block">
 					<div class="block-controls no-print">
 						<span class="drag-handle" title="Drag to reorder"
-							><svg width="14" height="14">
-								<use href="#ico-drag" /></svg
+							><svg width="14" height="14"><use href="#ico-drag" /></svg
 						></span>
 						<button onclick="duplicateBlock(this)" title="Duplicate">
-							<svg>
-								<use href="#ico-dup" />
-							</svg>
+							<svg><use href="#ico-dup" /></svg>
 						</button>
 						<button
 							class="btn-danger-small"
@@ -2305,6 +2312,15 @@
 						"fill:none;stroke:var(--theme-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round",
 				},
 				twitter: { svgHref: "#ico-twitter", style: "fill:var(--theme-color)" },
+				instagram: {
+					svgHref: "#ico-instagram",
+					style: "fill:var(--theme-color)",
+				},
+				youtube: { svgHref: "#ico-youtube", style: "fill:var(--theme-color)" },
+				facebook: {
+					svgHref: "#ico-facebook",
+					style: "fill:var(--theme-color)",
+				},
 				email: {
 					svgHref: "#ico-email",
 					style:
@@ -2318,7 +2334,7 @@
 			}
 
 			// ── ICON PICKER ────────────────────────────────────────────
-			let _selectedIcon = "none";
+			let _selectedIcon = "globe";
 			function selectIcon(el) {
 				document
 					.querySelectorAll(".icon-option")
@@ -2406,6 +2422,7 @@
 					if (lbl) lbl.style.display = "none";
 				}
 				makeColumnsResizable();
+				initPhoneFormatting();
 			}
 
 			function undo() {
@@ -2550,7 +2567,77 @@
 						"data-table-style",
 						document.getElementById("tableStyleSelector").value,
 					);
+				const hideLinkIcons = document.getElementById("toggleLinkIcons");
+				if (hideLinkIcons) {
+					document
+						.getElementById("resumeWrapper")
+						.classList.toggle("links-no-icons", hideLinkIcons.checked);
+				}
 				scheduleAutoSave();
+			}
+
+			function formatPhoneValue(raw) {
+				const trimmed = (raw || "").trim();
+				const hasPlus = trimmed.startsWith("+");
+				const digits = trimmed.replace(/\D/g, "");
+				if (!digits) return hasPlus ? "+" : "";
+				const parts = [];
+				const firstLen = Math.min(2, digits.length);
+				parts.push(digits.slice(0, firstLen));
+				let index = firstLen;
+				while (index < digits.length) {
+					parts.push(digits.slice(index, index + 5));
+					index += 5;
+				}
+				return hasPlus ? "+" + parts.join(" ") : parts.join(" ");
+			}
+
+			function placeCaretAtEnd(el) {
+				const range = document.createRange();
+				range.selectNodeContents(el);
+				range.collapse(false);
+				const selection = window.getSelection();
+				if (!selection) return;
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
+
+			function applyPhoneFormat(el) {
+				const formatted = formatPhoneValue(el.textContent);
+				if (formatted !== el.textContent) {
+					el.textContent = formatted;
+					placeCaretAtEnd(el);
+				}
+			}
+
+			function migratePhoneDropdown() {
+				document.querySelectorAll("select.country-code").forEach((select) => {
+					const code = (select.value || "").trim();
+					let numberText = "";
+					const nextEl = select.nextElementSibling;
+					if (nextEl && nextEl.matches("span[contenteditable='true']")) {
+						numberText = nextEl.textContent || "";
+						nextEl.remove();
+					}
+					const combined = `${code} ${numberText}`.trim();
+					const newSpan = document.createElement("span");
+					newSpan.className = "phone-number";
+					newSpan.contentEditable = "true";
+					newSpan.style.display = "inline-block";
+					newSpan.style.minWidth = "130px";
+					newSpan.textContent = formatPhoneValue(combined);
+					select.replaceWith(newSpan);
+				});
+			}
+
+			function initPhoneFormatting() {
+				migratePhoneDropdown();
+				document.querySelectorAll(".phone-number").forEach((el) => {
+					if (el.dataset.phoneBound === "true") return;
+					el.dataset.phoneBound = "true";
+					el.addEventListener("input", () => applyPhoneFormat(el));
+					applyPhoneFormat(el);
+				});
 			}
 
 			// ── LINK MODAL ─────────────────────────────────────────────
@@ -2578,8 +2665,8 @@
 					: "none";
 				// Pre-select icon
 				const currentIcon = el
-					? el.closest(".link-item")?.dataset.linkIcon || "none"
-					: "none";
+					? el.closest(".link-item")?.dataset.linkIcon || "globe"
+					: "globe";
 				_selectedIcon = currentIcon;
 				document.querySelectorAll(".icon-option").forEach((o) => {
 					o.classList.toggle("selected", o.dataset.icon === currentIcon);
@@ -2603,13 +2690,14 @@
 					);
 					return;
 				}
-				const iconSvg = buildLinkSvg(_selectedIcon);
+				const iconKey = _selectedIcon || "globe";
+				const iconSvg = buildLinkSvg(iconKey);
 				if (_activeLink) {
 					_activeLink.textContent = text;
 					_activeLink.setAttribute("href", url);
 					const span = _activeLink.closest(".link-item");
 					if (span) {
-						span.dataset.linkIcon = _selectedIcon;
+						span.dataset.linkIcon = iconKey;
 						const existingSvg = span.querySelector("svg");
 						if (existingSvg) existingSvg.remove();
 						span.insertAdjacentHTML("afterbegin", iconSvg);
@@ -2617,7 +2705,7 @@
 				} else {
 					const span = document.createElement("span");
 					span.className = "link-item";
-					span.dataset.linkIcon = _selectedIcon;
+					span.dataset.linkIcon = iconKey;
 					const a = document.createElement("a");
 					a.href = url;
 					a.textContent = text;
@@ -2637,23 +2725,23 @@
 			}
 
 			function deleteLink() {
-    if (!_activeLink) {
-        closeModal();
-        return;
-    }
-    const linkToDelete = _activeLink; // capture before closeModal nulls it
-    closeModal();
-    showConfirm(
-        "This link will be permanently removed from your resume.",
-        "Delete Link?",
-        "Delete",
-    ).then((ok) => {
-        if (ok) {
-            linkToDelete.closest(".link-item").remove(); // use captured ref
-            snapshot();
-        }
-    });
-}
+				if (!_activeLink) {
+					closeModal();
+					return;
+				}
+				closeModal();
+				showConfirm(
+					"This link will be permanently removed from your resume.",
+					"Delete Link?",
+					"Delete",
+				).then((ok) => {
+					if (ok) {
+						_activeLink.closest(".link-item").remove();
+						snapshot();
+						_activeLink = null;
+					}
+				});
+			}
 
 			window.addEventListener("click", (e) => {
 				if (e.target === document.getElementById("linkModal")) closeModal();
@@ -2672,6 +2760,47 @@
 					if (e.key === "Enter")
 						document.getElementById("linkUrlInput").focus();
 				});
+
+			// ── ALIGNMENT ──────────────────────────────────────────────
+			// Track the last focused contenteditable so alignment always targets it
+			let _lastFocused = null;
+			document.addEventListener("focusin", (e) => {
+				if (e.target.hasAttribute("contenteditable")) {
+					_lastFocused = e.target;
+					updateAlignButtons(e.target);
+				}
+			});
+			document.addEventListener("click", (e) => {
+				if (e.target.closest("[contenteditable]")) {
+					const el = e.target.closest("[contenteditable]");
+					_lastFocused = el;
+					updateAlignButtons(el);
+				}
+			});
+
+			function alignText(align) {
+				const el = _lastFocused;
+				if (!el) {
+					showAlert(
+						"Click inside a text area in the resume first.",
+						"No Field Selected",
+					);
+					return;
+				}
+				el.style.textAlign = align;
+				updateAlignButtons(el);
+				snapshot();
+			}
+
+			function updateAlignButtons(el) {
+				const current = el
+					? el.style.textAlign || getComputedStyle(el).textAlign || "left"
+					: "left";
+				["left", "center", "right", "justify"].forEach((a) => {
+					const btn = document.getElementById("align-" + a);
+					if (btn) btn.classList.toggle("active", current === a);
+				});
+			}
 
 			// ── FORMATTING ─────────────────────────────────────────────
 			function formatText(cmd) {
@@ -2898,6 +3027,8 @@
 					font: document.getElementById("fontSelector").value,
 					marker: document.getElementById("markerSelector").value,
 					tableStyle: document.getElementById("tableStyleSelector").value,
+					hideLinkIcons:
+						document.getElementById("toggleLinkIcons")?.checked || false,
 					zoom: document.getElementById("zoomSlider").value,
 					version: 2,
 				};
@@ -2923,6 +3054,7 @@
 						}
 					});
 					makeColumnsResizable();
+					initPhoneFormatting();
 				}
 				if (data.photo) {
 					_photoBase64 = data.photo;
@@ -2941,6 +3073,10 @@
 					document.getElementById("markerSelector").value = data.marker;
 				if (data.tableStyle)
 					document.getElementById("tableStyleSelector").value = data.tableStyle;
+				if (data.hideLinkIcons !== undefined) {
+					const toggle = document.getElementById("toggleLinkIcons");
+					if (toggle) toggle.checked = data.hideLinkIcons;
+				}
 				if (data.zoom) {
 					document.getElementById("zoomSlider").value = data.zoom;
 					applyZoom();
@@ -2963,6 +3099,19 @@
 				}
 			}
 
+			function clearBrowserSave() {
+				showConfirm(
+					"This will erase your saved resume from the browser. You cannot undo this.",
+					"Clear Browser Save?",
+					"Clear",
+				).then((ok) => {
+					if (ok) {
+						localStorage.removeItem("mySavedResume");
+						showToast("Browser save cleared.");
+					}
+				});
+			}
+
 			function exportData() {
 				const blob = new Blob([JSON.stringify(getResumeData())], {
 					type: "application/json",
@@ -2975,18 +3124,6 @@
 				document.body.removeChild(a);
 				URL.revokeObjectURL(a.href);
 				showToast("Exported!");
-			}
-			function clearBrowserSave() {
-				showConfirm(
-					"This will erase your saved resume from the browser. You cannot undo this.",
-					"Clear Browser Save?",
-					"Clear",
-				).then((ok) => {
-					if (ok) {
-						localStorage.removeItem("mySavedResume");
-						showToast("Browser save cleared.");
-					}
-				});
 			}
 
 			function importData(event) {
@@ -3021,6 +3158,7 @@
 				} else {
 					makeColumnsResizable();
 				}
+				initPhoneFormatting();
 				initSortable();
 				snapshot();
 				updateUndoButtons();
