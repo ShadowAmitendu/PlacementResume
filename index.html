@@ -2637,23 +2637,23 @@
 			}
 
 			function deleteLink() {
-				if (!_activeLink) {
-					closeModal();
-					return;
-				}
-				closeModal();
-				showConfirm(
-					"This link will be permanently removed from your resume.",
-					"Delete Link?",
-					"Delete",
-				).then((ok) => {
-					if (ok) {
-						_activeLink.closest(".link-item").remove();
-						snapshot();
-						_activeLink = null;
-					}
-				});
-			}
+    if (!_activeLink) {
+        closeModal();
+        return;
+    }
+    const linkToDelete = _activeLink; // capture before closeModal nulls it
+    closeModal();
+    showConfirm(
+        "This link will be permanently removed from your resume.",
+        "Delete Link?",
+        "Delete",
+    ).then((ok) => {
+        if (ok) {
+            linkToDelete.closest(".link-item").remove(); // use captured ref
+            snapshot();
+        }
+    });
+}
 
 			window.addEventListener("click", (e) => {
 				if (e.target === document.getElementById("linkModal")) closeModal();
