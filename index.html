@@ -493,13 +493,12 @@
 			}
 
 			.links-line {
-				display: inline-flex;
+				display: flex;
 				justify-content: flex-end;
 				align-items: center;
-				flex-wrap: nowrap;
-				white-space: nowrap;
-				gap: 4px;
-				font-size: 10.5pt;
+				flex-wrap: wrap;
+				gap: 3px 6px;
+				font-size: 9.5pt;
 				color: #333;
 			}
 			.links-no-icons .link-item {
@@ -511,7 +510,8 @@
 			.link-item {
 				display: inline-flex;
 				align-items: center;
-				gap: 2px;
+				gap: 3px;
+				white-space: nowrap;
 			}
 			.link-item:not(:last-of-type)::after {
 				content: "|";
@@ -695,6 +695,9 @@
 				text-align: right;
 				flex-grow: 1;
 				padding-left: 20px;
+				min-width: 0;
+				overflow-wrap: break-word;
+				word-wrap: break-word;
 			}
 			.header-details h1 {
 				font-size: 24pt;
@@ -1815,10 +1818,7 @@
 							Email:
 							<span contenteditable="true">[your.email@example.com]</span>
 						</p>
-						<div
-							class="links-line"
-							id="linksContainer"
-							style="margin-top: 2px; flex-wrap: nowrap">
+						<div class="links-line" id="linksContainer" style="margin-top: 2px">
 							<span class="link-item" style="white-space: nowrap">
 								Mobile:&nbsp;<span
 									class="phone-number"
@@ -2730,6 +2730,7 @@
 					closeModal();
 					return;
 				}
+				const linkToDelete = _activeLink; // save reference BEFORE closing modal
 				closeModal();
 				showConfirm(
 					"This link will be permanently removed from your resume.",
@@ -2737,9 +2738,8 @@
 					"Delete",
 				).then((ok) => {
 					if (ok) {
-						_activeLink.closest(".link-item").remove();
+						linkToDelete.closest(".link-item").remove(); // use saved reference
 						snapshot();
-						_activeLink = null;
 					}
 				});
 			}
