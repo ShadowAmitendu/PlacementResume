@@ -1135,13 +1135,12 @@
 				}
 
 				.zoom-row input[type="range"] {
-					min-width: 60px;
+					min-width: 100px;
 				}
 
-				/* Resume scales down to fit screen */
+				/* Resume scales down to fit screen  */
 				#resumeContainer {
 					overflow-x: auto;
-					padding-bottom: 80px;
 				}
 			}
 
@@ -1212,7 +1211,7 @@
 			/* ── PRINT ──────────────────────────────────────────────── */
 			@media print {
 				@page {
-					margin: 0.4in;
+					margin: 0.5in;
 				}
 				html,
 				body {
@@ -2581,6 +2580,11 @@
 
 		<script>
 			// ── MOBILE MENU ──────────────────────────────────────────
+			/**
+			 * Toggles the visibility of the mobile sidebar menu.
+			 * Opens the sidebar by adding 'open' and 'active' classes to the sidebar and overlay.
+			 * Disables background scrolling when the menu is open.
+			 */
 			function toggleMobileMenu() {
 				const sidebar = document.getElementById("sidebar");
 				const overlay = document.getElementById("sidebarOverlay");
@@ -2589,17 +2593,25 @@
 				} else {
 					sidebar.classList.add("open");
 					overlay.classList.add("active");
+					// Prevent scrolling on the main body
 					document.body.style.overflow = "hidden";
 				}
 			}
+
+			/**
+			 * Closes the mobile sidebar menu.
+			 * Removes 'open' and 'active' classes and restores body scrolling.
+			 */
 			function closeMobileMenu() {
 				const sidebar = document.getElementById("sidebar");
 				const overlay = document.getElementById("sidebarOverlay");
 				sidebar.classList.remove("open");
 				overlay.classList.remove("active");
+				// Restore default scrolling
 				document.body.style.overflow = "";
 			}
-			// Close on ESC
+
+			// Add global event listener to close menus and modals on 'Escape' key press
 			document.addEventListener("keydown", (e) => {
 				if (e.key === "Escape") {
 					closeMobileMenu();
@@ -2610,12 +2622,21 @@
 			});
 
 			// ── APP THEME (dark/light) ────────────────────────────────
-			let _isDarkMode = false;
+			let _isDarkMode = false; // Tracks the current theme state
+
+			/**
+			 * Toggles the application between light and dark themes.
+			 * Updates the UI accordingly by toggling the 'dark-mode' class on the body.
+			 * Persists the preferred theme to localStorage.
+			 */
 			function toggleAppTheme() {
 				_isDarkMode = !_isDarkMode;
 				document.body.classList.toggle("dark-mode", _isDarkMode);
+
 				const label = document.getElementById("themeLabel");
 				const icon = document.getElementById("themeIcon");
+
+				// Update labels and icons based on the new theme state
 				if (_isDarkMode) {
 					label.textContent = "Disable Dark Mode";
 					icon.setAttribute("href", "#ico-sun");
@@ -2623,26 +2644,34 @@
 					label.textContent = "Enable Dark Mode";
 					icon.setAttribute("href", "#ico-moon");
 				}
+
+				// Save user preference
 				try {
 					localStorage.setItem(
 						"resumeAppDarkMode",
 						_isDarkMode ? "true" : "false",
 					);
-				} catch (e) {}
+				} catch (e) {
+					// Ignore storage access errors
+				}
 			}
 
 			// ── TOUCH: show block controls on tap ────────────────────
-			// Allows touch users to reveal block controls by tapping a section
+			// Allows touch users to reveal edit/delete controls by tapping a resume section.
 			document.addEventListener(
 				"touchstart",
 				(e) => {
+					// Find the nearest section block that was tapped
 					const block = e.target.closest(".section-block");
-					// Remove active from all others
+
+					// Remove the 'touch-active' state from all other blocks
 					document
 						.querySelectorAll(".section-block.touch-active")
 						.forEach((b) => {
 							if (b !== block) b.classList.remove("touch-active");
 						});
+
+					// If a block was tapped (and not its inner buttons/controls), trigger its active state
 					if (
 						block &&
 						!e.target.closest(".block-controls") &&
@@ -2651,10 +2680,14 @@
 						block.classList.toggle("touch-active");
 					}
 				},
-				{ passive: true },
+				{ passive: true }, // Optimization for touch listeners
 			);
 
 			// ── ICON CONFIGS ──────────────────────────────────────────
+			/**
+			 * Configuration dictionary mapping icon names to their respective SVG definitions.
+			 * Uses <use> tags referencing hidden SVGs at the top of the HTML body.
+			 */
 			const LINK_ICONS = {
 				none: {
 					svgHref: "#ico-link",
@@ -2688,13 +2721,25 @@
 				},
 			};
 
+			/**
+			 * Helper function to generate an SVG HTML string based on an icon key.
+			 *
+			 * @param {string} iconKey - The key corresponding to an icon in LINK_ICONS.
+			 * @returns {string} The HTML string representing the SVG icon.
+			 */
 			function buildLinkSvg(iconKey) {
 				const cfg = LINK_ICONS[iconKey] || LINK_ICONS.none;
 				return `<svg viewBox="0 0 24 24" width="13" height="13" style="${cfg.style}"><use href="${cfg.svgHref}"/></svg>`;
 			}
 
 			// ── ICON PICKER ───────────────────────────────────────────
-			let _selectedIcon = "globe";
+			let _selectedIcon = "globe"; // Default selected icon for links
+
+			/**
+			 * Highlights the selected icon in the icon picker modal and updates the internal state.
+			 *
+			 * @param {HTMLElement} el - The element representing the clicked icon option.
+			 */
 			function selectIcon(el) {
 				document
 					.querySelectorAll(".icon-option")
@@ -2704,26 +2749,52 @@
 			}
 
 			// ── TOAST ─────────────────────────────────────────────────
+			/**
+			 * Displays a temporary toast notification at the bottom of the screen.
+			 *
+			 * @param {string} msg - The message to display.
+			 * @param {number} [duration=2200] - Duration in milliseconds before fading out.
+			 */
 			function showToast(msg, duration = 2200) {
 				const t = document.getElementById("toast");
 				t.textContent = msg;
 				t.classList.add("show");
-				clearTimeout(t._timer);
+				clearTimeout(t._timer); // Clear any pending timeouts to avoid overlapping fading
 				t._timer = setTimeout(() => t.classList.remove("show"), duration);
 			}
 
 			// ── ALERT MODAL ───────────────────────────────────────────
+			/**
+			 * Opens a generalized alert modal dialog to quickly inform the user.
+			 *
+			 * @param {string} message - Description of the alert.
+			 * @param {string} [title="Notice"] - Title of the alert modal.
+			 */
 			function showAlert(message, title = "Notice") {
 				document.getElementById("alertTitle").textContent = title;
 				document.getElementById("alertMessage").textContent = message;
 				document.getElementById("alertModal").style.display = "flex";
 			}
+
+			/**
+			 * Closes the active alert modal.
+			 */
 			function closeAlert() {
 				document.getElementById("alertModal").style.display = "none";
 			}
 
 			// ── CONFIRM MODAL ─────────────────────────────────────────
-			let _confirmResolve = null;
+			let _confirmResolve = null; // Promise resolver for modal confirmation
+
+			/**
+			 * Displays a confirmation modal with 'Cancel' and customizable 'OK' options.
+			 * Returns a Promise that resolves to true or false depending on user choice.
+			 *
+			 * @param {string} message - Main confirmation question/message.
+			 * @param {string} [title="Are you sure?"] - Modal title.
+			 * @param {string} [okLabel="Delete"] - Label for the confirmation button.
+			 * @returns {Promise<boolean>} Resolves to `true` if OK, `false` if cancelled.
+			 */
 			function showConfirm(
 				message,
 				title = "Are you sure?",
@@ -2733,44 +2804,77 @@
 				document.getElementById("confirmMessage").textContent = message;
 				document.getElementById("confirmOkBtn").textContent = okLabel;
 				document.getElementById("confirmModal").style.display = "flex";
+
+				// Keep track of the Promise to resolve it when the user clicks a button
 				return new Promise((resolve) => {
 					_confirmResolve = resolve;
 				});
 			}
+
+			/**
+			 * Resolves the confirmation dialog promise and hides the modal.
+			 *
+			 * @param {boolean} result - True if User clicked OK, false if Cancel/esc.
+			 */
 			function closeConfirm(result) {
 				document.getElementById("confirmModal").style.display = "none";
 				if (_confirmResolve) {
 					_confirmResolve(result);
-					_confirmResolve = null;
+					_confirmResolve = null; // Clean up the promise reference
 				}
 			}
 
 			// ── UNDO / REDO ───────────────────────────────────────────
-			const MAX_HISTORY = 60;
+			const MAX_HISTORY = 60; // Max allowed number of history snapshots
+
+			// Initial setup variables for tracking changes
 			let history = [],
 				historyIndex = -1,
-				_ignoreNextSnapshot = false;
+				_ignoreNextSnapshot = false; // Flag to prevent taking snapshot on restorations
 
+			/**
+			 * Captures the current state of the resume and pushes it onto the history stack.
+			 * Discards any redo states forward of the current point on taking new actions.
+			 */
 			function snapshot() {
+				// Don't record a new snapshot immediately if we just undid/redid an action
 				if (_ignoreNextSnapshot) {
 					_ignoreNextSnapshot = false;
 					return;
 				}
+
+				// Take a snapshot by grabbing the DOM and photo string
 				const state = {
 					html: document.getElementById("resumeWrapper").innerHTML,
 					photo: _photoBase64,
 				};
+
+				// Splice out future history effectively erasing "redo" elements
+				// when picking up edits from somewhere in the middle of time
 				if (historyIndex < history.length - 1)
 					history = history.slice(0, historyIndex + 1);
+
 				history.push(state);
+
+				// Ensure we don't hold an infinite log causing high memory use
 				if (history.length > MAX_HISTORY) history.shift();
+
 				historyIndex = history.length - 1;
-				updateUndoButtons();
+				updateUndoButtons(); // Ensure button states reflect our new timeline position
 			}
 
+			/**
+			 * Replaces the current application state with the data from a history entry.
+			 *
+			 * @param {Object} state - The history object containing 'html' and 'photo' keys.
+			 */
 			function restoreState(state) {
-				_ignoreNextSnapshot = true;
+				_ignoreNextSnapshot = true; // Setting to true prevents an immediate 'autosave' capture
+
+				// Inject HTML into the main resume container
 				document.getElementById("resumeWrapper").innerHTML = state.html;
+
+				// Handle picture display logic independently
 				if (state.photo) {
 					_photoBase64 = state.photo;
 					const img = document.getElementById("profile-photo");
@@ -2781,10 +2885,15 @@
 					const lbl = document.getElementById("photo-label");
 					if (lbl) lbl.style.display = "none";
 				}
+
+				// Re-init elements that may have had their listeners stripped when overwritten by HTML string
 				makeColumnsResizable();
 				initPhoneFormatting();
 			}
 
+			/**
+			 * Steps back by 1 in the tracked history and loads the older state.
+			 */
 			function undo() {
 				if (historyIndex > 0) {
 					historyIndex--;
@@ -2793,6 +2902,10 @@
 					updateUndoButtons();
 				}
 			}
+
+			/**
+			 * Steps forward by 1 in the tracked history if you undid something prior.
+			 */
 			function redo() {
 				if (historyIndex < history.length - 1) {
 					historyIndex++;
@@ -2801,6 +2914,10 @@
 					updateUndoButtons();
 				}
 			}
+
+			/**
+			 * Disables/enables undo and redo buttons based on what point in history user currently is.
+			 */
 			function updateUndoButtons() {
 				document.getElementById("undoBtn").style.opacity =
 					historyIndex > 0 ? "1" : "0.4";
@@ -2808,13 +2925,20 @@
 					historyIndex < history.length - 1 ? "1" : "0.4";
 			}
 
+			// Capture hotkeys specifically for undo and redo
 			document.addEventListener("keydown", (e) => {
 				const tag = document.activeElement.tagName;
+				// Avoid triggering while typing directly into formal form fields
+				// Content controls in template do not fire as standard inputs
 				if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+				// Map to Ctrl+Z or Cmd+Z
 				if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
 					e.preventDefault();
 					undo();
 				}
+
+				// Map to Ctrl+Y, Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z
 				if (
 					(e.ctrlKey || e.metaKey) &&
 					(e.key === "y" || (e.shiftKey && e.key === "z"))
@@ -2824,9 +2948,11 @@
 				}
 			});
 
+			// Setup an automatic snapshot queue whenever the DOM elements receive 'input'
 			let _snapshotTimer;
 			document.addEventListener("input", () => {
 				clearTimeout(_snapshotTimer);
+				// Debounce logic ensures we don't snapshot every single keystroke.
 				_snapshotTimer = setTimeout(snapshot, 800);
 			});
 
@@ -2850,6 +2976,12 @@
 
 			// ── AUTO-SAVE ─────────────────────────────────────────────
 			let _autoSaveTimer;
+
+			/**
+			 * Periodically saves the user's progress to the browser's local storage.
+			 * Uses debounce techniques to save roughly after 2 seconds of inactivity
+			 * from the last tracked 'input' action occurring on the page.
+			 */
 			function scheduleAutoSave() {
 				clearTimeout(_autoSaveTimer);
 				_autoSaveTimer = setTimeout(() => {
@@ -2858,29 +2990,50 @@
 							"mySavedResume",
 							JSON.stringify(getResumeData()),
 						);
-					} catch (e) {}
-				}, 2000);
+					} catch (e) {
+						// Error usually occurs when localStorage quota is exceeded or in private mode.
+					}
+				}, 2000); // 2000ms threshold
 			}
 			document.addEventListener("input", scheduleAutoSave);
 
 			// ── ZOOM ──────────────────────────────────────────────────
+
+			/**
+			 * Allows incremental zooming of the resume view interface.
+			 * Clamps boundaries between 40% and 150%.
+			 * @param {number} delta - Small digit value controlling step amounts, like -0.1 or 0.1
+			 */
 			function adjustZoom(delta) {
 				const s = document.getElementById("zoomSlider");
+
+				// Bound values between maximum scale (1.5) and minimum scale (0.4)
 				s.value = Math.min(
 					1.5,
 					Math.max(0.4, parseFloat(s.value) + delta),
 				).toFixed(2);
 				applyZoom();
 			}
+
+			/**
+			 * Read raw float value of zoomSlider and dynamically applies the scale to the `#resumeContainer`.
+			 * Updates display label automatically.
+			 */
 			function applyZoom() {
 				const v = parseFloat(document.getElementById("zoomSlider").value);
+
+				// Format to human-readable percentages
 				document.getElementById("zoomValue").textContent =
 					Math.round(v * 100) + "%";
+
 				const container = document.getElementById("resumeContainer");
 				container.style.transform = `scale(${v})`;
-				container.style.transformOrigin = "top center";
+				container.style.transformOrigin = "top center"; // Helps scaling stay anchored correctly during adjustments
+
 				const wrapper = document.getElementById("resumeWrapper");
-				// Adjust container height so content below isn't hidden
+
+				// Adjust container height/margins so content below isn't hidden
+				// when transforming via CSS scale.
 				if (v < 1) {
 					container.style.marginBottom = wrapper.offsetHeight * (v - 1) + "px";
 					container.style.marginTop = "0";
@@ -2890,24 +3043,30 @@
 				}
 			}
 
-			// Auto-adjust zoom on mobile to fit the resume width
+			/**
+			 * Tries to automatically adjust the resume zoom to comfortably fit
+			 * the container spacing for screens smaller than 1024px.
+			 */
 			function autoFitZoom() {
 				const isMobile = window.innerWidth <= 1024;
 				if (!isMobile) return;
-				const availableWidth = window.innerWidth - 32; // padding
-				const resumeWidth = 794; // ~210mm at 96dpi
-				const fitScale = Math.max(
-					0.4,
-					Math.min(1, availableWidth / resumeWidth),
-				);
+
+				const availableWidth = window.innerWidth - 32; // Allow some padding cushion
+				const resumeWidth = 794; // Based on A4 portrait dimensions at 96dpi (210mm)
+
+				// Compute math to fit scaling exactly
+				const fitScale = Math.max(1, Math.min(1, availableWidth / resumeWidth));
+
 				const s = document.getElementById("zoomSlider");
-				s.value = fitScale.toFixed(2);
+				s.value = fitScale.toFixed(2); // Convert to fixed-point for consistency
 				applyZoom();
 			}
 
+			// Add a resize listener resolving zoom logic back to defaults actively whenever
+			// a user drags window bounds beyond the desktop/tablet cutoff mark (1024px).
 			window.addEventListener("resize", () => {
 				if (window.innerWidth > 1024) {
-					// Restore default zoom on desktop
+					// Restore default zoom on desktop interfaces
 					const s = document.getElementById("zoomSlider");
 					if (parseFloat(s.value) < 0.6) {
 						s.value = "1";
@@ -2917,6 +3076,9 @@
 			});
 
 			// ── THEME ─────────────────────────────────────────────────
+			/**
+			 * Maps predefined theme color names to their CSS hex code configurations.
+			 */
 			const THEMES = {
 				classic: { color: "#000000", bg: "#d9d9d9", text: "#ffffff" },
 				navy: { color: "#003366", bg: "#e6edf5", text: "#ffffff" },
@@ -2926,24 +3088,39 @@
 				teal: { color: "#006666", bg: "#e0f0f0", text: "#ffffff" },
 				purple: { color: "#3d0066", bg: "#ede0f0", text: "#ffffff" },
 			};
-			let _currentTheme = "classic";
+			let _currentTheme = "classic"; // Track active global theme
 
+			/**
+			 * Restyles CSS property variables for document root representing styling of document.
+			 * Allows real-time user manipulation of theme settings dynamically syncing elements.
+			 *
+			 * @param {string} name - String representing key inside THEMES object.
+			 */
 			function setTheme(name) {
 				const t = THEMES[name];
 				if (!t) return;
-				_currentTheme = name;
+
+				_currentTheme = name; // Update tracking config
 				const root = document.documentElement;
+
+				// Set style variable hooks modifying overall interface
 				root.style.setProperty("--theme-color", t.color);
 				root.style.setProperty("--theme-bg-light", t.bg);
 				root.style.setProperty("--theme-text-light", t.text);
+
+				// Re-assign visible stroke highlighting the currently clicked swatch widget
 				document
 					.querySelectorAll(".swatch")
 					.forEach((s) =>
 						s.classList.toggle("active", s.dataset.theme === name),
 					);
-				scheduleAutoSave();
+				scheduleAutoSave(); // Store locally when the preference changes
 			}
 
+			/**
+			 * Grabs interface user inputs (dropdown menus) from sidebar controls and applies them globally
+			 * against the active `resumeWrapper` configuration parameters or style variables directly.
+			 */
 			function applySettings() {
 				const root = document.documentElement;
 				root.style.setProperty(
@@ -2960,6 +3137,8 @@
 						"data-table-style",
 						document.getElementById("tableStyleSelector").value,
 					);
+
+				// Controls rendering property class of `.links-no-icons` effectively masking child svg instances globally
 				const hideLinkIcons = document.getElementById("toggleLinkIcons");
 				if (hideLinkIcons) {
 					document
@@ -2970,15 +3149,27 @@
 			}
 
 			// ── PHONE FORMATTING ─────────────────────────────────────
+			/**
+			 * Scrapes inputs representing phone details and formats strings
+			 * cleanly spacing segments to keep UI tidy automatically. Uses logic bounding
+			 * to pieces of five digits maximum.
+			 *
+			 * @param {string} raw - Original unformatted numerical string values
+			 */
 			function formatPhoneValue(raw) {
 				const trimmed = (raw || "").trim();
 				const hasPlus = trimmed.startsWith("+");
-				const digits = trimmed.replace(/\D/g, "");
-				if (!digits) return hasPlus ? "+" : "";
+				const digits = trimmed.replace(/\D/g, ""); // Strip alphabetic input
+
+				if (!digits) return hasPlus ? "+" : ""; // Break early for empty strings returning cleanly
+
 				const parts = [];
 				const firstLen = Math.min(2, digits.length);
+
 				parts.push(digits.slice(0, firstLen));
 				let index = firstLen;
+
+				// Segment remainder via 5 step logic
 				while (index < digits.length) {
 					parts.push(digits.slice(index, index + 5));
 					index += 5;
@@ -2986,16 +3177,28 @@
 				return hasPlus ? "+" + parts.join(" ") : parts.join(" ");
 			}
 
+			/**
+			 * Explicit correction handling fixing contenteditable node jumps effectively resetting
+			 * highlighting cursor at true conclusion position of currently entered node instead of bouncing backward
+			 *
+			 * @param {HTMLElement} el
+			 */
 			function placeCaretAtEnd(el) {
 				const range = document.createRange();
 				range.selectNodeContents(el);
-				range.collapse(false);
+				range.collapse(false); // Move boundary right explicitly
+
 				const selection = window.getSelection();
 				if (!selection) return;
 				selection.removeAllRanges();
 				selection.addRange(range);
 			}
 
+			/**
+			 * Formats input matching actively typed elements cleanly blocking recursive loop events.
+			 *
+			 * @param {HTMLElement} el - Input object being dynamically tracked.
+			 */
 			function applyPhoneFormat(el) {
 				const formatted = formatPhoneValue(el.textContent);
 				if (formatted !== el.textContent) {
@@ -3004,6 +3207,10 @@
 				}
 			}
 
+			/**
+			 * Loops elements bearing `.phone-number` selector tags attaching continuous
+			 * monitoring attributes dynamically reformatting inputs on events explicitly.
+			 */
 			function initPhoneFormatting() {
 				document.querySelectorAll(".phone-number").forEach((el) => {
 					if (el.dataset.phoneBound === "true") return;
@@ -3551,7 +3758,7 @@
 				updateUndoButtons();
 
 				// Auto-fit zoom on mobile after everything loads
-				setTimeout(autoFitZoom, 100);
+				<!-- setTimeout(autoFitZoom, 100); -->
 			});
 		</script>
 	</body>
