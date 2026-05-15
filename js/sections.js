@@ -21,6 +21,13 @@ export function makeTableControls() {
         <button class="del-row-btn"><span class="material-symbols-outlined" style="font-size:14px">remove</span> Row</button>
         <button class="add-col-btn"><span class="material-symbols-outlined" style="font-size:14px">add</span> Col</button>
         <button class="del-col-btn"><span class="material-symbols-outlined" style="font-size:14px">remove</span> Col</button>
+        <label class="col-borders-toggle no-print" title="Toggle column border lines">
+            <div class="toggle-switch toggle-switch--mini">
+                <input type="checkbox" class="col-borders-checkbox" />
+                <span class="toggle-slider"></span>
+            </div>
+            <span class="col-borders-label">Col Lines</span>
+        </label>
       </div>`;
 }
 
@@ -81,6 +88,13 @@ export function addSection() {
 // --- Table Helpers ---
 
 function getTableFromBtn(btn) {
+    // Handle buttons inside table-controls container
+    const controls = btn.closest(".table-controls");
+    if (controls) {
+        const prev = controls.previousElementSibling;
+        if (prev && prev.tagName === "TABLE") return prev;
+    }
+    // Fallback
     return btn.parentElement.previousElementSibling;
 }
 
@@ -164,6 +178,140 @@ export function deleteColumn(btn, lastFocused) {
         if (row.lastElementChild) row.removeChild(row.lastElementChild);
     });
     reinitializeResizers(table);
+    snapshot();
+}
+
+// --- Contextual Delete (delete specific row/col at cursor) ---
+
+/**
+ * Deletes the specific row that the given cell belongs to.
+ */
+export function deleteRowAt(cell) {
+    if (!cell) return;
+    const row = cell.closest("tr");
+    const table = cell.closest("table");
+    if (!row || !table) return;
+
+    const tbody = table.querySelector("tbody") || table;
+    const rows = tbody.querySelectorAll("tr");
+    const hasHeader = !!table.querySelector("th");
+    
+    // Don't delete header row
+    if (row.querySelector("th")) {
+        showAlert("The header row cannot be deleted.", "Cannot Delete Header");
+        return;
+    }
+
+    if (rows.length <= (hasHeader ? 2 : 1)) {
+        showAlert("This is the last data row and cannot be deleted.", "Cannot Delete Row");
+        return;
+    }
+
+    row.remove();
+    snapshot();
+    showToast("Row deleted");
+}
+
+/**
+ * Deletes the specific column that the given cell belongs to.
+ */
+export function deleteColumnAt(cell) {
+    if (!cell) return;
+    const table = cell.closest("table");
+    if (!table) return;
+
+    const rows = table.querySelectorAll("tr");
+    if (!rows.length) return;
+
+    if (rows[0].children.length <= 1) {
+        showAlert("This is the last column and cannot be deleted.", "Cannot Delete Column");
+        return;
+    }
+
+    const colIndex = cell.cellIndex;
+    rows.forEach(row => {
+        if (row.children[colIndex]) row.removeChild(row.children[colIndex]);
+    });
+    reinitializeResizers(table);
+    snapshot();
+    showToast("Column deleted");
+}
+
+// --- Cell Context Toolbar ---
+
+let _cellToolbar = null;
+
+function ensureCellToolbar() {
+    if (_cellToolbar) return _cellToolbar;
+
+    const bar = document.createElement("div");
+    bar.className = "cell-context-toolbar no-print";
+    bar.innerHTML = `
+        <button class="ctx-del-row-btn" title="Delete this row">
+            <span class="material-symbols-outlined" style="font-size:15px">delete</span>
+            <span>Row</span>
+        </button>
+        <button class="ctx-del-col-btn" title="Delete this column">
+            <span class="material-symbols-outlined" style="font-size:15px">delete</span>
+            <span>Col</span>
+        </button>
+    `;
+    document.body.appendChild(bar);
+    _cellToolbar = bar;
+    return bar;
+}
+
+let _currentContextCell = null;
+
+export function showCellToolbar(cell) {
+    if (!cell) return;
+    
+    const table = cell.closest("table");
+    if (!table) return;
+
+    // Don't show for header cells (only 1 header row typically)
+    // Actually, let's show for all cells so columns can be deleted from headers too.
+    
+    _currentContextCell = cell;
+    const bar = ensureCellToolbar();
+    
+    // Position near the cell
+    const rect = cell.getBoundingClientRect();
+    bar.style.display = "flex";
+    
+    // Position at top-right of the cell
+    const barWidth = 130;
+    let left = rect.right - barWidth;
+    let top = rect.top - 34;
+    
+    // Keep within viewport
+    if (left < 0) left = rect.left;
+    if (top < 0) top = rect.bottom + 4;
+    
+    bar.style.left = left + "px";
+    bar.style.top = top + "px";
+}
+
+export function hideCellToolbar() {
+    if (_cellToolbar) {
+        _cellToolbar.style.display = "none";
+    }
+    _currentContextCell = null;
+}
+
+export function getCurrentContextCell() {
+    return _currentContextCell;
+}
+
+// --- Column Borders Toggle ---
+
+export function toggleColumnBorders(checkbox) {
+    const controls = checkbox.closest(".table-controls");
+    if (!controls) return;
+    const table = controls.previousElementSibling;
+    if (!table || table.tagName !== "TABLE") return;
+    
+    table.classList.toggle("show-col-borders", checkbox.checked);
     snapshot();
 }
 

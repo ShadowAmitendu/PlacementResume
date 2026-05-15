@@ -66,32 +66,51 @@ function initSortable() {
 }
 
 function applyResumeDataWrapper(data) {
-    if (!data.sections) return;
+    if (!data.sections && !data.html) return;
 
     const sortableContainer = document.getElementById("sortable-sections");
     const wrapper = document.getElementById("resumeWrapper");
     if (!sortableContainer || !wrapper) return;
 
-    sortableContainer.innerHTML = "";
-
-    data.sections.forEach((sec) => {
-        if (sec.type === "header") {
-            const header = wrapper.querySelector(".header");
-            if (header) header.innerHTML = sec.html;
-        } else if (sec.type === "section") {
-            const div = document.createElement("div");
-            div.className = "section-block";
-            div.innerHTML = sections.makeBlockControls() + sec.html;
-            if (div.querySelector("table") && !div.querySelector(".table-controls")) {
-                div.querySelector("table").insertAdjacentHTML("afterend", sections.makeTableControls());
+    if (data.sections) {
+        // Modern Section-based Format
+        sortableContainer.innerHTML = "";
+        data.sections.forEach((sec) => {
+            if (sec.type === "header") {
+                const header = wrapper.querySelector(".header");
+                if (header) header.innerHTML = sec.html;
+            } else if (sec.type === "section") {
+                const div = document.createElement("div");
+                div.className = "section-block";
+                div.innerHTML = sections.makeBlockControls() + sec.html;
+                if (div.querySelector("table") && !div.querySelector(".table-controls")) {
+                    div.querySelector("table").insertAdjacentHTML("afterend", sections.makeTableControls());
+                }
+                sortableContainer.appendChild(div);
+            } else if (sec.type === "final") {
+                const finalBlock = document.getElementById("declarationSection");
+                if (finalBlock) finalBlock.innerHTML = sections.makeBlockControls() + sec.html;
             }
-            sortableContainer.appendChild(div);
-        } else if (sec.type === "final") {
-            const finalBlock = document.getElementById("declarationSection");
-            if (finalBlock) finalBlock.innerHTML = sections.makeBlockControls() + sec.html;
-        }
-    });
+        });
+    } else if (data.html) {
+        // Legacy Monolithic HTML Format
+        wrapper.innerHTML = data.html;
+        
+        // Restore controls and functionality
+        document.querySelectorAll(".section-block").forEach((block) => {
+            if (!block.querySelector(".block-controls")) {
+                block.insertAdjacentHTML("afterbegin", sections.makeBlockControls());
+            }
+        });
+        document.querySelectorAll(".section-block table").forEach((table) => {
+            const block = table.closest(".section-block");
+            if (block && !block.querySelector(".table-controls")) {
+                table.insertAdjacentHTML("afterend", sections.makeTableControls());
+            }
+        });
+    }
 
+    // Apply Meta Settings (common to both versions)
     if (data.photo) {
         state.setPhotoBase64(data.photo);
         const img = document.getElementById("profile-photo");
@@ -107,17 +126,29 @@ function applyResumeDataWrapper(data) {
     if (data.font) document.getElementById("fontSelector").value = data.font;
     if (data.marker !== undefined) document.getElementById("markerSelector").value = data.marker;
     if (data.tableStyle) document.getElementById("tableStyleSelector").value = data.tableStyle;
-    if (data.hideLinkIcons !== undefined) {
-        const toggle = document.getElementById("toggleLinkIcons");
-        if (toggle) toggle.checked = data.hideLinkIcons;
+    
+    const toggle = document.getElementById("toggleLinkIcons");
+    if (toggle) {
+        if (data.showLinkIcons !== undefined) {
+            toggle.checked = data.showLinkIcons;
+        } else if (data.hideLinkIcons !== undefined) {
+            toggle.checked = !data.hideLinkIcons;
+        }
     }
+    
     if (data.zoom) {
         document.getElementById("zoomSlider").value = data.zoom;
         ui.applyZoom();
     }
+    
     state.applySettings();
     sections.makeColumnsResizable();
     formatting.initPhoneFormatting();
+    
+    // Re-initialize sortable in case the container was replaced (legacy import)
+    if (typeof Sortable !== "undefined") {
+        initSortable();
+    }
 }
 
 // --- Event Listeners (Delegation) ---
@@ -132,6 +163,7 @@ document.addEventListener("click", (e) => {
 
     // Modals
     if (target.id === "linkModal") ui.closeLinkModal();
+    if (target.id === "exportModal") ui.closeExportModal();
     if (target.id === "alertModal") closeAlert();
     if (target.id === "confirmModal") closeConfirm(false);
 
@@ -141,9 +173,9 @@ document.addEventListener("click", (e) => {
     if (target.id === "appThemeBtn" || target.closest("#appThemeBtn")) ui.toggleAppTheme();
     
     // Storage & PDF
-    if (target.ariaLabel === "Clear browser save") storage.clearBrowserSave();
-    if (target.ariaLabel === "Save to browser") storage.saveToBrowser();
-    if (target.ariaLabel === "Export file") storage.exportData();
+    if (target.id === "clearSaveBtn" || target.closest("#clearSaveBtn")) storage.clearBrowserSave();
+    if (target.id === "saveToBrowserBtn" || target.closest("#saveToBrowserBtn")) storage.saveToBrowser();
+    if (target.id === "exportBtn" || target.closest("#exportBtn")) storage.exportData();
     if (target.id === "importBtn" || target.closest("#importBtn")) {
         document.getElementById("importFile").click();
     }
@@ -161,6 +193,23 @@ document.addEventListener("click", (e) => {
     if (target.closest(".del-row-btn")) sections.deleteRow(target, alignment.getLastFocused());
     if (target.closest(".add-col-btn")) sections.addColumn(target);
     if (target.closest(".del-col-btn")) sections.deleteColumn(target, alignment.getLastFocused());
+
+    // Context toolbar (delete specific row/col)
+    if (target.closest(".ctx-del-row-btn")) {
+        const cell = sections.getCurrentContextCell();
+        if (cell) sections.deleteRowAt(cell);
+        sections.hideCellToolbar();
+    }
+    if (target.closest(".ctx-del-col-btn")) {
+        const cell = sections.getCurrentContextCell();
+        if (cell) sections.deleteColumnAt(cell);
+        sections.hideCellToolbar();
+    }
+
+    // Column borders toggle
+    if (target.closest(".col-borders-checkbox")) {
+        sections.toggleColumnBorders(target.closest(".col-borders-checkbox"));
+    }
 
     // Links
     if (target.tagName === "A" && target.closest(".link-item")) {
@@ -249,6 +298,20 @@ document.addEventListener("focusin", (e) => {
         alignment.setLastFocused(e.target);
         alignment.updateAlignButtons(e.target);
     }
+
+    // Show cell context toolbar when focusing a table cell
+    const cell = e.target.closest("td, th");
+    if (cell && cell.closest(".resume-wrapper")) {
+        sections.showCellToolbar(cell);
+    }
+});
+
+// Hide cell toolbar when clicking outside table cells
+document.addEventListener("mousedown", (e) => {
+    const target = e.target;
+    // Don't hide if clicking the toolbar itself or a table cell
+    if (target.closest(".cell-context-toolbar") || target.closest("td, th")) return;
+    sections.hideCellToolbar();
 });
 
 // Keyboard Shortcuts
@@ -256,6 +319,7 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
         ui.closeMobileMenu();
         ui.closeLinkModal();
+        ui.closeExportModal();
         closeAlert();
         closeConfirm(false);
     }
@@ -288,6 +352,8 @@ window.selectIcon = ui.selectIcon;
 window.saveToBrowser = storage.saveToBrowser;
 window.clearBrowserSave = storage.clearBrowserSave;
 window.exportData = storage.exportData;
+window.confirmExport = storage.confirmExport;
+window.closeExportModal = ui.closeExportModal;
 window.importData = (ev) => storage.importData(ev, applyResumeDataWrapper);
 window.formatText = formatting.formatText;
 window.formatCustom = formatting.formatCustom;

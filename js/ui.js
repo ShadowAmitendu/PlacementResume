@@ -193,3 +193,8 @@ export function deleteLink() {
         }
     });
 }
+
+export function closeExportModal() {
+    const modal = document.getElementById("exportModal");
+    if (modal) modal.style.display = "none";
+}

@@ -245,6 +245,33 @@
       </div>
     </div>
 
+    <!-- ── EXPORT MODAL ──────────────────────────────────────── -->
+    <div
+      aria-labelledby="exportTitle"
+      aria-modal="true"
+      class="modal no-print"
+      id="exportModal"
+      role="dialog"
+    >
+      <div class="modal-content" style="width: 320px; max-width: 100%">
+        <h3 id="exportTitle">Export Resume</h3>
+        <label for="exportFileName">File Name</label>
+        <input
+          autocomplete="off"
+          id="exportFileName"
+          placeholder="my_resume"
+          style="margin-bottom: 20px"
+          type="text"
+        />
+        <div class="modal-buttons">
+          <button class="btn-modal" onclick="closeExportModal()">Cancel</button>
+          <button class="btn-modal save" onclick="confirmExport()">
+            Export
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── SIDEBAR ──────────────────────────────────────────── -->
     <div
       aria-label="Resume Settings"
@@ -298,14 +325,17 @@
 
         <div class="sidebar-section">
           <span class="sidebar-label">Links</span>
-          <label class="sidebar-toggle">
-            <input
-              checked
-              id="toggleLinkIcons"
-              onchange="applySettings()"
-              type="checkbox"
-            />
-            Show Link Icons
+          <label class="toggle-switch-label" for="toggleLinkIcons">
+            <span class="toggle-switch-text">Show Link Icons</span>
+            <div class="toggle-switch">
+              <input
+                checked
+                id="toggleLinkIcons"
+                onchange="applySettings()"
+                type="checkbox"
+              />
+              <span class="toggle-slider"></span>
+            </div>
           </label>
         </div>
 
@@ -493,6 +523,34 @@
               onclick="setTheme('purple')"
               title="Deep Purple"
             ></button>
+            <button
+              aria-label="Emerald Green"
+              class="swatch"
+              data-theme="emerald"
+              onclick="setTheme('emerald')"
+              title="Emerald Green"
+            ></button>
+            <button
+              aria-label="Vibrant Violet"
+              class="swatch"
+              data-theme="violet"
+              onclick="setTheme('violet')"
+              title="Vibrant Violet"
+            ></button>
+            <button
+              aria-label="Crimson Red"
+              class="swatch"
+              data-theme="crimson"
+              onclick="setTheme('crimson')"
+              title="Crimson Red"
+            ></button>
+            <button
+              aria-label="Warm Amber"
+              class="swatch"
+              data-theme="amber"
+              onclick="setTheme('amber')"
+              title="Warm Amber"
+            ></button>
           </div>
         </div>
 
@@ -557,6 +615,14 @@
             <option value="latex">LaTeX Booktabs</option>
             <option value="word-clean">Word Clean</option>
             <option value="invisible">Minimal / No Borders</option>
+            <option value="striped-alt">Alternating Stripes</option>
+            <option value="rounded">Rounded Modern</option>
+            <option value="bordered-accent">Bordered Accent</option>
+            <option value="compact">Compact Dense</option>
+            <option value="clean-modern">Clean Modern</option>
+            <option value="classic-double">Classic Double Border</option>
+            <option value="elegant-serif">Elegant Serif</option>
+            <option value="simple-underline">Simple Underline</option>
           </select>
 
           <span class="sidebar-label" style="margin-top: 8px"
@@ -571,31 +637,32 @@
             <option value="● ">Bullet (●)</option>
             <option value="■ ">Square (■)</option>
             <option value="♦ ">Diamond (♦)</option>
+            <option value="▸ ">Triangle (▸)</option>
+            <option value="★ ">Star (★)</option>
+            <option value="✦ ">Four-Point Star (✦)</option>
+            <option value="✔ ">Check (✔)</option>
+            <option value="⬥ ">Black Diamond (⬥)</option>
+            <option value="› ">Angle (›)</option>
+            <option value="» ">Guillemet (»)</option>
+            <option value="— ">Dash (—)</option>
+            <option value="◆ ">Filled Diamond (◆)</option>
+            <option value="○ ">Circle (○)</option>
+            <option value="▪ ">Small Square (▪)</option>
             <option value="">None</option>
           </select>
 
-          <div
-            style="
-              margin-top: 12px;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-            "
-          >
-            <input
-              checked
-              id="showDeclarationToggle"
-              onchange="applySettings()"
-              style="width: 16px; height: 16px; cursor: pointer"
-              type="checkbox"
-            />
-            <label
-              class="sidebar-label"
-              for="showDeclarationToggle"
-              style="margin: 0; cursor: pointer"
-              >Show Declaration</label
-            >
-          </div>
+          <label class="toggle-switch-label" for="showDeclarationToggle" style="margin-top: 12px">
+            <span class="toggle-switch-text">Show Declaration</span>
+            <div class="toggle-switch">
+              <input
+                checked
+                id="showDeclarationToggle"
+                onchange="applySettings()"
+                type="checkbox"
+              />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
         </div>
 
         <div class="sidebar-section">
@@ -645,19 +712,19 @@
 
         <div class="sidebar-section">
           <span class="sidebar-label">Save &amp; Export</span>
-          <button aria-label="Clear browser save" class="btn-sidebar">
+          <button aria-label="Clear browser save" class="btn-sidebar" id="clearSaveBtn">
             <span class="material-symbols-outlined" style="font-size: 18px"
               >delete</span
             >
             Clear Browser Save
           </button>
-          <button aria-label="Save to browser" class="btn-sidebar">
+          <button aria-label="Save to browser" class="btn-sidebar" id="saveToBrowserBtn">
             <span class="material-symbols-outlined" style="font-size: 18px"
               >save</span
             >
             Save to Browser
           </button>
-          <button aria-label="Export file" class="btn-sidebar">
+          <button aria-label="Export file" class="btn-sidebar" id="exportBtn">
             <span class="material-symbols-outlined" style="font-size: 18px"
               >file_download</span
             >
@@ -670,9 +737,8 @@
             Import File
           </button>
           <input
-            accept=".resumeBuilder"
+            accept=".resbuild,.resumeBuilder,.html"
             id="importFile"
-            onchange="importData(event)"
             style="display: none"
             type="file"
           />
@@ -749,7 +815,7 @@
                   >[City, State, Country]</span
                 >
               </span>
-              <span class="link-item">
+              <span class="link-item no-sep">
                 Email:
                 <span
                   contenteditable="true"
@@ -917,46 +983,53 @@
                 <th contenteditable="true">Marks / CGPA</th>
               </tr>
               <tr>
-                <td contenteditable="true">[e.g. 2020-2024]</td>
-                <td contenteditable="true">[e.g. B.Tech / BCA]</td>
-                <td contenteditable="true">[e.g. University Name]</td>
-                <td contenteditable="true">[e.g. 8.5 / 85%]</td>
+                <td contenteditable="true">[Year]</td>
+                <td contenteditable="true">[Qualification]</td>
+                <td contenteditable="true">[Institution / Board]</td>
+                <td contenteditable="true">[Marks / CGPA]</td>
               </tr>
             </table>
             <div class="table-controls no-print">
-              <button class="add-row-btn" onclick="addRow(this)">
+              <button class="add-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Row
               </button>
-              <button class="del-row-btn" onclick="deleteRow(this)">
+              <button class="del-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >remove</span
                 >
                 Row
               </button>
-              <button class="add-col-btn" onclick="addColumn(this)">
+              <button class="add-col-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Col
               </button>
-              <button class="del-col-btn" onclick="deleteColumn(this)">
-                <svg height="10" style="stroke: #212529; fill: none" width="10">
-                  <use href="#ico-minus" />
-                </svg>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
                 Col
               </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
             </div>
           </div>
 
           <div class="section-block">
             <div class="block-controls no-print">
-              <span class="drag-handle" title="Drag to reorder"></span>
-                <svg height="14" width="14">
-                  <use href="#ico-drag" />
-                </svg>
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
               </span>
               <button onclick="duplicateBlock(this)" title="Duplicate">
                 <span class="material-symbols-outlined" style="font-size: 18px"
@@ -988,39 +1061,47 @@
               </tr>
             </table>
             <div class="table-controls no-print">
-              <button class="add-row-btn" onclick="addRow(this)">
+              <button class="add-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Row
               </button>
-              <button class="del-row-btn" onclick="deleteRow(this)">
+              <button class="del-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >remove</span
                 >
                 Row
               </button>
-              <button class="add-col-btn" onclick="addColumn(this)">
+              <button class="add-col-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Col
               </button>
-              <button class="del-col-btn" onclick="deleteColumn(this)">
-                <svg height="10" style="stroke: #212529; fill: none" width="10">
-                  <use href="#ico-minus" />
-                </svg>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
                 Col
               </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
             </div>
           </div>
 
           <div class="section-block">
             <div class="block-controls no-print">
-              <span class="drag-handle" title="Drag to reorder"
-                ><svg height="14" width="14">
-                  <use href="#ico-drag" /></svg
-              ></span>
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
               <button onclick="duplicateBlock(this)" title="Duplicate">
                 <span class="material-symbols-outlined" style="font-size: 18px"
                   >content_copy</span
@@ -1040,18 +1121,19 @@
               Professional Skills:
             </div>
             <ul class="skills-list" contenteditable="true">
-              <li>[e.g., Effective planning and organizing]</li>
-              <li>[e.g., Strong verbal and written communication]</li>
-              <li>[e.g., Proactive problem-solving and mentorship]</li>
+              <li>[Skill 1]</li>
+              <li>[Skill 2]</li>
+              <li>[Skill 3]</li>
             </ul>
           </div>
 
           <div class="section-block">
             <div class="block-controls no-print">
-              <span class="drag-handle" title="Drag to reorder"
-                ><svg height="14" width="14">
-                  <use href="#ico-drag" /></svg
-              ></span>
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
               <button onclick="duplicateBlock(this)" title="Duplicate">
                 <span class="material-symbols-outlined" style="font-size: 18px"
                   >content_copy</span
@@ -1086,39 +1168,47 @@
               </tr>
             </table>
             <div class="table-controls no-print">
-              <button class="add-row-btn" onclick="addRow(this)">
+              <button class="add-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Row
               </button>
-              <button class="del-row-btn" onclick="deleteRow(this)">
+              <button class="del-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >remove</span
                 >
                 Row
               </button>
-              <button class="add-col-btn" onclick="addColumn(this)">
+              <button class="add-col-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Col
               </button>
-              <button class="del-col-btn" onclick="deleteColumn(this)">
-                <span class="material-symbols-outlined" style="font-size: 14px"
-                  >remove</span
-                >
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
                 Col
               </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
             </div>
           </div>
 
           <div class="section-block">
             <div class="block-controls no-print">
-              <span class="drag-handle" title="Drag to reorder"
-                ><svg height="14" width="14">
-                  <use href="#ico-drag" /></svg
-              ></span>
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
               <button onclick="duplicateBlock(this)" title="Duplicate">
                 <span class="material-symbols-outlined" style="font-size: 18px"
                   >content_copy</span
@@ -1160,30 +1250,37 @@
               </tr>
             </table>
             <div class="table-controls no-print">
-              <button class="add-row-btn" onclick="addRow(this)">
+              <button class="add-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Row
               </button>
-              <button class="del-row-btn" onclick="deleteRow(this)">
+              <button class="del-row-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >remove</span
                 >
                 Row
               </button>
-              <button class="add-col-btn" onclick="addColumn(this)">
+              <button class="add-col-btn">
                 <span class="material-symbols-outlined" style="font-size: 14px"
                   >add</span
                 >
                 Col
               </button>
-              <button class="del-col-btn" onclick="deleteColumn(this)">
-                <svg height="10" style="stroke: #212529; fill: none" width="10">
-                  <use href="#ico-minus" />
-                </svg>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
                 Col
               </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
             </div>
           </div>
         </div>
@@ -1192,10 +1289,11 @@
         <!-- Declaration -->
         <div class="section-block" id="declarationSection">
           <div class="block-controls no-print">
-            <span class="drag-handle" title="Drag to reorder"
-              ><svg height="14" width="14">
-                <use href="#ico-drag" /></svg
-            ></span>
+            <span class="drag-handle" title="Drag to reorder">
+              <span class="material-symbols-outlined" style="font-size: 18px"
+                >drag_indicator</span
+              >
+            </span>
             <button
               class="btn-danger-small"
               onclick="deleteBlock(this)"
@@ -1207,16 +1305,11 @@
             </button>
           </div>
           <div class="declaration">
-            <strong contenteditable="true">Declaration:</strong><br />
-            <span contenteditable="true"
-              >I hereby declare that the information given above is true and
-              correct to the best of my knowledge.</span
-            >
+            <span contenteditable="true"><strong>Declaration:</strong> I hereby declare that the information given above is true and correct to the best of my knowledge.</span>
           </div>
           <div class="signature-area">
             <div>
               <p>Place: <span contenteditable="true">___________</span></p>
-              <br />
               <p>Date: <span contenteditable="true">___________</span></p>
             </div>
             <div style="text-align: right; margin-top: 15px">

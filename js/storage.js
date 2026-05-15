@@ -25,61 +25,60 @@ export function clearBrowserSave() {
 }
 
 /**
- * Exports resume data. 
- * Improved: Generates an HTML file that can redirect to the builder.
+ * Opens the export modal and populates the default filename.
  */
 export function exportData() {
-    const data = getResumeData();
-    const dataStr = JSON.stringify(data);
+    const h1 = document.querySelector(".header h1");
+    let defaultName = "My_Resume";
     
-    // Create an HTML shim that redirects to the builder website
-    // "I will make it work afterwards" - The user will replace the URL.
-    const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-    <title>Resume Data - ${data.sections[0]?.html.match(/<h1[^>]*>([^<]+)<\/h1>/)?.[1] || 'Export'}</title>
-    <style>
-        body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f4f4f9; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 1rem; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>Resume Data File</h2>
-        <p>This file contains your resume data. Click the button below to open it in the Resume Builder.</p>
-        <button id="openBtn">Open in Builder</button>
-        <p style="font-size: 12px; color: #666; margin-top: 1rem;">(Note: You can also import this file directly in the app)</p>
-    </div>
-    <script>
-        const resumeData = ${dataStr};
-        document.getElementById('openBtn').addEventListener('click', () => {
-            // Encode data and redirect. User said they will make it work afterwards.
-            const baseUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '');
-            const blob = new Blob([JSON.stringify(resumeData)], {type: 'application/json'});
-            const reader = new FileReader();
-            reader.onload = function() {
-                const b64 = btoa(reader.result);
-                // We'll use a hash fragment to pass data
-                window.location.href = baseUrl + "index.html#import=" + b64;
-            };
-            reader.readAsBinaryString(blob);
-        });
-    </script>
-</body>
-</html>`;
+    if (h1 && h1.textContent.trim()) {
+        // Strip brackets if they are still there
+        let rawName = h1.textContent.trim().replace(/^\[|\]$/g, '');
+        if (rawName && rawName !== "Your Full Name") {
+            // Clean up name but keep some character (allow spaces if user wants, but underscores are safer)
+            // Let's use spaces if they want, browsers handle it fine nowadays
+            defaultName = rawName + " Resume";
+        }
+    }
+    
+    const modal = document.getElementById("exportModal");
+    const input = document.getElementById("exportFileName");
+    if (modal && input) {
+        input.value = defaultName;
+        modal.style.display = "flex";
+        input.focus();
+        input.select();
+    }
+}
 
-    const blob = new Blob([htmlContent], { type: "text/html" });
+/**
+ * Performs the actual file export after confirmation from the modal.
+ */
+export function confirmExport() {
+    const input = document.getElementById("exportFileName");
+    const fileName = input?.value || "my_resume";
+    const data = getResumeData();
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+    });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "my_resume.html";
+    a.download = `${fileName}.resumeBuilder`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
-    showToast("Exported as HTML!");
+    
+    const modal = document.getElementById("exportModal");
+    if (modal) modal.style.display = "none";
+    
+    showToast(`Exported as ${fileName}.resumeBuilder`);
 }
 
+/**
+ * Imports resume data from .resbuild, .resumeBuilder, or .html files.
+ */
 export function importData(event, applyCallback) {
     const file = event.target.files[0];
     if (!file) return;
@@ -87,18 +86,25 @@ export function importData(event, applyCallback) {
     reader.onload = (e) => {
         try {
             let content = e.target.result;
-            // Check if it's the new HTML format or old JSON format
+            
+            // Check if it's the HTML shim format
             if (content.trim().startsWith("<!DOCTYPE html>")) {
                 const match = content.match(/const resumeData = ({.*?});/s);
                 if (match) {
                     content = match[1];
                 }
             }
-            applyCallback(JSON.parse(content));
+            
+            const data = JSON.parse(content);
+            applyCallback(data);
             snapshot();
-            showToast("Resume loaded!");
+            showToast("Resume loaded successfully!");
         } catch (err) {
-            showAlert("This file could not be loaded. Make sure it is a valid resume file.", "Invalid File");
+            console.error("Import error:", err);
+            showAlert(
+                "This file could not be loaded. Make sure it is a valid .resbuild or .resumeBuilder file.",
+                "Invalid File"
+            );
         }
     };
     reader.readAsText(file);

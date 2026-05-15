@@ -8,6 +8,10 @@ export const THEMES = {
     slate: { color: "#4a4a4a", bg: "#eeeeee", text: "#ffffff" },
     teal: { color: "#006666", bg: "#e0f0f0", text: "#ffffff" },
     purple: { color: "#3d0066", bg: "#ede0f0", text: "#ffffff" },
+    emerald: { color: "#10b981", bg: "#d1fae5", text: "#ffffff" },
+    violet: { color: "#8b5cf6", bg: "#ede9fe", text: "#ffffff" },
+    crimson: { color: "#dc2626", bg: "#fee2e2", text: "#ffffff" },
+    amber: { color: "#d97706", bg: "#fef3c7", text: "#ffffff" },
 };
 
 export let _currentTheme = "classic";
@@ -81,7 +85,7 @@ export function getResumeData() {
         font: document.getElementById("fontSelector")?.value,
         marker: document.getElementById("markerSelector")?.value,
         tableStyle: document.getElementById("tableStyleSelector")?.value,
-        hideLinkIcons: document.getElementById("toggleLinkIcons")?.checked || false,
+        showLinkIcons: document.getElementById("toggleLinkIcons")?.checked || false,
         zoom: document.getElementById("zoomSlider")?.value,
         version: 3,
     };
@@ -119,7 +123,7 @@ export function applySettings() {
     }
 
     if (toggleLinkIcons && resumeWrapper) {
-        resumeWrapper.classList.toggle("links-no-icons", toggleLinkIcons.checked);
+        resumeWrapper.classList.toggle("links-no-icons", !toggleLinkIcons.checked);
     }
 
     if (showDeclarationToggle && declarationSection) {
