@@ -134,7 +134,7 @@ export const ResumeCanvas: React.FC = () => {
   return (
     <>
       <div
-        className="w-full flex justify-center items-start overflow-x-auto overflow-y-visible px-1 py-1 print:p-0 print:m-0 print:block"
+        className="w-full flex justify-center items-start overflow-visible px-1 py-1 print:p-0 print:m-0 print:block"
         style={{
           minHeight: wrapperHeight && zoom ? `${Math.round(wrapperHeight * zoom)}px` : undefined,
         }}

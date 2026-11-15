@@ -79,16 +79,27 @@ footer,
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif !important;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
   background-color: var(--ui-bg);
   color: var(--ui-text);
-  margin: 0;
-  padding: 0;
   -webkit-font-smoothing: antialiased;
 }
 
 @media print {
-  body {
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
     background-color: #ffffff !important;
     color: #000000 !important;
   }

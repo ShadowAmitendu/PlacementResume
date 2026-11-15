@@ -74,7 +74,7 @@ const ResumeAppContent: React.FC = () => {
   }, [setZoom]);
 
   return (
-    <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
+    <div className="h-screen w-screen overflow-hidden bg-(--ui-bg) text-(--ui-text) flex flex-col print:bg-white print:h-auto print:w-auto print:overflow-visible print:block print:p-0 print:m-0">
       {/* Mobile Unsupported Screen (Only on phones < 640px; tablets and desktops work fine) */}
       {!isMobileDismissed && !isTabletOrDesktop && (
         <MobileUnsupportedView onDismiss={() => setIsMobileDismissed(true)} />
@@ -83,8 +83,8 @@ const ResumeAppContent: React.FC = () => {
       {/* Microsoft Word Style Ribbon Navigation & Controls */}
       <Ribbon />
 
-      {/* Main Document Canvas View (Full-width, centered A4 page) */}
-      <main className="flex-1 w-full min-h-screen p-2 sm:p-6 lg:p-8 pb-24 flex flex-col items-center justify-start overflow-x-auto print:m-0 print:p-0 print:bg-transparent print:min-h-0 print:block">
+      {/* Main Document Canvas View (Single scroll container for both vertical & horizontal overflow when zooming) */}
+      <main className="flex-1 w-full overflow-auto p-4 sm:p-6 lg:p-8 pb-20 flex flex-col items-center justify-start print:m-0 print:p-0 print:bg-transparent print:h-auto print:overflow-visible print:block">
         <ErrorBoundary>
           <ResumeCanvas />
         </ErrorBoundary>

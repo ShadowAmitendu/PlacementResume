@@ -170,11 +170,10 @@ export const Ribbon: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabClick('file')}
-          className={`h-7 px-3.5 text-xs font-semibold rounded transition-all cursor-pointer shrink-0 flex items-center justify-center ${
-            activeTab === 'file'
+          className={`h-7 px-3.5 text-xs font-semibold rounded transition-all cursor-pointer shrink-0 flex items-center justify-center ${activeTab === 'file'
               ? 'bg-[#0f6cbd] text-white shadow-xs'
               : 'text-[#0f6cbd] dark:text-[#2886de] hover:bg-primary/10 font-bold'
-          }`}
+            }`}
         >
           File
         </button>
@@ -195,11 +194,10 @@ export const Ribbon: React.FC = () => {
               key={tab.id}
               type="button"
               onClick={() => handleTabClick(tab.id)}
-              className={`relative h-full px-3.5 text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center justify-center rounded-t-sm ${
-                isActive
+              className={`relative h-full px-3.5 text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center justify-center rounded-t-sm ${isActive
                   ? 'text-[#0f6cbd] dark:text-[#2886de] font-bold'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
-              }`}
+                }`}
             >
               <span>{tab.label}</span>
               {/* Fluent Active Indicator Underline */}

@@ -12,8 +12,7 @@
   justify-content: center;
   width: 100%;
   transform-origin: top center;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .print-border {
