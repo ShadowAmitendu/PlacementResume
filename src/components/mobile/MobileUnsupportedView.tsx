@@ -7,7 +7,7 @@ interface MobileUnsupportedViewProps {
 
 export const MobileUnsupportedView: React.FC<MobileUnsupportedViewProps> = ({ onDismiss }) => {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-(--ui-bg) text-(--ui-text) no-print md:hidden">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center bg-(--ui-bg) text-(--ui-text) no-print sm:hidden">
       <div className="w-full max-w-sm flex flex-col items-center p-6 rounded-2xl bg-(--ui-surface) border border-(--ui-border) shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
         {/* App Logo & Device Illustration */}
         <div className="relative flex items-center justify-center">
@@ -23,13 +23,13 @@ export const MobileUnsupportedView: React.FC<MobileUnsupportedViewProps> = ({ on
         <div className="space-y-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            Desktop Required
+            Desktop &amp; Tablet Supported
           </span>
           <h1 className="text-lg font-bold text-foreground tracking-tight">
             This website is not supported in mobile
           </h1>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            PlacementResume is a full-featured desktop word-processor and resume layout designer. For the best editing experience with the ribbon toolbar, please open this website on a <strong>desktop</strong> or <strong>laptop</strong>.
+            PlacementResume is a full-featured resume word-processor with ribbon navigation. Please open this website on a <strong>tablet</strong>, <strong>laptop</strong>, or <strong>desktop computer</strong> for the best editing experience.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export const MobileUnsupportedView: React.FC<MobileUnsupportedViewProps> = ({ on
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Monitor className="w-3.5 h-3.5 text-[#0f6cbd] dark:text-[#2886de] shrink-0" />
-            <span>Real-time Single-Page A4 Layout Fitting</span>
+            <span>Supported on Tablets, Laptops &amp; Desktops</span>
           </div>
         </div>
 

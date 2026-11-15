@@ -17,6 +17,26 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 const ResumeAppContent: React.FC = () => {
   const { setZoom } = useResume();
   const [isMobileDismissed, setIsMobileDismissed] = useState(false);
+  const [isTabletOrDesktop, setIsTabletOrDesktop] = useState(true);
+
+  // Detect tablet vs mobile phone on mount and resize
+  useEffect(() => {
+    const checkDevice = () => {
+      const screenW = window.innerWidth;
+      // Tablets (iPad, Android Tablet) typically have width >= 640px or tablet user-agent
+      const ua = navigator.userAgent.toLowerCase();
+      const isTabletUa = /ipad|tablet|(android(?!.*mobile))|silk|playbook/.test(ua);
+      setIsTabletOrDesktop(screenW >= 640 || isTabletUa);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    window.addEventListener('orientationchange', checkDevice);
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+      window.removeEventListener('orientationchange', checkDevice);
+    };
+  }, []);
 
   // Responsive auto-fit zoom on mount and window resize / orientation change
   useEffect(() => {
@@ -55,8 +75,8 @@ const ResumeAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
-      {/* Mobile Unsupported Screen (Displayed when opened on mobile phones) */}
-      {!isMobileDismissed && (
+      {/* Mobile Unsupported Screen (Only on phones < 640px; tablets and desktops work fine) */}
+      {!isMobileDismissed && !isTabletOrDesktop && (
         <MobileUnsupportedView onDismiss={() => setIsMobileDismissed(true)} />
       )}
 
