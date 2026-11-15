@@ -362,6 +362,42 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                     placeholder="[Data]"
                     className="block w-full"
                   />
+
+                  {/* Floating Row Actions (hovering on the last column reveals row buttons outside the table) */}
+                  {colIdx === row.length - 1 && (
+                    <div
+                      className="row-actions-pill absolute -right-9 top-1/2 -translate-y-1/2 opacity-0 group-hover/td:opacity-100 group-focus-within/td:opacity-100 transition-all duration-150 bg-neutral-900 text-white rounded shadow-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[10px] pointer-events-auto border border-neutral-700/80"
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addTableRow(section.id, rowIdx + 1);
+                        }}
+                        title="Insert row below"
+                        className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center cursor-pointer leading-none"
+                      >
+                        <Plus className="w-2.5 h-2.5 text-emerald-400" />
+                      </button>
+                      {section.rows.length > 1 && (
+                        <button
+                          type="button"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteTableRow(section.id, rowIdx);
+                          }}
+                          title="Delete this row"
+                          className="px-1 py-0.5 hover:bg-red-950 active:bg-red-900 rounded text-red-300 hover:text-red-200 flex items-center cursor-pointer leading-none"
+                        >
+                          <Trash2 className="w-2.5 h-2.5 text-red-400" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   {/* For headerless tables, place resizer handles on the first row */}
                   {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
                     <div
@@ -373,32 +409,6 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                   )}
                 </td>
               ))}
-
-              {/* Hover row action buttons (insert row below & delete row) */}
-              <td className="no-print !p-0 !border-none !w-12 text-center select-none whitespace-nowrap">
-                <div className="opacity-0 group-hover/row:opacity-100 flex items-center gap-0.5 justify-center transition-opacity">
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => addTableRow(section.id, rowIdx + 1)}
-                    title="Insert row below"
-                    className="text-muted-foreground hover:text-emerald-500 p-1 rounded cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                  {section.rows.length > 1 && (
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => deleteTableRow(section.id, rowIdx)}
-                      title="Delete this row"
-                      className="text-muted-foreground hover:text-destructive p-1 rounded cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </td>
             </tr>
           ))}
         </tbody>
@@ -412,7 +422,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           className="add-btn"
           title="Add a row at the end"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
           <span>Row</span>
         </button>
         <button
@@ -421,7 +431,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           className="del-btn"
           title="Delete the last row"
         >
-          <Minus className="w-3 h-3" />
+          <Minus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
           <span>Row</span>
         </button>
         <button
@@ -430,7 +440,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           className="add-btn bg-cyan-700 hover:bg-cyan-800"
           title="Add a column at the end"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
           <span>Col</span>
         </button>
         <button
@@ -439,7 +449,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           className="del-btn bg-amber-600 hover:bg-amber-700"
           title="Delete the last column"
         >
-          <Minus className="w-3 h-3" />
+          <Minus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
           <span>Col</span>
         </button>
         <button
@@ -450,7 +460,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           }`}
           title="Toggle vertical column lines"
         >
-          <Columns className="w-3 h-3" />
+          <Columns className="w-3.5 h-3.5 shrink-0" />
           <span>Col Lines</span>
         </button>
         <button
@@ -459,7 +469,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           className="toggle-border-btn bg-neutral-600 hover:bg-neutral-700"
           title="Reset and equalize column widths"
         >
-          <RotateCcw className="w-3 h-3" />
+          <RotateCcw className="w-3.5 h-3.5 shrink-0" />
           <span>Auto Width</span>
         </button>
       </div>
