@@ -269,7 +269,7 @@ export const PdfAiImportModal: React.FC = () => {
             </div>
             <div>
               <DialogTitle className="text-base font-bold">Import Old Resume PDF (AI)</DialogTitle>
-              <p className="text-xs text-[var(--ui-text-dim)]">
+              <p className="text-xs text-(--ui-text-dim)">
                 Extract details from an existing resume PDF in your browser and automatically build your resume.
               </p>
             </div>
@@ -279,7 +279,7 @@ export const PdfAiImportModal: React.FC = () => {
         <div className="space-y-4 py-2">
           {/* File Upload Dropzone */}
           <div>
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-1.5">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block mb-1.5">
               1. Select Resume PDF
             </label>
             {!selectedFile ? (
@@ -287,31 +287,31 @@ export const PdfAiImportModal: React.FC = () => {
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[var(--ui-border)] hover:border-primary/60 bg-[var(--ui-surface2)] hover:bg-primary/5 rounded-xl p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2"
+                className="border-2 border-dashed border-(--ui-border) hover:border-primary/60 bg-(--ui-surface2) hover:bg-primary/5 rounded-xl p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2"
               >
-                <div className="w-10 h-10 rounded-full bg-[var(--ui-surface)] flex items-center justify-center shadow-xs text-primary">
+                <div className="w-10 h-10 rounded-full bg-(--ui-surface) flex items-center justify-center shadow-xs text-primary">
                   <Upload className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[var(--ui-text)]">
+                  <p className="text-sm font-semibold text-(--ui-text)">
                     Click to browse or drag &amp; drop PDF
                   </p>
-                  <p className="text-xs text-[var(--ui-text-dim)] mt-0.5">
+                  <p className="text-xs text-(--ui-text-dim) mt-0.5">
                     Supports any standard text-based PDF resume
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between p-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface2)]">
+              <div className="flex items-center justify-between p-3 rounded-xl border border-(--ui-border) bg-(--ui-surface2)">
                 <div className="flex items-center gap-2.5 overflow-hidden">
                   <div className="p-2 rounded-lg bg-red-500/10 text-red-600 shrink-0">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[var(--ui-text)] truncate">
+                    <p className="text-xs font-semibold text-(--ui-text) truncate">
                       {selectedFile.name}
                     </p>
-                    <p className="text-[10px] text-[var(--ui-text-dim)]">
+                    <p className="text-[10px] text-(--ui-text-dim)">
                       {(selectedFile.size / 1024).toFixed(1)} KB • PDF Document
                     </p>
                   </div>
@@ -342,7 +342,7 @@ export const PdfAiImportModal: React.FC = () => {
 
           {/* AI Engine Selection */}
           <div className="space-y-2">
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
               2. Choose AI Engine
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -353,14 +353,14 @@ export const PdfAiImportModal: React.FC = () => {
                 className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors ${
                   engine === 'gemini'
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-[var(--ui-border)] bg-[var(--ui-surface)] hover:bg-[var(--ui-surface2)] text-[var(--ui-text)]'
+                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text)'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
                   <span>{currentModelInfo?.displayName || 'Google Gemini'}</span>
                 </div>
-                <p className="text-[10px] text-[var(--ui-text-dim)] leading-tight">
+                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
                   High-accuracy extraction using Google Gemini API.
                 </p>
               </button>
@@ -372,14 +372,14 @@ export const PdfAiImportModal: React.FC = () => {
                 className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors ${
                   engine === 'local'
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-[var(--ui-border)] bg-[var(--ui-surface)] hover:bg-[var(--ui-surface2)] text-[var(--ui-text)]'
+                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text)'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
                   <Cpu className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Instant Local</span>
                 </div>
-                <p className="text-[10px] text-[var(--ui-text-dim)] leading-tight">
+                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
                   Zero setup, 100% offline rule-based parser.
                 </p>
               </button>
@@ -391,10 +391,10 @@ export const PdfAiImportModal: React.FC = () => {
                 onClick={() => setEngine('window-ai')}
                 className={`p-2.5 rounded-lg border text-left transition-colors ${
                   !hasWindowAi
-                    ? 'opacity-40 cursor-not-allowed border-[var(--ui-border)] bg-[var(--ui-surface)]'
+                    ? 'opacity-40 cursor-not-allowed border-(--ui-border) bg-(--ui-surface)'
                     : engine === 'window-ai'
                     ? 'border-primary bg-primary/10 text-primary cursor-pointer'
-                    : 'border-[var(--ui-border)] bg-[var(--ui-surface)] hover:bg-[var(--ui-surface2)] text-[var(--ui-text)] cursor-pointer'
+                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text) cursor-pointer'
                 }`}
                 title={!hasWindowAi ? 'Requires Chrome with Prompt API / Gemini Nano enabled' : undefined}
               >
@@ -402,7 +402,7 @@ export const PdfAiImportModal: React.FC = () => {
                   <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   <span>Window.ai</span>
                 </div>
-                <p className="text-[10px] text-[var(--ui-text-dim)] leading-tight">
+                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
                   {hasWindowAi ? 'On-device Gemini Nano model.' : 'Not available in this browser.'}
                 </p>
               </button>
@@ -410,11 +410,11 @@ export const PdfAiImportModal: React.FC = () => {
 
             {/* Gemini API Key & Model Selection */}
             {engine === 'gemini' && (
-              <div className="p-3 rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface2)] space-y-3 mt-2">
+              <div className="p-3 rounded-lg border border-(--ui-border) bg-(--ui-surface2) space-y-3 mt-2">
                 {/* API Key */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-[var(--ui-text)] flex items-center gap-1.5">
+                    <span className="font-medium text-(--ui-text) flex items-center gap-1.5">
                       <Key className="w-3.5 h-3.5 text-primary" />
                       Google Gemini API Key
                     </span>
@@ -433,7 +433,7 @@ export const PdfAiImportModal: React.FC = () => {
                       value={apiKey}
                       onChange={(e) => handleApiKeyChange(e.target.value)}
                       placeholder="AIzaSy..."
-                      className="w-full pr-8 pl-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)] focus:outline-none focus:border-primary font-mono"
+                      className="w-full pr-8 pl-2.5 py-1.5 text-xs rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) focus:outline-none focus:border-primary font-mono"
                     />
                     <button
                       type="button"
@@ -446,9 +446,9 @@ export const PdfAiImportModal: React.FC = () => {
                 </div>
 
                 {/* Model Selection Dropdown */}
-                <div className="space-y-1.5 pt-2 border-t border-[var(--ui-border)]/70">
+                <div className="space-y-1.5 pt-2 border-t border-(--ui-border)/70">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-[var(--ui-text)] flex items-center gap-1.5">
+                    <span className="font-medium text-(--ui-text) flex items-center gap-1.5">
                       <Bot className="w-3.5 h-3.5 text-primary" />
                       Select Gemini Model
                     </span>
@@ -468,7 +468,7 @@ export const PdfAiImportModal: React.FC = () => {
                     value={selectedModel}
                     onChange={(e) => handleModelChange(e.target.value)}
                     disabled={isLoadingModels}
-                    className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer font-medium"
+                    className="w-full px-2.5 py-1.5 text-xs rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) focus:outline-none focus:border-primary cursor-pointer font-medium"
                   >
                     {geminiModels.map((m) => (
                       <option key={m.id} value={m.id}>
@@ -477,7 +477,7 @@ export const PdfAiImportModal: React.FC = () => {
                     ))}
                   </select>
 
-                  <div className="flex items-center justify-between text-[10px] text-[var(--ui-text-dim)] pt-0.5">
+                  <div className="flex items-center justify-between text-[10px] text-(--ui-text-dim) pt-0.5">
                     <span className="truncate max-w-[70%]">
                       {currentModelInfo?.description || 'Select a Gemini model for resume parsing.'}
                     </span>
@@ -487,7 +487,7 @@ export const PdfAiImportModal: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-[var(--ui-text-dim)]">
+                <p className="text-[10px] text-(--ui-text-dim)">
                   Your key is stored securely in your browser's local storage and used directly via client-side fetch.
                 </p>
               </div>
@@ -542,7 +542,7 @@ export const PdfAiImportModal: React.FC = () => {
 
           {/* Parsed Result Preview */}
           {parsedResult && (
-            <div className="space-y-3 pt-2 border-t border-[var(--ui-border)]">
+            <div className="space-y-3 pt-2 border-t border-(--ui-border)">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
@@ -560,15 +560,15 @@ export const PdfAiImportModal: React.FC = () => {
               </div>
 
               {/* Summary Card */}
-              <div className="p-3 rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-xs space-y-2">
+              <div className="p-3 rounded-xl border border-(--ui-border) bg-(--ui-surface2) text-xs space-y-2">
                 <div>
-                  <h4 className="font-bold text-sm text-[var(--ui-text)]">
+                  <h4 className="font-bold text-sm text-(--ui-text)">
                     {parsedResult.header.fullName}
                   </h4>
-                  <p className="text-[11px] text-[var(--ui-text-dim)]">
+                  <p className="text-[11px] text-(--ui-text-dim)">
                     {parsedResult.header.degreeTitle} • {parsedResult.header.universityCompany}
                   </p>
-                  <p className="text-[10px] text-[var(--ui-text-dim)] mt-0.5">
+                  <p className="text-[10px] text-(--ui-text-dim) mt-0.5">
                     {parsedResult.header.location} | {parsedResult.header.email} | {parsedResult.header.phone}
                   </p>
                 </div>
@@ -604,7 +604,7 @@ export const PdfAiImportModal: React.FC = () => {
 
               {/* Import Mode Selection */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+                <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
                   3. Import Method
                 </label>
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -612,7 +612,7 @@ export const PdfAiImportModal: React.FC = () => {
                     className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                       importMode === 'replace'
                         ? 'border-primary bg-primary/10 text-primary font-semibold'
-                        : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
+                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
                     }`}
                   >
                     <input
@@ -625,7 +625,7 @@ export const PdfAiImportModal: React.FC = () => {
                     />
                     <div>
                       <span>Replace All</span>
-                      <p className="text-[10px] text-[var(--ui-text-dim)] font-normal">
+                      <p className="text-[10px] text-(--ui-text-dim) font-normal">
                         Fresh import of all sections
                       </p>
                     </div>
@@ -635,7 +635,7 @@ export const PdfAiImportModal: React.FC = () => {
                     className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                       importMode === 'merge'
                         ? 'border-primary bg-primary/10 text-primary font-semibold'
-                        : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
+                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
                     }`}
                   >
                     <input
@@ -648,7 +648,7 @@ export const PdfAiImportModal: React.FC = () => {
                     />
                     <div>
                       <span>Merge</span>
-                      <p className="text-[10px] text-[var(--ui-text-dim)] font-normal">
+                      <p className="text-[10px] text-(--ui-text-dim) font-normal">
                         Keep current sections, add new
                       </p>
                     </div>
@@ -659,7 +659,7 @@ export const PdfAiImportModal: React.FC = () => {
           )}
         </div>
 
-        <DialogFooter className="gap-2 pt-2 border-t border-[var(--ui-border)]">
+        <DialogFooter className="gap-2 pt-2 border-t border-(--ui-border)">
           <Button variant="outline" size="sm" onClick={() => setIsPdfAiModalOpen(false)}>
             Cancel
           </Button>

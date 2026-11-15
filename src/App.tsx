@@ -61,15 +61,15 @@ const ResumeAppContent: React.FC = () => {
   }, [setZoom]);
 
   return (
-    <div className="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)] flex flex-col lg:flex-row print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
+    <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col lg:flex-row print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
       {/* Mobile & Tablet Sticky Top Bar */}
-      <header className="lg:hidden sticky top-0 left-0 right-0 z-40 h-13 bg-[var(--ui-surface)] border-b border-[var(--ui-border)] px-3 sm:px-4 flex items-center justify-between no-print shadow-xs backdrop-blur-md shrink-0">
+      <header className="lg:hidden sticky top-0 left-0 right-0 z-40 h-13 bg-(--ui-surface) border-b border-(--ui-border) px-3 sm:px-4 flex items-center justify-between no-print shadow-xs backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setIsMobileSidebarOpen(true)}
             aria-label="Open controls sidebar"
-            className="p-2 rounded-lg bg-[var(--ui-surface2)] hover:bg-[var(--ui-surface3)] text-foreground transition-colors cursor-pointer flex items-center justify-center active:scale-95 touch-manipulation"
+            className="p-2 rounded-lg bg-(--ui-surface2) hover:bg-(--ui-surface3) text-foreground transition-colors cursor-pointer flex items-center justify-center active:scale-95 touch-manipulation"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -77,7 +77,7 @@ const ResumeAppContent: React.FC = () => {
             <span className="font-bold text-xs sm:text-sm tracking-wide text-foreground leading-tight">
               PlacementResume
             </span>
-            <span className="text-[10px] text-[var(--ui-text-dim)] leading-tight hidden sm:inline">
+            <span className="text-[10px] text-(--ui-text-dim) leading-tight hidden sm:inline">
               Interactive Resume Editor
             </span>
           </div>
@@ -91,7 +91,7 @@ const ResumeAppContent: React.FC = () => {
             disabled={!canUndo}
             aria-label="Undo"
             title="Undo"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-[var(--ui-surface2)] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
           >
             <Undo2 className="w-4 h-4" />
           </button>
@@ -101,7 +101,7 @@ const ResumeAppContent: React.FC = () => {
             disabled={!canRedo}
             aria-label="Redo"
             title="Redo"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-[var(--ui-surface2)] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
           >
             <Redo2 className="w-4 h-4" />
           </button>
@@ -110,7 +110,7 @@ const ResumeAppContent: React.FC = () => {
             onClick={saveToBrowser}
             aria-label="Save to browser"
             title="Save to browser"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-[var(--ui-surface2)] text-foreground cursor-pointer transition-colors active:scale-95 touch-manipulation"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground cursor-pointer transition-colors active:scale-95 touch-manipulation"
           >
             <Save className="w-4 h-4" />
           </button>

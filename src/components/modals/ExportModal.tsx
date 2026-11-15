@@ -34,7 +34,7 @@ export const ExportModal: React.FC = () => {
         </DialogHeader>
 
         <div className="space-y-1.5 py-2">
-          <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+          <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
             File Name
           </label>
           <div className="flex items-center gap-2">
@@ -46,12 +46,12 @@ export const ExportModal: React.FC = () => {
                 if (e.key === 'Enter') handleExport();
               }}
               placeholder="my_resume"
-              className="flex-1 px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none transition-colors"
+              className="flex-1 px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
               autoFocus
             />
-            <span className="text-xs text-[var(--ui-text-dim)] font-mono">.resumeBuilder</span>
+            <span className="text-xs text-(--ui-text-dim) font-mono">.resumeBuilder</span>
           </div>
-          <p className="text-[11px] text-[var(--ui-text-dim)]">
+          <p className="text-[11px] text-(--ui-text-dim)">
             Downloads a .resumeBuilder file you can import back anytime.
           </p>
         </div>

@@ -163,7 +163,7 @@ export const LinkModal: React.FC = () => {
 
         <div className="space-y-4 py-1">
           <div>
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-2">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block mb-2">
               Icon
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -174,7 +174,7 @@ export const LinkModal: React.FC = () => {
                   onClick={() => setIcon(opt.key)}
                   className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${icon === opt.key
                       ? 'border-primary bg-primary/10 text-primary font-semibold shadow-xs'
-                      : 'border-[var(--ui-border)] bg-[var(--ui-surface2)] hover:bg-[var(--ui-border)] text-[var(--ui-text)]'
+                      : 'border-(--ui-border) bg-(--ui-surface2) hover:bg-(--ui-border) text-(--ui-text)'
                     }`}
                 >
                   {renderIconBadge(opt.key)}
@@ -185,7 +185,7 @@ export const LinkModal: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-1">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block mb-1">
               Display Text
             </label>
             <input
@@ -193,12 +193,12 @@ export const LinkModal: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="e.g. GitHub"
-              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
+              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-1">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block mb-1">
               URL
             </label>
             <input
@@ -206,7 +206,7 @@ export const LinkModal: React.FC = () => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
+              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
             />
           </div>
         </div>

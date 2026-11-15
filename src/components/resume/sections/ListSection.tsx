@@ -83,7 +83,7 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
           <span>Add list item</span>
         </button>
 
-        <div className="flex items-center gap-1 text-[11px] text-muted-foreground bg-[var(--ui-surface2)] px-2 py-0.5 rounded border border-[var(--ui-border)]">
+        <div className="flex items-center gap-1 text-[11px] text-muted-foreground bg-(--ui-surface2) px-2 py-0.5 rounded border border-(--ui-border)">
           <span className="font-medium mr-1 text-[10px] uppercase">Format:</span>
           <button
             type="button"

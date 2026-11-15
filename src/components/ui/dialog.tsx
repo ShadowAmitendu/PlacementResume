@@ -38,13 +38,13 @@ const DialogContent = React.forwardRef<
         transform: 'translate(-50%, -50%)',
       }}
       className={cn(
-        'z-50 w-[calc(100vw-2rem)] max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain bg-[var(--ui-surface)] text-[var(--ui-text)] border border-[var(--ui-border)] p-4 sm:p-6 shadow-2xl rounded-xl focus:outline-none flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150',
+        'z-50 w-[calc(100vw-2rem)] max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain bg-(--ui-surface) text-(--ui-text) border border-(--ui-border) p-4 sm:p-6 shadow-2xl rounded-xl focus:outline-none flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150',
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-3.5 top-3.5 rounded-md p-1.5 text-[var(--ui-text-dim)] hover:text-[var(--ui-text)] hover:bg-[var(--ui-surface2)] transition-colors cursor-pointer focus:outline-none">
+      <DialogPrimitive.Close className="absolute right-3.5 top-3.5 rounded-md p-1.5 text-(--ui-text-dim) hover:text-(--ui-text) hover:bg-(--ui-surface2) transition-colors cursor-pointer focus:outline-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -59,7 +59,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col space-y-1.5 text-left pb-2.5 border-b border-[var(--ui-border)]',
+      'flex flex-col space-y-1.5 text-left pb-2.5 border-b border-(--ui-border)',
       className
     )}
     {...props}
@@ -73,7 +73,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex items-center justify-end gap-2 pt-3 border-t border-[var(--ui-border)] mt-1',
+      'flex items-center justify-end gap-2 pt-3 border-t border-(--ui-border) mt-1',
       className
     )}
     {...props}
@@ -88,7 +88,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      'text-base font-bold leading-none tracking-tight text-[var(--ui-text)]',
+      'text-base font-bold leading-none tracking-tight text-(--ui-text)',
       className
     )}
     {...props}
@@ -102,7 +102,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-xs text-[var(--ui-text-dim)] leading-relaxed', className)}
+    className={cn('text-xs text-(--ui-text-dim) leading-relaxed', className)}
     {...props}
   />
 ));

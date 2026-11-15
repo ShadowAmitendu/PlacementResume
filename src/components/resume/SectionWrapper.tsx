@@ -42,7 +42,7 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ section, childre
           {...listeners}
           aria-label="Drag to reorder section"
           aria-roledescription="sortable"
-          className="drag-handle cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground"
+          className="drag-handle p-1 text-muted-foreground hover:text-foreground"
           title="Drag to reorder"
         >
           <GripVertical className="w-3.5 h-3.5" />

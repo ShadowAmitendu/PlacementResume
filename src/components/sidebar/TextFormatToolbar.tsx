@@ -314,7 +314,7 @@ export const TextFormatToolbar: React.FC = () => {
             applyFontSize(e.target.value);
             e.target.value = 'inherit';
           }}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {FONT_SIZES.map((sz) => (
             <option key={sz.value} value={sz.value}>
@@ -350,7 +350,7 @@ export const TextFormatToolbar: React.FC = () => {
           </Button>
 
           {showTextColorPicker && (
-            <div className="absolute left-0 bottom-full mb-1 z-30 p-2 bg-[var(--ui-surface)] border border-[var(--ui-border)] rounded-md shadow-xl w-48 space-y-2">
+            <div className="absolute left-0 bottom-full mb-1 z-30 p-2 bg-(--ui-surface) border border-(--ui-border) rounded-md shadow-xl w-48 space-y-2">
               <span className="text-[10px] font-bold uppercase text-muted-foreground block">
                 Text Colors
               </span>
@@ -367,7 +367,7 @@ export const TextFormatToolbar: React.FC = () => {
                   />
                 ))}
               </div>
-              <div className="pt-1 flex items-center gap-1.5 border-t border-[var(--ui-border)]">
+              <div className="pt-1 flex items-center gap-1.5 border-t border-(--ui-border)">
                 <span className="text-[10px] text-muted-foreground">Custom:</span>
                 <input
                   type="color"
@@ -404,7 +404,7 @@ export const TextFormatToolbar: React.FC = () => {
           </Button>
 
           {showHighlightPicker && (
-            <div className="absolute right-0 bottom-full mb-1 z-30 p-2 bg-[var(--ui-surface)] border border-[var(--ui-border)] rounded-md shadow-xl w-48 space-y-2">
+            <div className="absolute right-0 bottom-full mb-1 z-30 p-2 bg-(--ui-surface) border border-(--ui-border) rounded-md shadow-xl w-48 space-y-2">
               <span className="text-[10px] font-bold uppercase text-muted-foreground block">
                 Highlight Colors
               </span>

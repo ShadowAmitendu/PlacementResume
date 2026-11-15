@@ -371,6 +371,10 @@ ol.skills-list-numbered li {
   background: var(--ui-surface2, #e0e0e0);
 }
 
+.block-controls .drag-handle:active {
+  cursor: grabbing;
+}
+
 @media (pointer: coarse) {
   .block-controls button {
     min-width: 32px;
@@ -541,10 +545,11 @@ ol.skills-list-numbered li {
 .section-title .editable-text,
 .section-title h2,
 .section-title span {
-  display: inline;
+  display: inline-block;
   font: inherit;
   margin: 0;
   padding: 0 2px;
+  min-width: 0;
 }
 
 .section-text {

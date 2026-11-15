@@ -73,7 +73,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 lg:left-72 z-30 bg-[var(--ui-surface)] border-t border-[var(--ui-border)] px-2.5 sm:px-4 py-1 sm:py-1.5 flex items-center justify-between text-[11px] text-[var(--ui-text-dim)] shadow-md select-none no-print backdrop-blur-xs gap-2">
+    <footer className="fixed bottom-0 left-0 right-0 lg:left-72 z-30 bg-(--ui-surface) border-t border-(--ui-border) px-2.5 sm:px-4 py-1 sm:py-1.5 flex items-center justify-between text-[11px] text-(--ui-text-dim) shadow-md select-none no-print backdrop-blur-xs gap-2">
       {/* Left: Document Metrics (Word-style) */}
       <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-x-auto py-0.5 shrink">
         <span className="flex items-center gap-1 font-medium text-foreground shrink-0">
@@ -81,19 +81,19 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
           <span>Page 1 of {estimatedPages}</span>
         </span>
 
-        <span className="text-[var(--ui-border)] shrink-0">|</span>
+        <span className="text-(--ui-border) shrink-0">|</span>
 
         <span className="shrink-0">
           <strong className="font-semibold text-foreground">{wordCount}</strong> words
         </span>
 
-        <span className="hidden sm:inline text-[var(--ui-border)] shrink-0">|</span>
+        <span className="hidden sm:inline text-(--ui-border) shrink-0">|</span>
 
         <span className="hidden sm:inline shrink-0">
           <strong className="font-semibold text-foreground">{charCount}</strong> characters
         </span>
 
-        <span className="hidden md:inline text-[var(--ui-border)] shrink-0">|</span>
+        <span className="hidden md:inline text-(--ui-border) shrink-0">|</span>
 
         {/* Fit Badge */}
         {wrapperHeight > 0 && (
@@ -139,13 +139,13 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
           type="button"
           onClick={() => setIsFindReplaceModalOpen(true)}
           title="Find & Replace (Ctrl+F)"
-          className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded hover:bg-[var(--ui-surface2)] text-foreground hover:text-primary transition-colors cursor-pointer text-xs touch-manipulation"
+          className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary transition-colors cursor-pointer text-xs touch-manipulation"
         >
           <Search className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Find</span>
         </button>
 
-        <span className="text-[var(--ui-border)]">|</span>
+        <span className="text-(--ui-border)">|</span>
 
         {/* Zoom Controls */}
         <div className="flex items-center gap-0.5 sm:gap-1">
@@ -154,7 +154,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             onClick={() => handleZoomChange(-0.1)}
             disabled={zoom <= 0.4}
             title="Zoom Out"
-            className="p-1 sm:p-1.5 rounded hover:bg-[var(--ui-surface2)] text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
+            className="p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
@@ -163,7 +163,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             type="button"
             onClick={handleResetZoom}
             title="Reset Zoom to 100%"
-            className="px-1 sm:px-1.5 py-0.5 rounded hover:bg-[var(--ui-surface2)] font-mono text-[11px] sm:text-xs font-semibold text-foreground cursor-pointer touch-manipulation"
+            className="px-1 sm:px-1.5 py-0.5 rounded hover:bg-(--ui-surface2) font-mono text-[11px] sm:text-xs font-semibold text-foreground cursor-pointer touch-manipulation"
           >
             {Math.round(zoom * 100)}%
           </button>
@@ -173,7 +173,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             onClick={() => handleZoomChange(0.1)}
             disabled={zoom >= 2.0}
             title="Zoom In"
-            className="p-1 sm:p-1.5 rounded hover:bg-[var(--ui-surface2)] text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
+            className="p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>

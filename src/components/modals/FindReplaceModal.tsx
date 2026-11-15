@@ -124,7 +124,7 @@ export const FindReplaceModal: React.FC = () => {
 
           {/* Replace Input */}
           <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
               Replace With
             </label>
             <input
@@ -132,18 +132,18 @@ export const FindReplaceModal: React.FC = () => {
               value={replaceQuery}
               onChange={(e) => setReplaceQuery(e.target.value)}
               placeholder="Replacement text..."
-              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
+              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
             />
           </div>
 
           {/* Options */}
           <div className="flex items-center gap-2 pt-1">
-            <label className="flex items-center gap-2 text-xs font-medium text-[var(--ui-text)] cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs font-medium text-(--ui-text) cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={matchCase}
                 onChange={(e) => setMatchCase(e.target.checked)}
-                className="rounded border-[var(--ui-border)] text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                className="rounded border-(--ui-border) text-primary focus:ring-primary h-4 w-4 cursor-pointer"
               />
               <span>Match Case</span>
             </label>

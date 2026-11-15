@@ -120,7 +120,7 @@ export const SignatureModal: React.FC = () => {
             <PenTool className="w-5 h-5 text-primary shrink-0" />
             <DialogTitle>Signature Cleaner & Vectorizer</DialogTitle>
           </div>
-          <p className="text-xs text-[var(--ui-text-dim)]">
+          <p className="text-xs text-(--ui-text-dim)">
             Upload a photo of your handwritten signature. Paper shadows and shading are removed to produce a crisp, transparent vector signature.
           </p>
         </DialogHeader>
@@ -129,16 +129,16 @@ export const SignatureModal: React.FC = () => {
           /* Upload State */
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-[var(--ui-border)] hover:border-primary rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-[var(--ui-surface2)]/50 hover:bg-[var(--ui-surface2)] transition-colors text-center"
+            className="border-2 border-dashed border-(--ui-border) hover:border-primary rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-(--ui-surface2)/50 hover:bg-(--ui-surface2) transition-colors text-center"
           >
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[var(--ui-text)]">
+              <p className="text-sm font-semibold text-(--ui-text)">
                 Click to upload photo of your handwritten signature
               </p>
-              <p className="text-xs text-[var(--ui-text-dim)] mt-1">
+              <p className="text-xs text-(--ui-text-dim) mt-1">
                 Supports camera snapshots, scans, PNG, JPG, WEBP
               </p>
             </div>
@@ -156,7 +156,7 @@ export const SignatureModal: React.FC = () => {
             {/* Live Preview Area (Checkerboard for transparency) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase text-[var(--ui-text-dim)] tracking-wider">
+                <span className="text-[11px] font-semibold uppercase text-(--ui-text-dim) tracking-wider">
                   Transparent Vector Preview
                 </span>
                 <button
@@ -170,7 +170,7 @@ export const SignatureModal: React.FC = () => {
               </div>
 
               <div
-                className="w-full h-36 rounded-lg border border-[var(--ui-border)] flex items-center justify-center p-3 relative overflow-hidden"
+                className="w-full h-36 rounded-lg border border-(--ui-border) flex items-center justify-center p-3 relative overflow-hidden"
                 style={{
                   backgroundImage: `
                     linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
@@ -194,12 +194,12 @@ export const SignatureModal: React.FC = () => {
             </div>
 
             {/* Sliders & Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-[var(--ui-surface2)] p-3.5 rounded-lg border border-[var(--ui-border)]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-(--ui-surface2) p-3.5 rounded-lg border border-(--ui-border)">
               {/* Paper & Shadow Removal */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span>Background / Shadow Cutoff</span>
-                  <span className="font-mono text-[11px] text-[var(--ui-text-dim)]">{threshold}</span>
+                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{threshold}</span>
                 </div>
                 <input
                   type="range"
@@ -210,7 +210,7 @@ export const SignatureModal: React.FC = () => {
                   onChange={(e) => setThreshold(Number(e.target.value))}
                   className="w-full accent-primary cursor-pointer"
                 />
-                <p className="text-[10px] text-[var(--ui-text-dim)]">
+                <p className="text-[10px] text-(--ui-text-dim)">
                   Slide right to wipe out paper texture & ambient shadows
                 </p>
               </div>
@@ -219,7 +219,7 @@ export const SignatureModal: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span>Ink Boldness / Contrast</span>
-                  <span className="font-mono text-[11px] text-[var(--ui-text-dim)]">{contrast.toFixed(1)}x</span>
+                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{contrast.toFixed(1)}x</span>
                 </div>
                 <input
                   type="range"
@@ -230,7 +230,7 @@ export const SignatureModal: React.FC = () => {
                   onChange={(e) => setContrast(Number(e.target.value))}
                   className="w-full accent-primary cursor-pointer"
                 />
-                <p className="text-[10px] text-[var(--ui-text-dim)]">
+                <p className="text-[10px] text-(--ui-text-dim)">
                   Strengthens faint pen strokes into solid ink
                 </p>
               </div>
@@ -239,7 +239,7 @@ export const SignatureModal: React.FC = () => {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs font-medium">
                   <span>Vector Smoothness</span>
-                  <span className="font-mono text-[11px] text-[var(--ui-text-dim)]">{smoothness}</span>
+                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{smoothness}</span>
                 </div>
                 <input
                   type="range"
@@ -250,7 +250,7 @@ export const SignatureModal: React.FC = () => {
                   onChange={(e) => setSmoothness(Number(e.target.value))}
                   className="w-full accent-primary cursor-pointer"
                 />
-                <p className="text-[10px] text-[var(--ui-text-dim)]">
+                <p className="text-[10px] text-(--ui-text-dim)">
                   Anti-aliases stroke edges for smooth curves
                 </p>
               </div>
@@ -264,7 +264,7 @@ export const SignatureModal: React.FC = () => {
                     onClick={() => setInkColor('black')}
                     className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'black'
                         ? 'border-primary bg-primary text-primary-foreground font-semibold'
-                        : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
+                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
                       }`}
                   >
                     Black
@@ -274,7 +274,7 @@ export const SignatureModal: React.FC = () => {
                     onClick={() => setInkColor('blue')}
                     className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'blue'
                         ? 'border-blue-700 bg-blue-700 text-white font-semibold'
-                        : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
+                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
                       }`}
                   >
                     Royal Blue
@@ -284,7 +284,7 @@ export const SignatureModal: React.FC = () => {
                     onClick={() => setInkColor('theme')}
                     className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'theme'
                         ? 'border-primary bg-primary/20 text-primary font-semibold'
-                        : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
+                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
                       }`}
                   >
                     Theme Color
@@ -304,12 +304,12 @@ export const SignatureModal: React.FC = () => {
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs font-medium text-[var(--ui-text)] cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs font-medium text-(--ui-text) cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={autoCrop}
                   onChange={(e) => setAutoCrop(e.target.checked)}
-                  className="rounded border-[var(--ui-border)] text-primary h-4 w-4 cursor-pointer"
+                  className="rounded border-(--ui-border) text-primary h-4 w-4 cursor-pointer"
                 />
                 <span>Auto-crop empty borders around signature</span>
               </label>
@@ -318,17 +318,17 @@ export const SignatureModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleDownloadSvg}
-                  className="text-xs text-[var(--ui-text-dim)] hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
+                  className="text-xs text-(--ui-text-dim) hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
                   title="Download SVG vector file"
                 >
                   <Download className="w-3 h-3" />
                   <span>SVG</span>
                 </button>
-                <span className="text-[var(--ui-border)]">|</span>
+                <span className="text-(--ui-border)">|</span>
                 <button
                   type="button"
                   onClick={handleDownloadPng}
-                  className="text-xs text-[var(--ui-text-dim)] hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
+                  className="text-xs text-(--ui-text-dim) hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
                   title="Download transparent PNG"
                 >
                   <Download className="w-3 h-3" />

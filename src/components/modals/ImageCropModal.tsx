@@ -344,7 +344,7 @@ export const ImageCropModal: React.FC = () => {
 
           {/* Aspect Ratio Presets */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
               Aspect Ratio
             </label>
             <div className="flex flex-wrap items-center gap-2">
@@ -392,7 +392,7 @@ export const ImageCropModal: React.FC = () => {
             {/* Zoom Slider */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs font-medium">
-                <span className="flex items-center gap-1 text-[var(--ui-text-dim)]">
+                <span className="flex items-center gap-1 text-(--ui-text-dim)">
                   <ZoomIn className="w-3.5 h-3.5" />
                   <span>Zoom</span>
                 </span>
@@ -432,7 +432,7 @@ export const ImageCropModal: React.FC = () => {
 
             {/* Rotate & Flip Tools */}
             <div className="space-y-1.5">
-              <span className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+              <span className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
                 Rotate & Flip
               </span>
               <div className="flex items-center gap-2">
