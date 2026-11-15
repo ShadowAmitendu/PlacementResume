@@ -17,7 +17,7 @@
   --color-muted-foreground: var(--ui-text-dim);
   --color-accent: var(--ui-surface2);
   --color-accent-foreground: var(--ui-text);
-  --color-destructive: #dc3545;
+  --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
   --color-border: var(--ui-border);
   --color-input: var(--ui-border);
@@ -27,21 +27,34 @@
 :root {
   --ui-bg: #f4f6f8;
   --ui-surface: #ffffff;
-  --ui-surface2: #eef1f5;
-  --ui-accent: #0056b3;
-  --ui-text: #1a1a1a;
-  --ui-text-dim: #6b7280;
-  --ui-border: #d1d5db;
+  --ui-surface2: #f1f5f9;
+  --ui-surface3: #e2e8f0;
+  --ui-accent: #0284c7;
+  --ui-text: #0f172a;
+  --ui-text-dim: #64748b;
+  --ui-border: #cbd5e1;
+  color-scheme: light;
 }
 
-body.dark-mode {
-  --ui-bg: #121212;
-  --ui-surface: #1e1e1e;
-  --ui-surface2: #2d2d2d;
-  --ui-accent: #3b82f6;
-  --ui-text: #e0e0e0;
-  --ui-text-dim: #a0aec0;
-  --ui-border: #3f3f46;
+html.dark,
+body.dark-mode,
+.dark {
+  --ui-bg: #090d16;
+  --ui-surface: #111827;
+  --ui-surface2: #1f2937;
+  --ui-surface3: #374151;
+  --ui-accent: #38bdf8;
+  --ui-text: #f9fafb;
+  --ui-text-dim: #9ca3af;
+  --ui-border: #374151;
+  color-scheme: dark;
+}
+
+/* Ensure native select and options render cleanly with high contrast in dark mode across all browsers */
+select option,
+select optgroup {
+  background-color: var(--ui-surface);
+  color: var(--ui-text);
 }
 
 body {
@@ -50,6 +63,7 @@ body {
   color: var(--ui-text);
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 @media print {

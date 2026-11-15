@@ -21,7 +21,7 @@ export const AddSectionPanel: React.FC = () => {
         <select
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value as SectionType)}
-          className="flex-1 px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary"
+          className="flex-1 px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           <option value="text">Text Paragraph</option>
           <option value="table">Table</option>

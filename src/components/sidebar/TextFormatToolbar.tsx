@@ -314,7 +314,7 @@ export const TextFormatToolbar: React.FC = () => {
             applyFontSize(e.target.value);
             e.target.value = 'inherit';
           }}
-          className="w-full px-2 py-1 text-xs rounded border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {FONT_SIZES.map((sz) => (
             <option key={sz.value} value={sz.value}>

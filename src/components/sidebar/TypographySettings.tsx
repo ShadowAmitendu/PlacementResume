@@ -32,7 +32,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={margin || 'normal'}
           onChange={(e) => updateMeta({ margin: e.target.value as any })}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {MARGIN_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -50,7 +50,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={lineHeight || 'normal'}
           onChange={(e) => updateMeta({ lineHeight: e.target.value as any })}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {LINE_HEIGHT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -68,7 +68,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={font}
           onChange={(e) => setFont(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {FONT_OPTIONS.map((group) => (
             <optgroup key={group.group} label={group.group}>
@@ -90,7 +90,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={tableStyle}
           onChange={(e) => setTableStyle(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {TABLE_STYLES.map((st) => (
             <option key={st.value} value={st.value}>
@@ -108,7 +108,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={marker}
           onChange={(e) => setMarker(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary cursor-pointer"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer transition-colors font-medium"
         >
           {SECTION_MARKERS.map((m) => (
             <option key={m.value} value={m.value}>

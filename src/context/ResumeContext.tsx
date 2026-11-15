@@ -249,6 +249,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Sync document body class & CSS root variables
   useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    document.body.classList.toggle('dark', isDarkMode);
     document.body.classList.toggle('dark-mode', isDarkMode);
   }, [isDarkMode]);
 

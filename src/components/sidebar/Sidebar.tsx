@@ -83,9 +83,9 @@ export const Sidebar: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={toggleDarkMode}
-              className="w-full justify-start text-xs h-9 gap-2"
+              className="w-full justify-start text-xs h-9 gap-2 font-medium"
             >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-primary" />}
               <span>{isDarkMode ? 'Disable Dark Mode' : 'Enable Dark Mode'}</span>
             </Button>
           </div>
