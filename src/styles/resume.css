@@ -34,6 +34,71 @@
   line-height: 1.3;
   flex-shrink: 0;
   color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+#sortable-sections {
+  flex-shrink: 0;
+}
+
+#declarationSection {
+  margin-top: auto !important;
+  margin-bottom: 0 !important;
+  padding-top: 4px;
+  flex-shrink: 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ── AUTO-FIT SINGLE PAGE OPTIMIZER ──────────────────────── */
+.resume-wrapper.auto-fit-page .header {
+  margin-bottom: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.resume-wrapper.auto-fit-page .section-block {
+  margin-bottom: 4px !important;
+  padding: 2px 4px !important;
+}
+
+.resume-wrapper.auto-fit-page .section-title {
+  margin: 3px 0 2px 0 !important;
+  font-size: 12pt !important;
+}
+
+.resume-wrapper.auto-fit-page .section-text {
+  margin-bottom: 4px !important;
+}
+
+.resume-wrapper.auto-fit-page table th,
+.resume-wrapper.auto-fit-page table td {
+  padding: 2.5px 3.5px !important;
+}
+
+.resume-wrapper.auto-fit-page #declarationSection {
+  padding-top: 2px !important;
+}
+
+.resume-wrapper.auto-fit-page .declaration {
+  margin-top: 4px !important;
+  font-size: 9.5pt !important;
+  line-height: 1.25 !important;
+}
+
+.resume-wrapper.auto-fit-page .signature-area {
+  margin-top: 8px !important;
+  font-size: 9.5pt !important;
+}
+
+.resume-wrapper.auto-fit-page .signature-area img {
+  max-height: 42px !important;
+}
+
+.resume-wrapper.auto-fit-page .signature-line {
+  padding-top: 2px !important;
+  width: 140px !important;
 }
 
 /* ── MARGINS (Word-like page margins) ───────────────────── */
@@ -900,16 +965,19 @@ ul.skills-list li::before {
 
 /* Declaration */
 .declaration {
-  margin-top: 15px;
-  font-size: 11pt;
-  line-height: 1.4;
+  margin-top: 8px;
+  font-size: 10.5pt;
+  line-height: 1.35;
 }
 
 .signature-area {
   display: flex;
   justify-content: space-between;
-  margin-top: 25px;
-  font-size: 11pt;
+  align-items: flex-end;
+  margin-top: 14px;
+  font-size: 10.5pt;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .signature-line {
@@ -1003,10 +1071,21 @@ ul.skills-list li::before {
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
-    min-height: 0 !important;
+    min-height: 275mm !important;
     margin: 0 !important;
     overflow: visible !important;
     color: #1a1a1a !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+  }
+
+  #declarationSection {
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+    padding-top: 4px !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .resume-wrapper[data-margin="compact"] {
@@ -1025,14 +1104,15 @@ ul.skills-list li::before {
   .section-block {
     border: none !important;
     padding: 0 !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 6px !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
   .signature-area {
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    align-items: flex-end !important;
   }
 
   .editable-text,

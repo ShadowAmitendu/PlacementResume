@@ -103,7 +103,7 @@ export const FindReplaceModal: React.FC = () => {
           {/* Find Input */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
+              <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
                 Find
               </label>
               {searchQuery.trim() && (
@@ -118,7 +118,7 @@ export const FindReplaceModal: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Text to find..."
-              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
+              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
             />
           </div>
 

@@ -48,7 +48,7 @@ export const DeclarationSection: React.FC = () => {
               <img
                 src={signatureImage}
                 alt="Signature"
-                className="max-h-16 max-w-[160px] object-contain inline-block filter contrast-125"
+                className="max-h-14 max-w-[160px] object-contain inline-block filter contrast-125"
               />
               <div className="absolute top-0 -right-7 opacity-0 group-hover/sig:opacity-100 flex flex-col gap-1 no-print bg-[var(--ui-surface)] p-1 rounded-md shadow-md border border-[var(--ui-border)] transition-opacity">
                 <button

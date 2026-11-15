@@ -120,6 +120,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
     zoom: 1,
     margin: 'normal',
     lineHeight: 'normal',
+    fitSignatureToPage: true,
   },
   header: {
     fullName: '[Your Full Name]',

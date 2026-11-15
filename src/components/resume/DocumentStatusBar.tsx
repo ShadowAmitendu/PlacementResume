@@ -5,9 +5,10 @@ import { Search, ZoomIn, ZoomOut, CheckCircle2, AlertTriangle, FileText } from '
 
 interface DocumentStatusBarProps {
   wrapperHeight: number;
+  isAutoFit?: boolean;
 }
 
-export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHeight }) => {
+export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHeight, isAutoFit }) => {
   const { resumeData, setZoom, setIsFindReplaceModalOpen } = useResume();
   const { zoom, margin, lineHeight } = resumeData.meta;
 
@@ -97,20 +98,23 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
         {/* Fit Badge */}
         {wrapperHeight > 0 && (
           <span
-            className={`hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${isOnePageFit
+            className={`hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+              isOnePageFit
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-              }`}
+            }`}
             title={
               isOnePageFit
-                ? 'Document fits on a standard single A4 page'
+                ? isAutoFit
+                  ? 'Spacing automatically optimized to keep signature fitted on 1 page'
+                  : 'Document fits on a standard single A4 page'
                 : 'Content exceeds 1 page. Adjust margins or line spacing if 1-page fit is desired.'
             }
           >
             {isOnePageFit ? (
               <>
                 <CheckCircle2 className="w-3 h-3" />
-                <span>1-Page Fit</span>
+                <span>{isAutoFit ? '1-Page Fit (Auto-Fit)' : '1-Page Fit'}</span>
               </>
             ) : (
               <>

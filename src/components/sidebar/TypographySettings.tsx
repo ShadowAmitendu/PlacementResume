@@ -144,6 +144,19 @@ export const TypographySettings: React.FC = () => {
           />
         </div>
 
+        {showDeclaration && (
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <span className="text-xs font-medium text-foreground block">Fit Signature to Page</span>
+              <span className="text-[10px] text-muted-foreground block">Auto-compact spacing to keep signature on page</span>
+            </div>
+            <Switch
+              checked={resumeData.meta.fitSignatureToPage ?? true}
+              onCheckedChange={(checked) => updateMeta({ fitSignatureToPage: checked })}
+            />
+          </div>
+        )}
+
         {/* Signature Action Button */}
         {showDeclaration && (
           <div className="pt-1">

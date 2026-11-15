@@ -10,6 +10,7 @@ export interface ResumeMeta {
   zoom: number;
   margin?: 'compact' | 'normal' | 'moderate' | 'wide';
   lineHeight?: 'tight' | 'normal' | 'relaxed';
+  fitSignatureToPage?: boolean;
 }
 
 export type LinkIconType =

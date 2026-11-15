@@ -46,12 +46,12 @@ export const ExportModal: React.FC = () => {
                 if (e.key === 'Enter') handleExport();
               }}
               placeholder="my_resume"
-              className="flex-1 px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-[var(--ui-text)] text-sm focus:outline-none transition-colors"
+              className="flex-1 px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
               autoFocus
             />
-            <span className="text-xs text-[var(--ui-text-dim)] font-mono">.resbuild</span>
+            <span className="text-xs text-(--ui-text-dim) font-mono">.resbuild</span>
           </div>
-          <p className="text-[11px] text-[var(--ui-text-dim)]">
+          <p className="text-[11px] text-(--ui-text-dim)">
             Downloads a .resumeBuilder file you can import back anytime.
           </p>
         </div>
