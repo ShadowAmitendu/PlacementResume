@@ -73,7 +73,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 lg:left-72 z-30 bg-(--ui-surface) border-t border-(--ui-border) px-2.5 sm:px-4 py-1 sm:py-1.5 flex items-center justify-between text-[11px] text-(--ui-text-dim) shadow-md select-none no-print backdrop-blur-xs gap-2">
+    <footer className="fixed bottom-0 left-0 right-0 z-30 bg-(--ui-surface) border-t border-(--ui-border) px-2.5 sm:px-4 py-1 sm:py-1.5 flex items-center justify-between text-[11px] text-(--ui-text-dim) shadow-md select-none no-print backdrop-blur-xs gap-2">
       {/* Left: Document Metrics (Word-style) */}
       <div className="flex items-center gap-2 sm:gap-3 flex-nowrap overflow-x-auto py-0.5 shrink">
         <span className="flex items-center gap-1 font-medium text-foreground shrink-0">

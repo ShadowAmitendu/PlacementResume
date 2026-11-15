@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { ResumeProvider, useResume } from './context/ResumeContext';
-import { Sidebar } from './components/sidebar/Sidebar';
+import { Ribbon } from './components/ribbon/Ribbon';
 import { ResumeCanvas } from './components/resume/ResumeCanvas';
 import { LinkModal } from './components/modals/LinkModal';
 import { ExportModal } from './components/modals/ExportModal';
@@ -12,18 +12,9 @@ import { PdfAiImportModal } from './components/modals/PdfAiImportModal';
 import { ImageCropModal } from './components/modals/ImageCropModal';
 import { Toast } from './components/ui/toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Menu, Undo2, Redo2, Save, Printer } from 'lucide-react';
 
 const ResumeAppContent: React.FC = () => {
-  const {
-    setIsMobileSidebarOpen,
-    setZoom,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-    saveToBrowser,
-  } = useResume();
+  const { setZoom } = useResume();
 
   // Responsive auto-fit zoom on mount and window resize / orientation change
   useEffect(() => {
@@ -61,77 +52,12 @@ const ResumeAppContent: React.FC = () => {
   }, [setZoom]);
 
   return (
-    <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col lg:flex-row print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
-      {/* Mobile & Tablet Sticky Top Bar */}
-      <header className="lg:hidden sticky top-0 left-0 right-0 z-40 h-13 bg-(--ui-surface) border-b border-(--ui-border) px-3 sm:px-4 flex items-center justify-between no-print shadow-xs backdrop-blur-md shrink-0">
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => setIsMobileSidebarOpen(true)}
-            aria-label="Open controls sidebar"
-            className="p-2 rounded-lg bg-(--ui-surface2) hover:bg-(--ui-surface3) text-foreground transition-colors cursor-pointer flex items-center justify-center active:scale-95 touch-manipulation"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div className="flex flex-col">
-            <span className="font-bold text-xs sm:text-sm tracking-wide text-foreground leading-tight">
-              PlacementResume
-            </span>
-            <span className="text-[10px] text-(--ui-text-dim) leading-tight hidden sm:inline">
-              Interactive Resume Editor
-            </span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
+      {/* Microsoft Word Style Ribbon Navigation & Controls */}
+      <Ribbon />
 
-        {/* Quick Actions */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
-          <button
-            type="button"
-            onClick={undo}
-            disabled={!canUndo}
-            aria-label="Undo"
-            title="Undo"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
-          >
-            <Undo2 className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={redo}
-            disabled={!canRedo}
-            aria-label="Redo"
-            title="Redo"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95 touch-manipulation"
-          >
-            <Redo2 className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={saveToBrowser}
-            aria-label="Save to browser"
-            title="Save to browser"
-            className="p-1.5 sm:p-2 rounded-md hover:bg-(--ui-surface2) text-foreground cursor-pointer transition-colors active:scale-95 touch-manipulation"
-          >
-            <Save className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            aria-label="Print or save as PDF"
-            title="Print / Save PDF"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold cursor-pointer shadow-xs transition-colors active:scale-95 touch-manipulation"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">PDF</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main View Area */}
-      <main className="flex-1 lg:ml-72 min-h-screen p-2 sm:p-6 lg:p-8 pb-20 flex flex-col items-center justify-start overflow-x-hidden print:m-0 print:p-0 print:bg-transparent print:min-h-0 print:block">
+      {/* Main Document Canvas View (Full-width, centered A4 page) */}
+      <main className="flex-1 w-full min-h-screen p-2 sm:p-6 lg:p-8 pb-24 flex flex-col items-center justify-start overflow-x-auto print:m-0 print:p-0 print:bg-transparent print:min-h-0 print:block">
         <ErrorBoundary>
           <ResumeCanvas />
         </ErrorBoundary>
