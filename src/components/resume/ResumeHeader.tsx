@@ -2,10 +2,10 @@ import React, { useRef } from 'react';
 import { useResume } from '../../context/ResumeContext';
 import { EditableContent } from './EditableContent';
 import { SocialLinks } from './SocialLinks';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Crop } from 'lucide-react';
 
 export const ResumeHeader: React.FC = () => {
-  const { resumeData, updateHeader, setPhoto } = useResume();
+  const { resumeData, updateHeader, setPhoto, openCropModal } = useResume();
   const { fullName, degreeTitle, universityCompany } = resumeData.header;
   const photo = resumeData.meta.photo;
   const showPhoto = resumeData.meta.showPhoto ?? true;
@@ -17,36 +17,8 @@ export const ResumeHeader: React.FC = () => {
 
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 400;
-
-        if (width > height) {
-          if (width > maxDim) {
-            height *= maxDim / width;
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width *= maxDim / height;
-            height = maxDim;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
-          const base64 = canvas.toDataURL('image/jpeg', 0.7);
-          setPhoto(base64);
-        }
-      };
       if (typeof ev.target?.result === 'string') {
-        img.src = ev.target.result;
+        openCropModal(ev.target.result);
       }
     };
     reader.readAsDataURL(file);
@@ -62,7 +34,7 @@ export const ResumeHeader: React.FC = () => {
           onClick={() => fileInputRef.current?.click()}
           role="button"
           tabIndex={0}
-          title="Click to upload profile photo"
+          title="Click to upload or change profile photo"
           onKeyDown={(e) => {
             if (e.key === 'Enter') fileInputRef.current?.click();
           }}
@@ -70,17 +42,30 @@ export const ResumeHeader: React.FC = () => {
           {photo ? (
             <>
               <img src={photo} alt="Profile" className="block w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPhoto(null);
-                }}
-                title="Remove photo"
-                className="absolute top-1 right-1 opacity-0 group-hover/photo:opacity-100 bg-neutral-900/80 hover:bg-destructive text-white rounded p-1 transition-opacity no-print cursor-pointer"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
+              <div className="absolute top-1 right-1 opacity-0 group-hover/photo:opacity-100 flex items-center gap-1 transition-opacity no-print z-10">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openCropModal(photo);
+                  }}
+                  title="Crop / adjust photo"
+                  className="bg-neutral-900/80 hover:bg-neutral-800 text-white rounded p-1 cursor-pointer transition-colors"
+                >
+                  <Crop className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPhoto(null);
+                  }}
+                  title="Remove photo"
+                  className="bg-neutral-900/80 hover:bg-destructive text-white rounded p-1 cursor-pointer transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
             </>
           ) : (
             <span id="photo-label" className="leading-tight text-center px-1">

@@ -9,6 +9,7 @@ import { AlertModal } from './components/modals/AlertModal';
 import { FindReplaceModal } from './components/modals/FindReplaceModal';
 import { SignatureModal } from './components/modals/SignatureModal';
 import { PdfAiImportModal } from './components/modals/PdfAiImportModal';
+import { ImageCropModal } from './components/modals/ImageCropModal';
 import { Toast } from './components/ui/toast';
 import { Menu } from 'lucide-react';
 
@@ -51,6 +52,7 @@ const ResumeAppContent: React.FC = () => {
       <FindReplaceModal />
       <SignatureModal />
       <PdfAiImportModal />
+      <ImageCropModal />
       <ConfirmModal />
       <AlertModal />
       <Toast />

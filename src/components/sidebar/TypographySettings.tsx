@@ -8,10 +8,18 @@ import {
   LINE_HEIGHT_OPTIONS,
 } from '../../constants/themes';
 import { Switch } from '../ui/switch';
-import { PenTool } from 'lucide-react';
+import { PenTool, Crop } from 'lucide-react';
 
 export const TypographySettings: React.FC = () => {
-  const { resumeData, setFont, setTableStyle, setMarker, updateMeta, setIsSignatureModalOpen } = useResume();
+  const {
+    resumeData,
+    setFont,
+    setTableStyle,
+    setMarker,
+    updateMeta,
+    setIsSignatureModalOpen,
+    openCropModal,
+  } = useResume();
   const { font, tableStyle, marker, showDeclaration, showLinkIcons, margin, lineHeight } =
     resumeData.meta;
   const showPhoto = resumeData.meta.showPhoto ?? true;
@@ -127,6 +135,19 @@ export const TypographySettings: React.FC = () => {
             onCheckedChange={(checked) => updateMeta({ showPhoto: checked })}
           />
         </div>
+
+        {showPhoto && resumeData.meta.photo && (
+          <div className="pt-0.5">
+            <button
+              type="button"
+              onClick={() => openCropModal(resumeData.meta.photo)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] hover:bg-[var(--ui-surface)] text-xs font-medium text-foreground transition-colors cursor-pointer shadow-xs"
+            >
+              <Crop className="w-3.5 h-3.5 text-primary" />
+              <span>Crop & Adjust Photo</span>
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-foreground">Show Link Icons</span>

@@ -114,6 +114,12 @@ interface ResumeContextType {
   setPdfImportInitialFile: (file: File | null) => void;
   applyAiParsedResume: (parsedData: ResumeData) => void;
 
+  isCropModalOpen: boolean;
+  setIsCropModalOpen: (open: boolean) => void;
+  cropImageSrc: string | null;
+  setCropImageSrc: (src: string | null) => void;
+  openCropModal: (imageSrc?: string | null) => void;
+
   confirmDialog: ConfirmDialogState;
   showConfirm: (message: string, title?: string, confirmLabel?: string) => Promise<boolean>;
   closeConfirm: () => void;
@@ -173,6 +179,20 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isPdfAiModalOpen, setIsPdfAiModalOpen] = useState(false);
   const [pdfImportInitialFile, setPdfImportInitialFile] = useState<File | null>(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+
+  const openCropModal = useCallback(
+    (src?: string | null) => {
+      if (src) {
+        setCropImageSrc(src);
+      } else if (resumeData.meta.photo) {
+        setCropImageSrc(resumeData.meta.photo);
+      }
+      setIsCropModalOpen(true);
+    },
+    [resumeData.meta.photo]
+  );
 
   // Modals & Toast
   const [toast, setToast] = useState<ToastState>({ show: false, message: '' });
@@ -921,6 +941,11 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     pdfImportInitialFile,
     setPdfImportInitialFile,
     applyAiParsedResume,
+    isCropModalOpen,
+    setIsCropModalOpen,
+    cropImageSrc,
+    setCropImageSrc,
+    openCropModal,
     confirmDialog,
     showConfirm,
     closeConfirm,
