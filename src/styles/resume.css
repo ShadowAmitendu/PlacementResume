@@ -266,6 +266,27 @@ ol.skills-list-numbered li {
   flex-wrap: wrap;
 }
 
+.header.no-photo {
+  justify-content: center;
+}
+.header.no-photo .header-details {
+  text-align: center;
+  align-items: center;
+  max-width: 100%;
+  padding-left: 0;
+  width: 100%;
+}
+.header.no-photo .header-details h1 {
+  max-width: 100%;
+  text-align: center;
+}
+.header.no-photo .subtitle-line {
+  justify-content: center;
+}
+.header.no-photo .links-line {
+  justify-content: center;
+}
+
 .photo-box {
   width: 100px;
   height: 125px;

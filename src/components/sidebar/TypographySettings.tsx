@@ -8,11 +8,13 @@ import {
   LINE_HEIGHT_OPTIONS,
 } from '../../constants/themes';
 import { Switch } from '../ui/switch';
+import { PenTool } from 'lucide-react';
 
 export const TypographySettings: React.FC = () => {
-  const { resumeData, setFont, setTableStyle, setMarker, updateMeta } = useResume();
+  const { resumeData, setFont, setTableStyle, setMarker, updateMeta, setIsSignatureModalOpen } = useResume();
   const { font, tableStyle, marker, showDeclaration, showLinkIcons, margin, lineHeight } =
     resumeData.meta;
+  const showPhoto = resumeData.meta.showPhoto ?? true;
 
   return (
     <div className="space-y-4">
@@ -119,6 +121,14 @@ export const TypographySettings: React.FC = () => {
       {/* Toggles */}
       <div className="pt-1 space-y-3">
         <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-foreground">Show Profile Picture</span>
+          <Switch
+            checked={showPhoto}
+            onCheckedChange={(checked) => updateMeta({ showPhoto: checked })}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-foreground">Show Link Icons</span>
           <Switch
             checked={showLinkIcons}
@@ -133,6 +143,20 @@ export const TypographySettings: React.FC = () => {
             onCheckedChange={(checked) => updateMeta({ showDeclaration: checked })}
           />
         </div>
+
+        {/* Signature Action Button */}
+        {showDeclaration && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setIsSignatureModalOpen(true)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] hover:bg-[var(--ui-surface)] text-xs font-medium text-foreground transition-colors cursor-pointer shadow-xs"
+            >
+              <PenTool className="w-3.5 h-3.5 text-primary" />
+              <span>Clean & Vectorize Signature</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -105,6 +105,9 @@ interface ResumeContextType {
   setIsFindReplaceModalOpen: (open: boolean) => void;
   findAndReplaceAll: (search: string, replaceWith: string, matchCase?: boolean) => number;
 
+  isSignatureModalOpen: boolean;
+  setIsSignatureModalOpen: (open: boolean) => void;
+
   confirmDialog: ConfirmDialogState;
   showConfirm: (message: string, title?: string, confirmLabel?: string) => Promise<boolean>;
   closeConfirm: () => void;
@@ -161,6 +164,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [editingLink, setEditingLink] = useState<HeaderLink | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isFindReplaceModalOpen, setIsFindReplaceModalOpen] = useState(false);
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
 
   // Modals & Toast
   const [toast, setToast] = useState<ToastState>({ show: false, message: '' });
@@ -288,6 +292,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsLinkModalOpen(false);
         setIsExportModalOpen(false);
         setIsFindReplaceModalOpen(false);
+        setIsSignatureModalOpen(false);
         closeAlert();
         closeConfirm();
       }
@@ -857,6 +862,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isFindReplaceModalOpen,
     setIsFindReplaceModalOpen,
     findAndReplaceAll,
+    isSignatureModalOpen,
+    setIsSignatureModalOpen,
     confirmDialog,
     showConfirm,
     closeConfirm,

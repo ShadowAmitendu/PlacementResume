@@ -115,6 +115,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
     showDeclaration: true,
     showLinkIcons: true,
     photo: null,
+    showPhoto: true,
     zoom: 1,
     margin: 'normal',
     lineHeight: 'normal',
@@ -198,5 +199,6 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
     place: '___________',
     date: '___________',
     signature: 'Signature',
+    signatureImage: null,
   },
 };

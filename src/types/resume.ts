@@ -6,6 +6,7 @@ export interface ResumeMeta {
   showDeclaration: boolean;
   showLinkIcons: boolean;
   photo: string | null;
+  showPhoto?: boolean;
   zoom: number;
   margin?: 'compact' | 'normal' | 'moderate' | 'wide';
   lineHeight?: 'tight' | 'normal' | 'relaxed';
@@ -82,6 +83,7 @@ export interface DeclarationData {
   place: string;
   date: string;
   signature: string;
+  signatureImage?: string | null;
 }
 
 export interface ResumeData {
