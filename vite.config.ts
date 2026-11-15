@@ -14,6 +14,17 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('pdfjs-dist')) {
+            return 'pdfjs';
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     open: false,

@@ -108,6 +108,12 @@ interface ResumeContextType {
   isSignatureModalOpen: boolean;
   setIsSignatureModalOpen: (open: boolean) => void;
 
+  isPdfAiModalOpen: boolean;
+  setIsPdfAiModalOpen: (open: boolean) => void;
+  pdfImportInitialFile: File | null;
+  setPdfImportInitialFile: (file: File | null) => void;
+  applyAiParsedResume: (parsedData: ResumeData) => void;
+
   confirmDialog: ConfirmDialogState;
   showConfirm: (message: string, title?: string, confirmLabel?: string) => Promise<boolean>;
   closeConfirm: () => void;
@@ -165,6 +171,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isFindReplaceModalOpen, setIsFindReplaceModalOpen] = useState(false);
   const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+  const [isPdfAiModalOpen, setIsPdfAiModalOpen] = useState(false);
+  const [pdfImportInitialFile, setPdfImportInitialFile] = useState<File | null>(null);
 
   // Modals & Toast
   const [toast, setToast] = useState<ToastState>({ show: false, message: '' });
@@ -704,8 +712,22 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [resumeData, showToast]
   );
 
+  const applyAiParsedResume = useCallback(
+    (parsedData: ResumeData) => {
+      setResumeData(parsedData);
+      showToast('Resume updated from PDF using AI!');
+    },
+    [setResumeData, showToast]
+  );
+
   const importResume = useCallback(
     (file: File): Promise<void> => {
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        setPdfImportInitialFile(file);
+        setIsPdfAiModalOpen(true);
+        return Promise.resolve();
+      }
+
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -722,7 +744,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             resolve();
           } catch (err) {
             console.error('Import failure', err);
-            showAlert('Could not read file. Ensure it is a valid .resumeBuilder file.', 'Invalid File');
+            showAlert('Could not read file. Ensure it is a valid .resumeBuilder or .pdf file.', 'Invalid File');
             reject(err);
           }
         };
@@ -864,6 +886,11 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     findAndReplaceAll,
     isSignatureModalOpen,
     setIsSignatureModalOpen,
+    isPdfAiModalOpen,
+    setIsPdfAiModalOpen,
+    pdfImportInitialFile,
+    setPdfImportInitialFile,
+    applyAiParsedResume,
     confirmDialog,
     showConfirm,
     closeConfirm,

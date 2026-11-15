@@ -1,10 +1,16 @@
 import React, { useRef } from 'react';
 import { useResume } from '../../context/ResumeContext';
 import { Button } from '../ui/button';
-import { Save, Trash2, Download, Upload, FileDown } from 'lucide-react';
+import { Save, Trash2, Download, Upload, FileDown, Sparkles } from 'lucide-react';
 
 export const StoragePanel: React.FC = () => {
-  const { saveToBrowser, clearBrowserSave, setIsExportModalOpen, importResume } = useResume();
+  const {
+    saveToBrowser,
+    clearBrowserSave,
+    setIsExportModalOpen,
+    importResume,
+    setIsPdfAiModalOpen,
+  } = useResume();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,6 +61,16 @@ export const StoragePanel: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onClick={() => setIsPdfAiModalOpen(true)}
+          className="w-full justify-start text-xs h-9 gap-2 border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary font-medium"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <span>Upload Old Resume (PDF AI)</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => fileInputRef.current?.click()}
           className="w-full justify-start text-xs h-9 gap-2"
         >
@@ -64,7 +80,7 @@ export const StoragePanel: React.FC = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".resbuild,.resumeBuilder,.html,.json"
+          accept=".resbuild,.resumeBuilder,.html,.json,.pdf"
           onChange={handleFileChange}
           className="hidden"
         />
