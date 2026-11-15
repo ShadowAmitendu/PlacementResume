@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
-import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight, AlignJustify, Indent, Outdent } from 'lucide-react';
 
 export const AlignmentToolbar: React.FC = () => {
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -25,6 +25,10 @@ export const AlignmentToolbar: React.FC = () => {
     document.execCommand(cmd, false, undefined);
   };
 
+  const handleIndent = (action: 'indent' | 'outdent') => {
+    document.execCommand(action, false, undefined);
+  };
+
   const preventBlur = (e: React.MouseEvent) => {
     e.preventDefault();
   };
@@ -32,9 +36,9 @@ export const AlignmentToolbar: React.FC = () => {
   return (
     <div className="space-y-2">
       <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground block">
-        Alignment
+        Paragraph & Alignment
       </span>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-6 gap-1.5">
         <Button
           variant="outline"
           size="sm"
@@ -74,6 +78,26 @@ export const AlignmentToolbar: React.FC = () => {
           className="h-8 p-0"
         >
           <AlignJustify className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onMouseDown={preventBlur}
+          onClick={() => handleIndent('outdent')}
+          title="Decrease Indent (Outdent)"
+          className="h-8 p-0"
+        >
+          <Outdent className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onMouseDown={preventBlur}
+          onClick={() => handleIndent('indent')}
+          title="Increase Indent"
+          className="h-8 p-0"
+        >
+          <Indent className="w-3.5 h-3.5" />
         </Button>
       </div>
     </div>

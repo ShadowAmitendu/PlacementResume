@@ -92,6 +92,19 @@ export const SECTION_MARKERS = [
   { value: '', label: 'None' },
 ];
 
+export const MARGIN_OPTIONS = [
+  { value: 'compact', label: 'Compact (6mm)' },
+  { value: 'normal', label: 'Normal (10mm)' },
+  { value: 'moderate', label: 'Moderate (14mm)' },
+  { value: 'wide', label: 'Wide (18mm)' },
+];
+
+export const LINE_HEIGHT_OPTIONS = [
+  { value: 'tight', label: 'Tight (1.15) - Best for 1 page' },
+  { value: 'normal', label: 'Normal (1.3)' },
+  { value: 'relaxed', label: 'Relaxed (1.5)' },
+];
+
 export const DEFAULT_RESUME_DATA: ResumeData = {
   version: 4,
   meta: {
@@ -103,6 +116,8 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
     showLinkIcons: true,
     photo: null,
     zoom: 1,
+    margin: 'normal',
+    lineHeight: 'normal',
   },
   header: {
     fullName: '[Your Full Name]',
@@ -149,6 +164,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
       type: 'list',
       title: 'Professional Skills:',
       items: ['[Skill 1]', '[Skill 2]', '[Skill 3]'],
+      listType: 'bullet',
     },
     {
       id: 'sec-projects',

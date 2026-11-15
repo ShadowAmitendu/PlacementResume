@@ -6,6 +6,7 @@ import { LinkModal } from './components/modals/LinkModal';
 import { ExportModal } from './components/modals/ExportModal';
 import { ConfirmModal } from './components/modals/ConfirmModal';
 import { AlertModal } from './components/modals/AlertModal';
+import { FindReplaceModal } from './components/modals/FindReplaceModal';
 import { Toast } from './components/ui/toast';
 import { Menu } from 'lucide-react';
 
@@ -38,13 +39,14 @@ const ResumeAppContent: React.FC = () => {
       <Sidebar />
 
       {/* Main View Area */}
-      <main className="flex-1 lg:ml-72 min-h-screen p-4 sm:p-8 flex flex-col items-center justify-start overflow-x-hidden">
+      <main className="flex-1 lg:ml-72 min-h-screen p-4 sm:p-8 pb-16 flex flex-col items-center justify-start overflow-x-hidden">
         <ResumeCanvas />
       </main>
 
       {/* Modals & Notifications */}
       <LinkModal />
       <ExportModal />
+      <FindReplaceModal />
       <ConfirmModal />
       <AlertModal />
       <Toast />

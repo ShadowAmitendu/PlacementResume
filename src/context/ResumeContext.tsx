@@ -7,6 +7,8 @@ import {
   SectionData,
   DeclarationData,
   TableSectionData,
+  TextSectionData,
+  ListSectionData,
   SectionType,
 } from '../types/resume';
 import { DEFAULT_RESUME_DATA, THEMES } from '../constants/themes';
@@ -99,6 +101,10 @@ interface ResumeContextType {
   isExportModalOpen: boolean;
   setIsExportModalOpen: (open: boolean) => void;
 
+  isFindReplaceModalOpen: boolean;
+  setIsFindReplaceModalOpen: (open: boolean) => void;
+  findAndReplaceAll: (search: string, replaceWith: string, matchCase?: boolean) => number;
+
   confirmDialog: ConfirmDialogState;
   showConfirm: (message: string, title?: string, confirmLabel?: string) => Promise<boolean>;
   closeConfirm: () => void;
@@ -154,6 +160,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<HeaderLink | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isFindReplaceModalOpen, setIsFindReplaceModalOpen] = useState(false);
 
   // Modals & Toast
   const [toast, setToast] = useState<ToastState>({ show: false, message: '' });
@@ -273,15 +280,22 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [resetHistory, showToast]);
 
-  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Esc)
+  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsMobileSidebarOpen(false);
         setIsLinkModalOpen(false);
         setIsExportModalOpen(false);
+        setIsFindReplaceModalOpen(false);
         closeAlert();
         closeConfirm();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'h')) {
+        e.preventDefault();
+        setIsFindReplaceModalOpen(true);
+        return;
       }
 
       const target = e.target as HTMLElement;
@@ -713,6 +727,90 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [resetHistory, showToast, showAlert]
   );
 
+  const findAndReplaceAll = useCallback(
+    (searchStr: string, replaceStr: string, matchCase = false): number => {
+      if (!searchStr) return 0;
+      let count = 0;
+
+      const replaceInString = (str: string): string => {
+        if (!str) return str;
+        const flags = matchCase ? 'g' : 'gi';
+        const escaped = searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, flags);
+        const matches = str.match(regex);
+        if (matches) {
+          count += matches.length;
+        }
+        return str.replace(regex, replaceStr);
+      };
+
+      setResumeData((prev) => {
+        // 1. Header
+        const updatedHeader = {
+          ...prev.header,
+          fullName: replaceInString(prev.header.fullName),
+          degreeTitle: replaceInString(prev.header.degreeTitle),
+          universityCompany: replaceInString(prev.header.universityCompany),
+          email: replaceInString(prev.header.email),
+          phone: replaceInString(prev.header.phone),
+          location: prev.header.location ? replaceInString(prev.header.location) : prev.header.location,
+          links: prev.header.links.map((link) => ({
+            ...link,
+            text: replaceInString(link.text),
+            url: replaceInString(link.url),
+          })),
+        };
+
+        // 2. Sections
+        const updatedSections = prev.sections.map((sec) => {
+          const title = replaceInString(sec.title);
+          if (sec.type === 'text') {
+            const textSec = sec as TextSectionData;
+            return {
+              ...textSec,
+              title,
+              content: replaceInString(textSec.content),
+            };
+          } else if (sec.type === 'list') {
+            const listSec = sec as ListSectionData;
+            return {
+              ...listSec,
+              title,
+              items: listSec.items.map(replaceInString),
+            };
+          } else if (sec.type === 'table') {
+            const tableSec = sec as TableSectionData;
+            return {
+              ...tableSec,
+              title,
+              headers: tableSec.headers ? tableSec.headers.map(replaceInString) : undefined,
+              rows: tableSec.rows.map((row) => row.map(replaceInString)),
+            };
+          }
+          return { ...sec, title };
+        });
+
+        // 3. Declaration
+        const updatedDeclaration = {
+          ...prev.declaration,
+          text: replaceInString(prev.declaration.text),
+          date: replaceInString(prev.declaration.date),
+          place: replaceInString(prev.declaration.place),
+        };
+
+        return {
+          ...prev,
+          header: updatedHeader,
+          sections: updatedSections,
+          declaration: updatedDeclaration,
+        };
+      });
+
+      return count;
+    },
+    [setResumeData]
+  );
+
   const value = {
     resumeData,
     canUndo,
@@ -756,6 +854,9 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setEditingLink,
     isExportModalOpen,
     setIsExportModalOpen,
+    isFindReplaceModalOpen,
+    setIsFindReplaceModalOpen,
+    findAndReplaceAll,
     confirmDialog,
     showConfirm,
     closeConfirm,

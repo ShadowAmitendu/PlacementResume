@@ -36,6 +36,56 @@
   color: #1a1a1a;
 }
 
+/* ── MARGINS (Word-like page margins) ───────────────────── */
+.resume-wrapper[data-margin="compact"] {
+  padding: 6mm 10mm;
+}
+.resume-wrapper[data-margin="normal"] {
+  padding: 10mm 15mm;
+}
+.resume-wrapper[data-margin="moderate"] {
+  padding: 14mm 18mm;
+}
+.resume-wrapper[data-margin="wide"] {
+  padding: 18mm 22mm;
+}
+
+/* ── LINE SPACING (Word-like paragraph spacing) ─────────── */
+.resume-wrapper[data-line-height="tight"] {
+  line-height: 1.15;
+}
+.resume-wrapper[data-line-height="tight"] .section-text,
+.resume-wrapper[data-line-height="tight"] table,
+.resume-wrapper[data-line-height="tight"] ul.skills-list,
+.resume-wrapper[data-line-height="tight"] ol.skills-list-numbered {
+  line-height: 1.15;
+}
+
+.resume-wrapper[data-line-height="normal"] {
+  line-height: 1.3;
+}
+
+.resume-wrapper[data-line-height="relaxed"] {
+  line-height: 1.5;
+}
+.resume-wrapper[data-line-height="relaxed"] .section-text,
+.resume-wrapper[data-line-height="relaxed"] table,
+.resume-wrapper[data-line-height="relaxed"] ul.skills-list,
+.resume-wrapper[data-line-height="relaxed"] ol.skills-list-numbered {
+  line-height: 1.5;
+}
+
+/* Numbered List */
+ol.skills-list-numbered {
+  list-style: decimal;
+  padding-left: 20px;
+  font-size: 11pt;
+  margin-bottom: 8px;
+}
+ol.skills-list-numbered li {
+  margin-bottom: 2px;
+}
+
 .resume-wrapper a {
   color: var(--theme-color);
   text-decoration: none;
@@ -858,6 +908,19 @@ ul.skills-list li::before {
     padding: 2mm 4mm !important;
     margin: 0 !important;
     overflow: visible !important;
+  }
+
+  .resume-wrapper[data-margin="compact"] {
+    padding: 0mm 2mm !important;
+  }
+  .resume-wrapper[data-margin="normal"] {
+    padding: 2mm 4mm !important;
+  }
+  .resume-wrapper[data-margin="moderate"] {
+    padding: 5mm 7mm !important;
+  }
+  .resume-wrapper[data-margin="wide"] {
+    padding: 8mm 10mm !important;
   }
 
   .section-block {

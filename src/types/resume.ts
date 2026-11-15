@@ -7,6 +7,8 @@ export interface ResumeMeta {
   showLinkIcons: boolean;
   photo: string | null;
   zoom: number;
+  margin?: 'compact' | 'normal' | 'moderate' | 'wide';
+  lineHeight?: 'tight' | 'normal' | 'relaxed';
 }
 
 export type LinkIconType =
@@ -62,6 +64,7 @@ export interface TableSectionData extends BaseSection {
 export interface ListSectionData extends BaseSection {
   type: 'list';
   items: string[];
+  listType?: 'bullet' | 'numbered';
 }
 
 export interface DividerSectionData extends BaseSection {

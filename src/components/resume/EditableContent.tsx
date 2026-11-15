@@ -5,10 +5,9 @@ interface EditableContentProps {
   onChange: (value: string) => void;
   className?: string;
   style?: React.CSSProperties;
-  tagName?: 'span' | 'div' | 'p' | 'h1' | 'th' | 'td' | 'li';
+  tagName?: 'span' | 'div' | 'p' | 'h1';
   placeholder?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
-  children?: React.ReactNode;
 }
 
 export const EditableContent: React.FC<EditableContentProps> = ({
@@ -19,7 +18,6 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   tagName: Tag = 'span',
   placeholder,
   onKeyDown,
-  children,
 }) => {
   const ref = useRef<HTMLElement>(null);
   const lastHtmlRef = useRef(html);
@@ -111,8 +109,6 @@ export const EditableContent: React.FC<EditableContentProps> = ({
       className={`editable-text ${className}`}
       style={style}
       data-placeholder={placeholder}
-    >
-      {children}
-    </Tag>
+    />
   );
 };

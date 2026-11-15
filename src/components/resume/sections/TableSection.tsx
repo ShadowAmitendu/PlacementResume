@@ -67,14 +67,14 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           <thead>
             <tr>
               {section.headers.map((headerText, colIdx) => (
-                <EditableContent
-                  key={colIdx}
-                  tagName="th"
-                  html={headerText}
-                  onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
-                  placeholder="[Header]"
-                  className="relative"
-                >
+                <th key={colIdx} className="relative">
+                  <EditableContent
+                    tagName="span"
+                    html={headerText}
+                    onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
+                    placeholder="[Header]"
+                    className="block w-full"
+                  />
                   {colIdx < colCount - 1 && (
                     <div
                       onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
@@ -82,7 +82,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                       title="Drag to resize column"
                     />
                   )}
-                </EditableContent>
+                </th>
               ))}
             </tr>
           </thead>
@@ -91,14 +91,17 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           {section.rows.map((row, rowIdx) => (
             <tr key={rowIdx} className="group/row relative">
               {row.map((cellText, colIdx) => (
-                <EditableContent
+                <td
                   key={colIdx}
-                  tagName="td"
                   className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
-                  html={cellText}
-                  onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
-                  placeholder="[Data]"
                 >
+                  <EditableContent
+                    tagName="span"
+                    html={cellText}
+                    onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
+                    placeholder="[Data]"
+                    className="block w-full"
+                  />
                   {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
                     <div
                       onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
@@ -106,7 +109,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                       title="Drag to resize column"
                     />
                   )}
-                </EditableContent>
+                </td>
               ))}
 
               {/* Hover row delete button */}
