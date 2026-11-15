@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ResumeProvider, useResume } from './context/ResumeContext';
 import { Ribbon } from './components/ribbon/Ribbon';
 import { ResumeCanvas } from './components/resume/ResumeCanvas';
+import { MobileUnsupportedView } from './components/mobile/MobileUnsupportedView';
 import { LinkModal } from './components/modals/LinkModal';
 import { ExportModal } from './components/modals/ExportModal';
 import { ConfirmModal } from './components/modals/ConfirmModal';
@@ -15,6 +16,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 const ResumeAppContent: React.FC = () => {
   const { setZoom } = useResume();
+  const [isMobileDismissed, setIsMobileDismissed] = useState(false);
 
   // Responsive auto-fit zoom on mount and window resize / orientation change
   useEffect(() => {
@@ -53,6 +55,11 @@ const ResumeAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-(--ui-bg) text-(--ui-text) flex flex-col print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
+      {/* Mobile Unsupported Screen (Displayed when opened on mobile phones) */}
+      {!isMobileDismissed && (
+        <MobileUnsupportedView onDismiss={() => setIsMobileDismissed(true)} />
+      )}
+
       {/* Microsoft Word Style Ribbon Navigation & Controls */}
       <Ribbon />
 
