@@ -143,11 +143,10 @@ export const LinkModal: React.FC = () => {
                   key={opt.key}
                   type="button"
                   onClick={() => setIcon(opt.key)}
-                  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
-                    icon === opt.key
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${icon === opt.key
                       ? 'border-primary bg-primary/10 text-primary font-semibold shadow-xs'
                       : 'border-[var(--ui-border)] bg-[var(--ui-surface2)] hover:bg-[var(--ui-border)] text-[var(--ui-text)]'
-                  }`}
+                    }`}
                 >
                   {renderIconBadge(opt.key)}
                   <span className="truncate">{opt.label}</span>

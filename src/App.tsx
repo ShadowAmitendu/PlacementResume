@@ -25,7 +25,7 @@ const ResumeAppContent: React.FC = () => {
   }, [setZoom]);
 
   return (
-    <div className="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)] flex">
+    <div className="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)] flex print:bg-white print:min-h-0 print:block print:p-0 print:m-0">
       {/* Mobile Menu Button */}
       <button
         type="button"
@@ -40,7 +40,7 @@ const ResumeAppContent: React.FC = () => {
       <Sidebar />
 
       {/* Main View Area */}
-      <main className="flex-1 lg:ml-72 min-h-screen p-4 sm:p-8 pb-16 flex flex-col items-center justify-start overflow-x-hidden">
+      <main className="flex-1 lg:ml-72 min-h-screen p-4 sm:p-8 pb-16 flex flex-col items-center justify-start overflow-x-hidden print:m-0 print:p-0 print:bg-transparent print:min-h-0 print:block">
         <ResumeCanvas />
       </main>
 

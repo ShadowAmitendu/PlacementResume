@@ -262,33 +262,30 @@ export const SignatureModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setInkColor('black')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${
-                      inkColor === 'black'
+                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'black'
                         ? 'border-primary bg-primary text-primary-foreground font-semibold'
                         : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
-                    }`}
+                      }`}
                   >
                     Black
                   </button>
                   <button
                     type="button"
                     onClick={() => setInkColor('blue')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${
-                      inkColor === 'blue'
+                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'blue'
                         ? 'border-blue-700 bg-blue-700 text-white font-semibold'
                         : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
-                    }`}
+                      }`}
                   >
                     Royal Blue
                   </button>
                   <button
                     type="button"
                     onClick={() => setInkColor('theme')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${
-                      inkColor === 'theme'
+                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'theme'
                         ? 'border-primary bg-primary/20 text-primary font-semibold'
                         : 'border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)]'
-                    }`}
+                      }`}
                   >
                     Theme Color
                   </button>

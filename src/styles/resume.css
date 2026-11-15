@@ -885,16 +885,41 @@ ul.skills-list li::before {
 @media print {
   @page {
     margin: 0.4in;
+    size: A4 portrait;
   }
 
   html,
   body {
-    background: white !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  /* Reset all outer app containers so zero offset, padding, or grey background leaks into print */
+  #root,
+  #root > div,
+  main {
+    background: transparent !important;
+    background-color: transparent !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: block !important;
+    overflow: visible !important;
+    position: static !important;
   }
 
   .print-border {
@@ -909,26 +934,39 @@ ul.skills-list li::before {
   .no-print,
   .block-controls,
   .table-controls,
-  .add-link-btn {
+  .add-link-btn,
+  .resizer,
+  aside,
+  header,
+  footer,
+  [role="dialog"],
+  [role="status"] {
     display: none !important;
+    visibility: hidden !important;
   }
 
   #resumeContainer {
     transform: none !important;
-    display: block;
-    width: 100%;
-    overflow: visible;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
   }
 
   .resume-wrapper {
-    box-shadow: none;
+    box-shadow: none !important;
     border: none !important;
-    width: 100%;
+    background: transparent !important;
+    background-color: transparent !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
-    padding: 2mm 4mm !important;
     margin: 0 !important;
     overflow: visible !important;
+    color: #1a1a1a !important;
   }
 
   .resume-wrapper[data-margin="compact"] {
@@ -947,7 +985,7 @@ ul.skills-list li::before {
   .section-block {
     border: none !important;
     padding: 0 !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 10px !important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
@@ -957,9 +995,13 @@ ul.skills-list li::before {
     page-break-inside: avoid;
   }
 
-  .editable-text {
+  .editable-text,
+  [contenteditable="true"] {
     border-bottom: none !important;
     background: transparent !important;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   #photo-label {

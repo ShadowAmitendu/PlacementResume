@@ -50,3 +50,10 @@ body {
   margin: 0;
   padding: 0;
 }
+
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+}

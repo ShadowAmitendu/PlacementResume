@@ -97,11 +97,10 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
         {/* Fit Badge */}
         {wrapperHeight > 0 && (
           <span
-            className={`hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-              isOnePageFit
+            className={`hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${isOnePageFit
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-            }`}
+              }`}
             title={
               isOnePageFit
                 ? 'Document fits on a standard single A4 page'
