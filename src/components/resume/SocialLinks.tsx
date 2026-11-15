@@ -3,7 +3,7 @@ import { useResume } from '../../context/ResumeContext';
 import { HeaderLink, LinkIconType } from '../../types/resume';
 import { EditableContent } from './EditableContent';
 import { formatPhoneValue } from '../../utils/phoneFormatter';
-import { Globe, Mail, Link as LinkIcon, Plus } from 'lucide-react';
+import { MapPin, Mail, Phone, Globe, Plus } from 'lucide-react';
 
 export const SocialLinks: React.FC = () => {
   const { resumeData, updateHeader, setIsLinkModalOpen, setEditingLink } = useResume();
@@ -16,45 +16,99 @@ export const SocialLinks: React.FC = () => {
   const renderIcon = (icon: LinkIconType) => {
     switch (icon) {
       case 'none':
-        return <LinkIcon className="w-3.5 h-3.5 text-[var(--theme-color)]" />;
+        return null;
       case 'globe':
         return <Globe className="w-3.5 h-3.5 text-[var(--theme-color)]" />;
       case 'email':
         return <Mail className="w-3.5 h-3.5 text-[var(--theme-color)]" />;
       case 'github':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+            <path d="M9 18c-4.51 2-5-2-7-2" />
           </svg>
         );
       case 'linkedin':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+            <rect width="4" height="12" x="2" y="9" />
+            <circle cx="4" cy="4" r="2" />
           </svg>
         );
       case 'twitter':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.264 5.633 5.9-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
           </svg>
         );
       case 'instagram':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm-5 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm5.75-2.75a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
           </svg>
         );
       case 'youtube':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M23 7.5a3.5 3.5 0 0 0-2.46-2.48C18.4 4.5 12 4.5 12 4.5s-6.4 0-8.54.52A3.5 3.5 0 0 0 1 7.5 36.1 36.1 0 0 0 .5 12c0 1.5.2 3 .5 4.5a3.5 3.5 0 0 0 2.46 2.48C5.6 19.5 12 19.5 12 19.5s6.4 0 8.54-.52A3.5 3.5 0 0 0 23 16.5c.3-1.5.5-3 .5-4.5s-.2-3-.5-4.5zM10 15V9l5 3-5 3z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+            <polygon points="10 15 15 12 10 9 10 15" />
           </svg>
         );
       case 'facebook':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)]" viewBox="0 0 24 24">
-            <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.4V12h2.4V9.7c0-2.4 1.4-3.7 3.6-3.7 1 0 2 .1 2 .1v2.2h-1.1c-1.1 0-1.4.7-1.4 1.4V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z" />
+          <svg
+            className="w-3.5 h-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
           </svg>
         );
       default:
@@ -75,6 +129,7 @@ export const SocialLinks: React.FC = () => {
   return (
     <div className="links-line" id="linksContainer">
       <span className="link-item">
+        <MapPin className="w-3.5 h-3.5 text-[var(--theme-color)] shrink-0" />
         <EditableContent
           html={location}
           onChange={(val) => updateHeader({ location: val })}
@@ -82,8 +137,8 @@ export const SocialLinks: React.FC = () => {
         />
       </span>
 
-      <span className="link-item no-sep">
-        Email:&nbsp;
+      <span className="link-item">
+        <Mail className="w-3.5 h-3.5 text-[var(--theme-color)] shrink-0" />
         <EditableContent
           html={email}
           onChange={(val) => updateHeader({ email: val })}
@@ -92,7 +147,7 @@ export const SocialLinks: React.FC = () => {
       </span>
 
       <span className="link-item">
-        Mobile:&nbsp;
+        <Phone className="w-3.5 h-3.5 text-[var(--theme-color)] shrink-0" />
         <EditableContent
           html={phone}
           onChange={handlePhoneChange}

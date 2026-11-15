@@ -108,22 +108,21 @@ ol.skills-list-numbered li {
   color: #333;
 }
 
-.links-no-icons .link-item svg,
-.links-no-icons .link-item .material-symbols-outlined {
+.links-no-icons .link-item svg {
   display: none !important;
 }
 
 .link-item {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   white-space: nowrap;
 }
 
 .link-item:not(:last-of-type)::after {
   content: "|";
   margin-left: 6px;
-  color: #333;
+  color: #555;
 }
 
 .link-item.no-sep::after {
@@ -134,7 +133,9 @@ ol.skills-list-numbered li {
   width: 13px;
   height: 13px;
   flex-shrink: 0;
-  fill: var(--theme-color);
+  stroke: var(--theme-color);
+  color: var(--theme-color);
+  fill: none;
 }
 
 .section-block {
@@ -974,6 +975,7 @@ ul.skills-list li::before {
   .table-controls,
   .add-link-btn,
   .resizer,
+  .link-item:has(.editable-text:empty),
   aside,
   header,
   footer,

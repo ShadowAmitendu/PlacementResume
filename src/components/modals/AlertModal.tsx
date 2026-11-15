@@ -17,7 +17,7 @@ export const AlertModal: React.FC = () => {
           </div>
         </DialogHeader>
 
-        <p className="text-sm text-[var(--ui-text)] py-2 leading-relaxed">
+        <p className="text-sm text-(--ui-text) py-2 leading-relaxed">
           {alertDialog.message}
         </p>
 
