@@ -1,0 +1,1328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+      name="viewport"
+    />
+    <title>Ultimate Editable Resume Template</title>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/gh/bitmaks/cm-web-fonts@latest/fonts.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+    <link href="./style.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+
+  <body>
+    <div class="print-border"></div>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay no-print" id="sidebarOverlay"></div>
+
+    <!-- Mobile FAB -->
+    <button aria-label="Toggle Sidebar" class="mobile-menu-btn no-print">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+
+    <!-- ── LINK MODAL ─────────────────────────────────────────── -->
+    <div
+      aria-labelledby="modalTitle"
+      aria-modal="true"
+      class="modal no-print"
+      id="linkModal"
+      role="dialog"
+    >
+      <div class="modal-content">
+        <h3 id="modalTitle">Edit Link</h3>
+        <label>Icon Style</label>
+        <div class="icon-picker" id="iconPicker">
+          <div
+            class="icon-option selected"
+            data-icon="none"
+            onclick="selectIcon(this)"
+          >
+            <span class="material-symbols-outlined">link</span>
+            None
+          </div>
+          <div
+            class="icon-option"
+            data-icon="github"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+              />
+            </svg>
+            GitHub
+          </div>
+          <div
+            class="icon-option"
+            data-icon="linkedin"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+              />
+            </svg>
+            LinkedIn
+          </div>
+          <div class="icon-option" data-icon="globe" onclick="selectIcon(this)">
+            <span class="material-symbols-outlined">public</span>
+            Website
+          </div>
+          <div
+            class="icon-option"
+            data-icon="twitter"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.264 5.633 5.9-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              />
+            </svg>
+            X/Twitter
+          </div>
+          <div
+            class="icon-option"
+            data-icon="instagram"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm10 2H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3zm-5 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm5.75-2.75a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"
+              />
+            </svg>
+            Instagram
+          </div>
+          <div
+            class="icon-option"
+            data-icon="youtube"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M23 7.5a3.5 3.5 0 0 0-2.46-2.48C18.4 4.5 12 4.5 12 4.5s-6.4 0-8.54.52A3.5 3.5 0 0 0 1 7.5 36.1 36.1 0 0 0 .5 12c0 1.5.2 3 .5 4.5a3.5 3.5 0 0 0 2.46 2.48C5.6 19.5 12 19.5 12 19.5s6.4 0 8.54-.52A3.5 3.5 0 0 0 23 16.5c.3-1.5.5-3 .5-4.5s-.2-3-.5-4.5zM10 15V9l5 3-5 3z"
+              />
+            </svg>
+            YouTube
+          </div>
+          <div
+            class="icon-option"
+            data-icon="facebook"
+            onclick="selectIcon(this)"
+          >
+            <svg
+              style="fill: currentColor; width: 18px; height: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.4V12h2.4V9.7c0-2.4 1.4-3.7 3.6-3.7 1 0 2 .1 2 .1v2.2h-1.1c-1.1 0-1.4.7-1.4 1.4V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z"
+              />
+            </svg>
+            Facebook
+          </div>
+          <div class="icon-option" data-icon="email" onclick="selectIcon(this)">
+            <span class="material-symbols-outlined">mail</span>
+            Email
+          </div>
+        </div>
+        <label for="linkTextInput">Display Text</label>
+        <input
+          autocomplete="off"
+          id="linkTextInput"
+          placeholder="e.g. GitHub"
+          type="text"
+        />
+        <label for="linkUrlInput">URL</label>
+        <input
+          autocomplete="off"
+          id="linkUrlInput"
+          placeholder="https://..."
+          type="url"
+        />
+        <div class="modal-buttons">
+          <button
+            class="btn-modal danger"
+            id="deleteLinkBtn"
+            onclick="deleteLink()"
+          >
+            Delete
+          </button>
+          <div style="flex: 1"></div>
+          <button class="btn-modal" onclick="closeModal()">Cancel</button>
+          <button class="btn-modal save" onclick="saveLink()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CONFIRM MODAL ─────────────────────────────────────── -->
+    <div
+      aria-labelledby="confirmTitle"
+      aria-modal="true"
+      class="modal no-print"
+      id="confirmModal"
+      role="dialog"
+    >
+      <div class="modal-content" style="width: 320px; max-width: 100%">
+        <h3 id="confirmTitle">Are you sure?</h3>
+        <p
+          id="confirmMessage"
+          style="
+            font-size: 13px;
+            color: var(--ui-text-dim);
+            margin-bottom: 20px;
+            line-height: 1.5;
+          "
+        ></p>
+        <div class="modal-buttons">
+          <button class="btn-modal" onclick="closeConfirm(false)">
+            Cancel
+          </button>
+          <button
+            class="btn-modal danger"
+            id="confirmOkBtn"
+            onclick="closeConfirm(true)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ALERT MODAL ───────────────────────────────────────── -->
+    <div
+      aria-labelledby="alertTitle"
+      aria-modal="true"
+      class="modal no-print"
+      id="alertModal"
+      role="dialog"
+    >
+      <div class="modal-content" style="width: 300px; max-width: 100%">
+        <h3 id="alertTitle">Notice</h3>
+        <p
+          id="alertMessage"
+          style="
+            font-size: 13px;
+            color: var(--ui-text-dim);
+            margin-bottom: 20px;
+            line-height: 1.5;
+          "
+        ></p>
+        <div class="modal-buttons">
+          <button class="btn-modal save" onclick="closeAlert()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXPORT MODAL ──────────────────────────────────────── -->
+    <div
+      aria-labelledby="exportTitle"
+      aria-modal="true"
+      class="modal no-print"
+      id="exportModal"
+      role="dialog"
+    >
+      <div class="modal-content" style="width: 320px; max-width: 100%">
+        <h3 id="exportTitle">Export Resume</h3>
+        <label for="exportFileName">File Name</label>
+        <input
+          autocomplete="off"
+          id="exportFileName"
+          placeholder="my_resume"
+          style="margin-bottom: 20px"
+          type="text"
+        />
+        <div class="modal-buttons">
+          <button class="btn-modal" onclick="closeExportModal()">Cancel</button>
+          <button class="btn-modal save" onclick="confirmExport()">
+            Export
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+    <div
+      aria-label="Resume Settings"
+      class="sidebar no-print"
+      id="sidebar"
+      role="complementary"
+    >
+      <div class="sidebar-header">
+        <div class="sidebar-header-text">
+          <h2>Resume Builder</h2>
+          <p>Click any field to edit</p>
+        </div>
+        <button
+          aria-label="Close sidebar"
+          class="sidebar-close-btn"
+          onclick="closeMobileMenu()"
+        >
+          <span class="material-symbols-outlined" style="font-size: 20px"
+            >close</span
+          >
+        </button>
+      </div>
+      <div class="sidebar-body">
+        <div class="sidebar-section">
+          <span class="sidebar-label">History</span>
+          <div class="undo-row">
+            <button
+              aria-label="Undo"
+              class="btn-sidebar"
+              id="undoBtn"
+              title="Undo (Ctrl+Z)"
+            >
+              <span class="material-symbols-outlined" style="font-size: 18px"
+                >undo</span
+              >
+              Undo
+            </button>
+            <button
+              aria-label="Redo"
+              class="btn-sidebar"
+              id="redoBtn"
+              title="Redo (Ctrl+Y)"
+            >
+              <span class="material-symbols-outlined" style="font-size: 18px"
+                >redo</span
+              >
+              Redo
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Links</span>
+          <label class="toggle-switch-label" for="toggleLinkIcons">
+            <span class="toggle-switch-text">Show Link Icons</span>
+            <div class="toggle-switch">
+              <input
+                checked
+                id="toggleLinkIcons"
+                onchange="applySettings()"
+                type="checkbox"
+              />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Page Zoom</span>
+          <div class="zoom-row">
+            <button aria-label="Zoom out" onclick="adjustZoom(-0.1)">−</button>
+            <input
+              aria-label="Zoom level"
+              id="zoomSlider"
+              max="1.5"
+              min="0.4"
+              oninput="applyZoom()"
+              step="0.05"
+              type="range"
+              value="1"
+            />
+            <button aria-label="Zoom in" onclick="adjustZoom(0.1)">+</button>
+            <span class="zoom-label" id="zoomValue">100%</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Text Formatting</span>
+          <div class="format-toolbar">
+            <button
+              class="btn-format"
+              onclick="formatText('bold')"
+              title="Bold"
+            >
+              <b>B</b>
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatText('italic')"
+              title="Italic"
+            >
+              <i>I</i>
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatText('underline')"
+              title="Underline"
+            >
+              <u>U</u>
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatText('strikeThrough')"
+              title="Strikethrough"
+            >
+              <s>S</s>
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatText('superscript')"
+              title="Superscript"
+            >
+              X²
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatText('subscript')"
+              title="Subscript"
+            >
+              X₂
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatCustom('font-variant:small-caps')"
+              style="font-variant: small-caps"
+              title="Small Caps"
+            >
+              Sc
+            </button>
+            <button
+              class="btn-format"
+              onclick="formatCustom('text-transform:uppercase')"
+              title="All Caps"
+            >
+              AA
+            </button>
+            <button
+              class="btn-format code-btn"
+              onclick="formatCode()"
+              title="Code"
+            >
+              &lt;/&gt; Code
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Alignment</span>
+          <div
+            class="format-toolbar"
+            style="grid-template-columns: repeat(4, 1fr)"
+          >
+            <button
+              class="btn-format"
+              id="align-left"
+              onclick="alignText('left')"
+              title="Left"
+            >
+              <span class="material-symbols-outlined">format_align_left</span>
+            </button>
+            <button
+              class="btn-format"
+              id="align-center"
+              onclick="alignText('center')"
+              title="Center"
+            >
+              <span class="material-symbols-outlined">format_align_center</span>
+            </button>
+            <button
+              class="btn-format"
+              id="align-right"
+              onclick="alignText('right')"
+              title="Right"
+            >
+              <span class="material-symbols-outlined">format_align_right</span>
+            </button>
+            <button
+              class="btn-format"
+              id="align-justify"
+              onclick="alignText('justify')"
+              title="Justify"
+            >
+              <span class="material-symbols-outlined"
+                >format_align_justify</span
+              >
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Color Theme</span>
+          <div class="color-swatches">
+            <button
+              aria-label="Classic Black"
+              class="swatch active"
+              data-theme="classic"
+              onclick="setTheme('classic')"
+              title="Classic Black"
+            ></button>
+            <button
+              aria-label="Navy Blue"
+              class="swatch"
+              data-theme="navy"
+              onclick="setTheme('navy')"
+              title="Navy Blue"
+            ></button>
+            <button
+              aria-label="Burgundy Red"
+              class="swatch"
+              data-theme="burgundy"
+              onclick="setTheme('burgundy')"
+              title="Burgundy Red"
+            ></button>
+            <button
+              aria-label="Forest Green"
+              class="swatch"
+              data-theme="forest"
+              onclick="setTheme('forest')"
+              title="Forest Green"
+            ></button>
+            <button
+              aria-label="Slate Grey"
+              class="swatch"
+              data-theme="slate"
+              onclick="setTheme('slate')"
+              title="Slate Grey"
+            ></button>
+            <button
+              aria-label="Teal"
+              class="swatch"
+              data-theme="teal"
+              onclick="setTheme('teal')"
+              title="Teal"
+            ></button>
+            <button
+              aria-label="Deep Purple"
+              class="swatch"
+              data-theme="purple"
+              onclick="setTheme('purple')"
+              title="Deep Purple"
+            ></button>
+            <button
+              aria-label="Emerald Green"
+              class="swatch"
+              data-theme="emerald"
+              onclick="setTheme('emerald')"
+              title="Emerald Green"
+            ></button>
+            <button
+              aria-label="Vibrant Violet"
+              class="swatch"
+              data-theme="violet"
+              onclick="setTheme('violet')"
+              title="Vibrant Violet"
+            ></button>
+            <button
+              aria-label="Crimson Red"
+              class="swatch"
+              data-theme="crimson"
+              onclick="setTheme('crimson')"
+              title="Crimson Red"
+            ></button>
+            <button
+              aria-label="Warm Amber"
+              class="swatch"
+              data-theme="amber"
+              onclick="setTheme('amber')"
+              title="Warm Amber"
+            ></button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Font Style</span>
+          <select
+            aria-label="Font style"
+            id="fontSelector"
+            onchange="applySettings()"
+          >
+            <optgroup label="Computer Modern (LaTeX)">
+              <option value="'Computer Modern Serif', serif">
+                CM Serif (Regular)
+              </option>
+              <option value="'Computer Modern Serif Slanted', serif">
+                CM Serif Slanted
+              </option>
+              <option value="'Computer Modern Classical Serif Italic', serif">
+                CM Classical Serif Italic
+              </option>
+              <option value="'Computer Modern Upright Italic', serif">
+                CM Upright Italic
+              </option>
+              <option value="'Computer Modern Concrete', serif">
+                CM Concrete
+              </option>
+              <option value="'Computer Modern Bright', sans-serif">
+                CM Bright
+              </option>
+              <option value="'Computer Modern Sans', sans-serif">
+                CM Sans
+              </option>
+              <option value="'Computer Modern Typewriter', monospace">
+                CM Typewriter
+              </option>
+            </optgroup>
+            <optgroup label="Serif (Classic)">
+              <option value="'Times New Roman', Times, serif">
+                Times New Roman
+              </option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="Garamond, serif">Garamond</option>
+            </optgroup>
+            <optgroup label="Sans-Serif (Modern)">
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="'Inter', sans-serif">Inter</option>
+              <option value="'Roboto', sans-serif">Roboto</option>
+              <option value="'Open Sans', sans-serif">Open Sans</option>
+              <option value="'Lato', sans-serif">Lato</option>
+              <option value="Calibri, 'Segoe UI', sans-serif">Calibri</option>
+              <option value="Verdana, sans-serif">Verdana</option>
+            </optgroup>
+          </select>
+
+          <span class="sidebar-label" style="margin-top: 8px">Table Style</span>
+          <select
+            aria-label="Table style"
+            id="tableStyleSelector"
+            onchange="applySettings()"
+          >
+            <option value="standard">Standard Grid</option>
+            <option value="latex">LaTeX Booktabs</option>
+            <option value="word-clean">Word Clean</option>
+            <option value="invisible">Minimal / No Borders</option>
+            <option value="striped-alt">Alternating Stripes</option>
+            <option value="rounded">Rounded Modern</option>
+            <option value="bordered-accent">Bordered Accent</option>
+            <option value="compact">Compact Dense</option>
+            <option value="clean-modern">Clean Modern</option>
+            <option value="classic-double">Classic Double Border</option>
+            <option value="elegant-serif">Elegant Serif</option>
+            <option value="simple-underline">Simple Underline</option>
+          </select>
+
+          <span class="sidebar-label" style="margin-top: 8px"
+            >Section Marker</span
+          >
+          <select
+            aria-label="Section marker"
+            id="markerSelector"
+            onchange="applySettings()"
+          >
+            <option value="➢ ">Arrow (➢)</option>
+            <option value="● ">Bullet (●)</option>
+            <option value="■ ">Square (■)</option>
+            <option value="♦ ">Diamond (♦)</option>
+            <option value="▸ ">Triangle (▸)</option>
+            <option value="★ ">Star (★)</option>
+            <option value="✦ ">Four-Point Star (✦)</option>
+            <option value="✔ ">Check (✔)</option>
+            <option value="⬥ ">Black Diamond (⬥)</option>
+            <option value="› ">Angle (›)</option>
+            <option value="» ">Guillemet (»)</option>
+            <option value="— ">Dash (—)</option>
+            <option value="◆ ">Filled Diamond (◆)</option>
+            <option value="○ ">Circle (○)</option>
+            <option value="▪ ">Small Square (▪)</option>
+            <option value="">None</option>
+          </select>
+
+          <label class="toggle-switch-label" for="showDeclarationToggle" style="margin-top: 12px">
+            <span class="toggle-switch-text">Show Declaration</span>
+            <div class="toggle-switch">
+              <input
+                checked
+                id="showDeclarationToggle"
+                onchange="applySettings()"
+                type="checkbox"
+              />
+              <span class="toggle-slider"></span>
+            </div>
+          </label>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">App Interface</span>
+          <button
+            aria-label="Toggle Dark Mode"
+            class="btn-sidebar"
+            id="appThemeBtn"
+          >
+            <span
+              class="material-symbols-outlined"
+              id="themeIcon"
+              style="font-size: 18px"
+              >dark_mode</span
+            >
+            <span id="themeLabel">Enable Dark Mode</span>
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Add Section</span>
+          <div class="add-section-row">
+            <select aria-label="Section type" id="newSectionType">
+              <option value="text">Text Paragraph</option>
+              <option value="table">Table</option>
+              <option value="list">Bullet List</option>
+              <option value="hr">Divider Line</option>
+            </select>
+            <button
+              class="btn-sidebar"
+              onclick="addSection()"
+              style="
+                flex: 0 0 auto;
+                width: auto;
+                padding: 8px 14px;
+                margin-bottom: 0;
+                gap: 5px;
+              "
+            >
+              <span class="material-symbols-outlined" style="font-size: 18px"
+                >add</span
+              >
+              Add
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <span class="sidebar-label">Save &amp; Export</span>
+          <button aria-label="Clear browser save" class="btn-sidebar" id="clearSaveBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px"
+              >delete</span
+            >
+            Clear Browser Save
+          </button>
+          <button aria-label="Save to browser" class="btn-sidebar" id="saveToBrowserBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px"
+              >save</span
+            >
+            Save to Browser
+          </button>
+          <button aria-label="Export file" class="btn-sidebar" id="exportBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px"
+              >file_download</span
+            >
+            Export .resumeBuilder
+          </button>
+          <button aria-label="Import file" class="btn-sidebar" id="importBtn">
+            <span class="material-symbols-outlined" style="font-size: 18px"
+              >file_upload</span
+            >
+            Import File
+          </button>
+          <input
+            accept=".resbuild,.resumeBuilder,.html"
+            id="importFile"
+            style="display: none"
+            type="file"
+          />
+        </div>
+
+        <div class="sidebar-section">
+          <button
+            aria-label="Download PDF"
+            class="btn-sidebar primary"
+            id="downloadPdfBtn"
+          >
+            <span
+              class="material-symbols-outlined"
+              style="font-size: 18px; margin-right: 4px"
+              >picture_as_pdf</span
+            >
+            Download as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESUME ────────────────────────────────────────────── -->
+    <div id="resumeContainer">
+      <div
+        class="resume-wrapper"
+        data-table-style="standard"
+        id="resumeWrapper"
+      >
+        <!-- Fixed Header -->
+        <div class="header">
+          <div
+            aria-label="Click to upload profile photo"
+            class="photo-box"
+            onclick="document.getElementById('photo-upload').click()"
+            onkeypress="if (event.key === 'Enter') this.click();"
+            role="button"
+            tabindex="0"
+          >
+            <span id="photo-label">Click to<br />upload photo</span>
+            <img alt="Profile Photo" id="profile-photo" />
+            <input
+              accept="image/*"
+              id="photo-upload"
+              onchange="loadPhoto(event)"
+              style="display: none"
+              type="file"
+            />
+          </div>
+
+          <div class="header-details">
+            <h1 contenteditable="true" data-placeholder="Your Full Name">
+              [Your Full Name]
+            </h1>
+            <div class="subtitle-line">
+              <span
+                contenteditable="true"
+                data-placeholder="Degree / Job Title"
+                style="font-weight: bold"
+                >[Degree / Job Title]</span
+              >
+              <span class="subtitle-sep">|</span>
+              <span
+                contenteditable="true"
+                data-placeholder="University / Company"
+                >[University / Company]</span
+              >
+            </div>
+            <div class="links-line" id="linksContainer" style="margin-top: 4px">
+              <span class="link-item">
+                <span
+                  contenteditable="true"
+                  data-placeholder="City, State, Country"
+                  >[City, State, Country]</span
+                >
+              </span>
+              <span class="link-item no-sep">
+                Email:
+                <span
+                  contenteditable="true"
+                  data-placeholder="your.email@example.com"
+                  >[your.email@example.com]</span
+                >
+              </span>
+              <span class="link-item">
+                Mobile:
+                <span
+                  class="phone-number"
+                  contenteditable="true"
+                  data-placeholder="+91 00000 00000"
+                  style="display: inline-block; min-width: 110px"
+                  >+91 00000 00000</span
+                >
+              </span>
+              <span class="link-item" data-link-icon="github">
+                <svg
+                  height="13"
+                  style="
+                    fill: var(--theme-color);
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                  viewBox="0 0 24 24"
+                  width="13"
+                >
+                  <path
+                    d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+                <a
+                  href="https://github.com/"
+                  onclick="editLink(event, this)"
+                  target="_blank"
+                  title="Click to edit"
+                  >GitHub</a
+                >
+              </span>
+              <span class="link-item" data-link-icon="linkedin">
+                <svg
+                  height="13"
+                  style="
+                    fill: var(--theme-color);
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                  viewBox="0 0 24 24"
+                  width="13"
+                >
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+                <a
+                  href="https://linkedin.com/in/"
+                  onclick="editLink(event, this)"
+                  target="_blank"
+                  title="Click to edit"
+                  >LinkedIn</a
+                >
+              </span>
+              <span class="link-item" data-link-icon="globe">
+                <span
+                  class="material-symbols-outlined"
+                  style="
+                    font-size: 14px;
+                    vertical-align: middle;
+                    color: var(--theme-color);
+                    margin-right: 4px;
+                  "
+                  >public</span
+                >
+                <a
+                  href="#"
+                  onclick="editLink(event, this)"
+                  target="_blank"
+                  title="Click to edit"
+                  >Portfolio</a
+                >
+              </span>
+              <button class="add-link-btn no-print" onclick="openModal(null)">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Add Link
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sortable Sections -->
+        <div id="sortable-sections">
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div
+              class="section-title"
+              contenteditable="true"
+              data-placeholder="Section Title"
+            >
+              Career Objective:
+            </div>
+            <p
+              class="section-text"
+              contenteditable="true"
+              data-placeholder="Write your professional summary here..."
+            >
+              [Write a brief, professional summary outlining your career goals,
+              key strengths, and the value you aim to bring to the target
+              organization.]
+            </p>
+          </div>
+
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <svg height="14" width="14">
+                  <use href="#ico-drag" />
+                </svg>
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div class="section-title" contenteditable="true">
+              Academic Background:
+            </div>
+            <table class="striped">
+              <tr>
+                <th contenteditable="true">Year</th>
+                <th contenteditable="true">Qualification</th>
+                <th contenteditable="true">Institution / Board</th>
+                <th contenteditable="true">Marks / CGPA</th>
+              </tr>
+              <tr>
+                <td contenteditable="true">[Year]</td>
+                <td contenteditable="true">[Qualification]</td>
+                <td contenteditable="true">[Institution / Board]</td>
+                <td contenteditable="true">[Marks / CGPA]</td>
+              </tr>
+            </table>
+            <div class="table-controls no-print">
+              <button class="add-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Row
+              </button>
+              <button class="del-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >remove</span
+                >
+                Row
+              </button>
+              <button class="add-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Col
+              </button>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
+                Col
+              </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div class="section-title" contenteditable="true">
+              Technical Skills:
+            </div>
+            <table class="striped">
+              <tr>
+                <td class="text-left">
+                  ●
+                  <strong contenteditable="true"
+                    >[Category e.g. Languages]:</strong
+                  >
+                  <span contenteditable="true">[Python, Java, C++]</span>
+                </td>
+              </tr>
+            </table>
+            <div class="table-controls no-print">
+              <button class="add-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Row
+              </button>
+              <button class="del-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >remove</span
+                >
+                Row
+              </button>
+              <button class="add-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Col
+              </button>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
+                Col
+              </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div class="section-title" contenteditable="true">
+              Professional Skills:
+            </div>
+            <ul class="skills-list" contenteditable="true">
+              <li>[Skill 1]</li>
+              <li>[Skill 2]</li>
+              <li>[Skill 3]</li>
+            </ul>
+          </div>
+
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div class="section-title" contenteditable="true">Projects:</div>
+            <table class="striped">
+              <tr>
+                <th contenteditable="true">Project Name</th>
+                <th contenteditable="true">
+                  Role / Description / Technologies
+                </th>
+                <th contenteditable="true">Duration</th>
+              </tr>
+              <tr>
+                <td contenteditable="true">[Project Title]</td>
+                <td contenteditable="true">
+                  [Briefly describe what you built, your role, and the tech
+                  stack used]
+                </td>
+                <td contenteditable="true">[Month Year]</td>
+              </tr>
+            </table>
+            <div class="table-controls no-print">
+              <button class="add-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Row
+              </button>
+              <button class="del-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >remove</span
+                >
+                Row
+              </button>
+              <button class="add-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Col
+              </button>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
+                Col
+              </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <div class="block-controls no-print">
+              <span class="drag-handle" title="Drag to reorder">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >drag_indicator</span
+                >
+              </span>
+              <button onclick="duplicateBlock(this)" title="Duplicate">
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >content_copy</span
+                >
+              </button>
+              <button
+                class="btn-danger-small"
+                onclick="deleteBlock(this)"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined" style="font-size: 18px"
+                  >delete</span
+                >
+              </button>
+            </div>
+            <div class="section-title" contenteditable="true">
+              Personal Profile:
+            </div>
+            <table class="profile-table">
+              <tr>
+                <td class="text-left" contenteditable="true">Date of birth</td>
+                <td class="text-left" contenteditable="true">[DD/MM/YYYY]</td>
+              </tr>
+              <tr>
+                <td class="text-left" contenteditable="true">
+                  Gender / Nationality
+                </td>
+                <td class="text-left" contenteditable="true">
+                  [Gender] / [Nationality]
+                </td>
+              </tr>
+              <tr>
+                <td class="text-left" contenteditable="true">
+                  Languages known
+                </td>
+                <td class="text-left" contenteditable="true">
+                  [Language 1, Language 2]
+                </td>
+              </tr>
+            </table>
+            <div class="table-controls no-print">
+              <button class="add-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Row
+              </button>
+              <button class="del-row-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >remove</span
+                >
+                Row
+              </button>
+              <button class="add-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px"
+                  >add</span
+                >
+                Col
+              </button>
+              <button class="del-col-btn">
+                <span class="material-symbols-outlined" style="font-size: 14px">
+                  remove
+                </span>
+                Col
+              </button>
+              <label class="col-borders-toggle no-print" title="Toggle column border lines">
+                <div class="toggle-switch toggle-switch--mini">
+                  <input type="checkbox" class="col-borders-checkbox" />
+                  <span class="toggle-slider"></span>
+                </div>
+                <span class="col-borders-label">Col Lines</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <!-- /sortable-sections -->
+
+        <!-- Declaration -->
+        <div class="section-block" id="declarationSection">
+          <div class="block-controls no-print">
+            <span class="drag-handle" title="Drag to reorder">
+              <span class="material-symbols-outlined" style="font-size: 18px"
+                >drag_indicator</span
+              >
+            </span>
+            <button
+              class="btn-danger-small"
+              onclick="deleteBlock(this)"
+              title="Delete"
+            >
+              <svg style="stroke: white; fill: none">
+                <use href="#ico-trash" />
+              </svg>
+            </button>
+          </div>
+          <div class="declaration">
+            <span contenteditable="true"><strong>Declaration:</strong> I hereby declare that the information given above is true and correct to the best of my knowledge.</span>
+          </div>
+          <div class="signature-area">
+            <div>
+              <p>Place: <span contenteditable="true">___________</span></p>
+              <p>Date: <span contenteditable="true">___________</span></p>
+            </div>
+            <div style="text-align: right; margin-top: 15px">
+              <div class="signature-line" contenteditable="true">Signature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /resume-wrapper -->
+    </div>
+    <!-- /resumeContainer -->
+
+    <div aria-live="polite" id="toast" role="status"></div>
+    <script src="./js/main.js" type="module"></script>
+  </body>
+</html>

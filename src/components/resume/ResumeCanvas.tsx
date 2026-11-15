@@ -1,0 +1,122 @@
+import React from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useResume } from '../../context/ResumeContext';
+import { ResumeHeader } from './ResumeHeader';
+import { SectionWrapper } from './SectionWrapper';
+import { TextSection } from './sections/TextSection';
+import { TableSection } from './sections/TableSection';
+import { ListSection } from './sections/ListSection';
+import { DividerSection } from './sections/DividerSection';
+import { DeclarationSection } from './DeclarationSection';
+import {
+  SectionData,
+  TextSectionData,
+  TableSectionData,
+  ListSectionData,
+} from '../../types/resume';
+
+export const ResumeCanvas: React.FC = () => {
+  const { resumeData, reorderSections } = useResume();
+  const { zoom, tableStyle, showLinkIcons } = resumeData.meta;
+  const sections = resumeData.sections;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = sections.findIndex((s) => s.id === active.id);
+      const newIndex = sections.findIndex((s) => s.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        reorderSections(arrayMove(sections, oldIndex, newIndex));
+      }
+    }
+  };
+
+  const renderSectionContent = (section: SectionData) => {
+    switch (section.type) {
+      case 'text':
+        return <TextSection section={section as TextSectionData} />;
+      case 'table':
+        return <TableSection section={section as TableSectionData} />;
+      case 'list':
+        return <ListSection section={section as ListSectionData} />;
+      case 'hr':
+        return <DividerSection />;
+      default:
+        return null;
+    }
+  };
+
+  const wrapperClasses = [
+    'resume-wrapper',
+    !showLinkIcons ? 'links-no-icons' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div
+      id="resumeContainer"
+      style={{
+        transform: `scale(${zoom})`,
+        transformOrigin: 'top center',
+        marginBottom: zoom < 1 ? `calc((297mm * (${zoom} - 1)))` : undefined,
+      }}
+    >
+      <div className="print-border" />
+
+      <div
+        className={wrapperClasses}
+        data-table-style={tableStyle}
+        id="resumeWrapper"
+      >
+        <ResumeHeader />
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sections.map((s) => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div id="sortable-sections">
+              {sections.map((section) => (
+                <SectionWrapper key={section.id} section={section}>
+                  {renderSectionContent(section)}
+                </SectionWrapper>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        <DeclarationSection />
+      </div>
+    </div>
+  );
+};
