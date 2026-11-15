@@ -5,48 +5,98 @@ export function useHistory<T>(initialPresent: T, maxHistory = 60) {
   const [present, setPresent] = useState<T>(initialPresent);
   const [future, setFuture] = useState<T[]>([]);
 
-  // Ref to always have the latest present value without triggering stale closures
   const presentRef = useRef<T>(present);
   presentRef.current = present;
 
-  const canUndo = past.length > 0;
+  const snapshotBaseRef = useRef<T | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const canUndo = past.length > 0 || snapshotBaseRef.current !== null;
   const canRedo = future.length > 0;
 
+  const flushPendingSnapshot = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (snapshotBaseRef.current !== null) {
+      const base = snapshotBaseRef.current;
+      snapshotBaseRef.current = null;
+      if (JSON.stringify(base) !== JSON.stringify(presentRef.current)) {
+        setPast((prevPast) => {
+          const updated = [...prevPast, base];
+          if (updated.length > maxHistory) {
+            return updated.slice(updated.length - maxHistory);
+          }
+          return updated;
+        });
+      }
+    }
+  }, [maxHistory]);
+
   const undo = useCallback(() => {
-    if (past.length === 0) return;
+    flushPendingSnapshot();
 
-    const previous = past[past.length - 1];
-    const newPast = past.slice(0, past.length - 1);
+    setPast((prevPast) => {
+      if (prevPast.length === 0) return prevPast;
+      const previous = prevPast[prevPast.length - 1];
+      const newPast = prevPast.slice(0, prevPast.length - 1);
 
-    setPast(newPast);
-    setFuture((prevFuture) => [presentRef.current, ...prevFuture]);
-    setPresent(previous);
-  }, [past]);
+      setFuture((prevFuture) => [presentRef.current, ...prevFuture]);
+      setPresent(previous);
+      return newPast;
+    });
+  }, [flushPendingSnapshot]);
 
   const redo = useCallback(() => {
-    if (future.length === 0) return;
+    flushPendingSnapshot();
 
-    const next = future[0];
-    const newFuture = future.slice(1);
+    setFuture((prevFuture) => {
+      if (prevFuture.length === 0) return prevFuture;
+      const next = prevFuture[0];
+      const newFuture = prevFuture.slice(1);
 
-    setPast((prevPast) => [...prevPast, presentRef.current]);
-    setPresent(next);
-    setFuture(newFuture);
-  }, [future]);
+      setPast((prevPast) => [...prevPast, presentRef.current]);
+      setPresent(next);
+      return newFuture;
+    });
+  }, [flushPendingSnapshot]);
 
-  const set = useCallback(
-    (newPresent: T | ((prev: T) => T), shouldSnapshot = true) => {
+  // Immediate state update with debounced snapshot (for text editing)
+  const setDebounced = useCallback(
+    (newPresent: T | ((prev: T) => T)) => {
       const resolved =
         typeof newPresent === 'function'
           ? (newPresent as (prev: T) => T)(presentRef.current)
           : newPresent;
 
-      if (!shouldSnapshot) {
-        setPresent(resolved);
-        return;
+      if (snapshotBaseRef.current === null) {
+        snapshotBaseRef.current = presentRef.current;
       }
 
-      // Memory check: don't snapshot if deep equal via JSON string
+      setPresent(resolved);
+      setFuture([]);
+
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        flushPendingSnapshot();
+      }, 500);
+    },
+    [flushPendingSnapshot]
+  );
+
+  // Immediate state update with immediate snapshot (for buttons/switches/actions)
+  const set = useCallback(
+    (newPresent: T | ((prev: T) => T)) => {
+      flushPendingSnapshot();
+
+      const resolved =
+        typeof newPresent === 'function'
+          ? (newPresent as (prev: T) => T)(presentRef.current)
+          : newPresent;
+
       if (JSON.stringify(presentRef.current) === JSON.stringify(resolved)) {
         return;
       }
@@ -61,10 +111,15 @@ export function useHistory<T>(initialPresent: T, maxHistory = 60) {
       setPresent(resolved);
       setFuture([]);
     },
-    [maxHistory]
+    [maxHistory, flushPendingSnapshot]
   );
 
   const resetHistory = useCallback((newInitial: T) => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    snapshotBaseRef.current = null;
     setPast([]);
     setPresent(newInitial);
     setFuture([]);
@@ -73,6 +128,7 @@ export function useHistory<T>(initialPresent: T, maxHistory = 60) {
   return {
     state: present,
     set,
+    setDebounced,
     undo,
     redo,
     canUndo,

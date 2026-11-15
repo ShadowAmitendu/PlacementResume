@@ -22,8 +22,17 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   const ref = useRef<HTMLElement>(null);
   const lastHtmlRef = useRef(html);
 
+  // Initialize innerHTML on mount
   useEffect(() => {
-    if (ref.current && ref.current.innerHTML !== html) {
+    if (ref.current) {
+      ref.current.innerHTML = html;
+      lastHtmlRef.current = html;
+    }
+  }, []);
+
+  // Update DOM ONLY when the value was changed externally (e.g. Undo, Redo, File Import)
+  useEffect(() => {
+    if (ref.current && html !== lastHtmlRef.current) {
       ref.current.innerHTML = html;
       lastHtmlRef.current = html;
     }
@@ -32,15 +41,14 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   const handleInput = () => {
     if (!ref.current) return;
     const currentHtml = ref.current.innerHTML;
-    if (currentHtml !== lastHtmlRef.current) {
-      lastHtmlRef.current = currentHtml;
-      onChange(currentHtml);
-    }
+    lastHtmlRef.current = currentHtml;
+    onChange(currentHtml);
   };
 
   const handleBlur = () => {
     if (!ref.current) return;
     const currentHtml = ref.current.innerHTML;
+    lastHtmlRef.current = currentHtml;
     onChange(currentHtml);
   };
 
@@ -55,7 +63,6 @@ export const EditableContent: React.FC<EditableContentProps> = ({
       className={`editable-text ${className}`}
       style={style}
       data-placeholder={placeholder}
-      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 };

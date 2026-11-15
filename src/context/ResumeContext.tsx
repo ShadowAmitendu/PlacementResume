@@ -133,6 +133,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const {
     state: resumeData,
     set: setResumeData,
+    setDebounced: setResumeDataDebounced,
     undo,
     redo,
     canUndo,
@@ -308,12 +309,12 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // --- Header Actions ---
   const updateHeader = useCallback(
     (headerUpdate: Partial<HeaderData>) => {
-      setResumeData((prev) => ({
+      setResumeDataDebounced((prev) => ({
         ...prev,
         header: { ...prev.header, ...headerUpdate },
       }));
     },
-    [setResumeData]
+    [setResumeDataDebounced]
   );
 
   const addLink = useCallback(
@@ -419,12 +420,12 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateSection = useCallback(
     (id: string, updated: Partial<SectionData>) => {
-      setResumeData((prev) => ({
+      setResumeDataDebounced((prev) => ({
         ...prev,
         sections: prev.sections.map((s) => (s.id === id ? ({ ...s, ...updated } as SectionData) : s)),
       }));
     },
-    [setResumeData]
+    [setResumeDataDebounced]
   );
 
   const removeSection = useCallback(
@@ -590,7 +591,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       value: string,
       isHeader = false
     ) => {
-      setResumeData((prev) => ({
+      setResumeDataDebounced((prev) => ({
         ...prev,
         sections: prev.sections.map((sec) => {
           if (sec.id !== sectionId || sec.type !== 'table') return sec;
@@ -610,18 +611,18 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }),
       }));
     },
-    [setResumeData]
+    [setResumeDataDebounced]
   );
 
   // --- Declaration ---
   const updateDeclaration = useCallback(
     (decl: Partial<DeclarationData>) => {
-      setResumeData((prev) => ({
+      setResumeDataDebounced((prev) => ({
         ...prev,
         declaration: { ...prev.declaration, ...decl },
       }));
     },
-    [setResumeData]
+    [setResumeDataDebounced]
   );
 
   // --- Storage ---

@@ -178,6 +178,15 @@
   outline: none;
 }
 
+.editable-text:empty:before,
+[contenteditable="true"]:empty:before {
+  content: attr(data-placeholder);
+  color: #888888;
+  opacity: 0.6;
+  font-style: italic;
+  pointer-events: none;
+}
+
 .editable-text:hover {
   background-color: var(--theme-bg-light);
   border-bottom: 1px dashed #ccc;
