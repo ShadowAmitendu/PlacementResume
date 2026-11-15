@@ -38,7 +38,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={saveToBrowser}
             title="Save to browser localStorage (Ctrl+S)"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-blue-500/10 dark:bg-blue-500/20 text-[#0f6cbd] dark:text-[#2886de] flex items-center justify-center">
               <Save className="w-4 h-4" />
@@ -50,7 +50,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={clearBrowserSave}
             title="Clear browser storage and reset to default template"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-destructive cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-destructive cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center">
               <Trash2 className="w-4 h-4" />
@@ -72,7 +72,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={() => setIsExportModalOpen(true)}
             title="Export resume project backup file (.resumeBuilder)"
-            className="w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <Download className="w-4 h-4" />
@@ -84,7 +84,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             title="Import an existing .resumeBuilder, .json, or .pdf file"
-            className="w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center">
               <Upload className="w-4 h-4" />
@@ -113,7 +113,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={() => window.print()}
             title="Print or Save as PDF (Ctrl+P)"
-            className="h-14 px-3 flex flex-col items-center justify-center rounded-md bg-[#0f6cbd] dark:bg-[#2886de] text-white hover:brightness-105 active:scale-95 cursor-pointer shadow-xs transition-all font-semibold"
+            className="fluent-btn h-14 px-3 flex flex-col items-center justify-center rounded-md bg-[#0f6cbd] dark:bg-[#2886de] text-white hover:brightness-105 active:scale-95 cursor-pointer shadow-xs transition-all font-semibold"
           >
             <Printer className="w-4 h-4 mb-1" />
             <span className="text-xs leading-none">Print / Save PDF</span>
@@ -124,7 +124,7 @@ export const FileTab: React.FC = () => {
             type="button"
             onClick={() => setIsExportModalOpen(true)}
             title="Advanced Export options"
-            className="w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-black/[0.05] dark:bg-white/[0.08] text-foreground flex items-center justify-center">
               <FileDown className="w-4 h-4" />

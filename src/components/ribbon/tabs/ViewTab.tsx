@@ -39,7 +39,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
               type="button"
               onClick={() => handleAdjust(-0.05)}
               title="Zoom out"
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-black/[0.06] dark:hover:bg-white/[0.1] text-foreground cursor-pointer transition-colors"
+              className="fluent-btn w-6 h-6 flex items-center justify-center rounded hover:bg-black/[0.06] dark:hover:bg-white/[0.1] text-foreground cursor-pointer transition-colors"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -58,7 +58,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
               type="button"
               onClick={() => handleAdjust(0.05)}
               title="Zoom in"
-              className="w-6 h-6 flex items-center justify-center rounded hover:bg-black/[0.06] dark:hover:bg-white/[0.1] text-foreground cursor-pointer transition-colors"
+              className="fluent-btn w-6 h-6 flex items-center justify-center rounded hover:bg-black/[0.06] dark:hover:bg-white/[0.1] text-foreground cursor-pointer transition-colors"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
@@ -74,7 +74,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
               type="button"
               onClick={handleAutoFit}
               title="Auto-fit page to window width"
-              className="h-8 px-2.5 flex items-center gap-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
+              className="fluent-btn h-8 px-2.5 flex items-center gap-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
             >
               <Maximize2 className="w-3 h-3 text-primary" />
               <span>Fit Width</span>
@@ -84,7 +84,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
               type="button"
               onClick={handleReset100}
               title="Reset Zoom to 100%"
-              className="h-8 px-2.5 flex items-center justify-center rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
+              className="fluent-btn h-8 px-2.5 flex items-center justify-center rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
             >
               <span>100%</span>
             </button>
@@ -124,7 +124,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
             type="button"
             onClick={toggleDarkMode}
             title="Toggle between Dark and Light Office themes"
-            className="w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center">
               {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-[#0f6cbd]" />}
@@ -138,7 +138,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({ isRibbonCollapsed, setIsRibbon
             type="button"
             onClick={() => setIsRibbonCollapsed((prev) => !prev)}
             title="Collapse or pin the ribbon toolbar"
-            className="w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-black/[0.04] dark:bg-white/[0.08] text-foreground flex items-center justify-center">
               {isRibbonCollapsed ? <PanelTopOpen className="w-4 h-4" /> : <PanelTopClose className="w-4 h-4" />}

@@ -141,6 +141,7 @@ export const ResumeCanvas: React.FC = () => {
       >
         <div
           id="resumeContainer"
+          className="fluent-canvas-zoom"
           style={{
             transform: `scale(${zoom})`,
             transformOrigin: 'top center',

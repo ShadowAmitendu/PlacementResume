@@ -80,7 +80,7 @@ export const Ribbon: React.FC = () => {
               type="button"
               onClick={saveToBrowser}
               title="Save to browser (Ctrl+S)"
-              className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors active:scale-95"
+              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors"
             >
               <Save className="w-3.5 h-3.5" />
             </button>
@@ -89,7 +89,7 @@ export const Ribbon: React.FC = () => {
               onClick={undo}
               disabled={!canUndo}
               title="Undo (Ctrl+Z)"
-              className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
+              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors"
             >
               <Undo2 className="w-3.5 h-3.5" />
             </button>
@@ -98,7 +98,7 @@ export const Ribbon: React.FC = () => {
               onClick={redo}
               disabled={!canRedo}
               title="Redo (Ctrl+Y)"
-              className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
+              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors"
             >
               <Redo2 className="w-3.5 h-3.5" />
             </button>
@@ -106,7 +106,7 @@ export const Ribbon: React.FC = () => {
               type="button"
               onClick={() => window.print()}
               title="Print / Save PDF (Ctrl+P)"
-              className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors active:scale-95"
+              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
             </button>
@@ -114,7 +114,7 @@ export const Ribbon: React.FC = () => {
               type="button"
               onClick={() => setIsPdfAiModalOpen(true)}
               title="AI Resume Parser (PDF)"
-              className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-[#0f6cbd] dark:text-[#2886de] cursor-pointer transition-colors active:scale-95"
+              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-[#0f6cbd] dark:text-[#2886de] cursor-pointer transition-colors"
             >
               <Sparkles className="w-3.5 h-3.5" />
             </button>
@@ -126,7 +126,7 @@ export const Ribbon: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsFindReplaceModalOpen(true)}
-            className="w-64 lg:w-76 h-7 px-2.5 rounded-md bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] border border-(--ui-border) flex items-center justify-between text-xs text-muted-foreground transition-all cursor-pointer shadow-2xs"
+            className="fluent-btn w-64 lg:w-76 h-7 px-2.5 rounded-md bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] hover:border-primary/50 border border-(--ui-border) flex items-center justify-between text-xs text-muted-foreground transition-all cursor-pointer shadow-2xs focus-visible:ring-2 focus-visible:ring-primary"
             title="Search and Replace across document (Ctrl+F)"
           >
             <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export const Ribbon: React.FC = () => {
             type="button"
             onClick={toggleDarkMode}
             title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer transition-colors"
+            className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer transition-colors"
           >
             {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-[#0f6cbd]" />}
           </button>
@@ -154,7 +154,7 @@ export const Ribbon: React.FC = () => {
             type="button"
             onClick={() => setIsCollapsed((prev) => !prev)}
             title={isCollapsed ? 'Expand Ribbon' : 'Collapse Ribbon'}
-            className="p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+            className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
           >
             {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </button>
@@ -170,7 +170,7 @@ export const Ribbon: React.FC = () => {
         <button
           type="button"
           onClick={() => handleTabClick('file')}
-          className={`h-7 px-3.5 text-xs font-semibold rounded transition-all cursor-pointer shrink-0 flex items-center justify-center ${activeTab === 'file'
+          className={`fluent-btn h-7 px-3.5 text-xs font-semibold rounded transition-all cursor-pointer shrink-0 flex items-center justify-center ${activeTab === 'file'
               ? 'bg-[#0f6cbd] text-white shadow-xs'
               : 'text-[#0f6cbd] dark:text-[#2886de] hover:bg-primary/10 font-bold'
             }`}
@@ -194,24 +194,33 @@ export const Ribbon: React.FC = () => {
               key={tab.id}
               type="button"
               onClick={() => handleTabClick(tab.id)}
-              className={`relative h-full px-3.5 text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center justify-center rounded-t-sm ${isActive
+              className={`fluent-btn relative h-full px-3.5 text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center justify-center rounded-t-sm ${isActive
                   ? 'text-[#0f6cbd] dark:text-[#2886de] font-bold'
                   : 'text-foreground/80 hover:text-foreground hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
                 }`}
             >
               <span>{tab.label}</span>
-              {/* Fluent Active Indicator Underline */}
+              {/* Fluent Active Indicator Underline with smooth glide entrance */}
               {isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-[#0f6cbd] dark:bg-[#2886de] rounded-t-full" />
+                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-[#0f6cbd] dark:bg-[#2886de] rounded-t-full animate-fluent-underline origin-center" />
               )}
             </button>
           );
         })}
       </nav>
 
-      {/* ── Ribbon Content Panel (Fluent Toolbar Body) ── */}
-      {!isCollapsed && (
-        <div className="h-[92px] bg-(--ui-surface) px-2 sm:px-3 overflow-x-auto scrollbar-none flex items-center border-b border-(--ui-border)/40">
+      {/* ── Ribbon Content Panel (Fluent Collapsible Toolbar Body) ── */}
+      <div
+        className={`fluent-ribbon-collapsible bg-(--ui-surface) border-b overflow-hidden ${
+          isCollapsed
+            ? 'max-h-0 opacity-0 border-transparent pointer-events-none'
+            : 'max-h-[96px] opacity-100 border-(--ui-border)/40'
+        }`}
+      >
+        <div
+          key={activeTab}
+          className="h-[92px] px-2 sm:px-3 overflow-x-auto scrollbar-none flex items-center animate-fluent-tab"
+        >
           {activeTab === 'home' && <HomeTab />}
           {activeTab === 'insert' && <InsertTab />}
           {activeTab === 'layout' && <LayoutTab />}
@@ -224,7 +233,7 @@ export const Ribbon: React.FC = () => {
             />
           )}
         </div>
-      )}
+      </div>
     </header>
   );
 };

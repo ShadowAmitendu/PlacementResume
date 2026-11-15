@@ -94,6 +94,91 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ── MICROSOFT FLUENT 2 MOTION SYSTEM ── */
+:root {
+  --fluent-curve-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1.0);
+  --fluent-curve-accelerate: cubic-bezier(0.9, 0.1, 1, 0.2);
+  --fluent-curve-standard: cubic-bezier(0.33, 0, 0.67, 1);
+  --fluent-duration-fast: 120ms;
+  --fluent-duration-normal: 180ms;
+  --fluent-duration-gentle: 240ms;
+}
+
+@keyframes fluentTabEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fluentFlyoutEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fluentUnderlineGlide {
+  0% {
+    transform: scaleX(0.7);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.animate-fluent-tab {
+  animation: fluentTabEnter var(--fluent-duration-normal) var(--fluent-curve-decelerate) forwards;
+}
+
+.animate-fluent-flyout {
+  animation: fluentFlyoutEnter var(--fluent-duration-fast) var(--fluent-curve-decelerate) forwards;
+}
+
+.animate-fluent-underline {
+  animation: fluentUnderlineGlide var(--fluent-duration-normal) var(--fluent-curve-decelerate) forwards;
+}
+
+/* Fluent Interactive Button Micro-Interactions */
+.fluent-btn {
+  transition: all var(--fluent-duration-fast) var(--fluent-curve-decelerate);
+  touch-action: manipulation;
+}
+.fluent-btn:hover {
+  filter: brightness(0.97);
+}
+.dark .fluent-btn:hover {
+  filter: brightness(1.08);
+}
+.fluent-btn:active {
+  transform: scale(0.96) translateY(0.5px);
+  filter: brightness(0.93);
+}
+
+/* Smooth Canvas Zoom */
+.fluent-canvas-zoom {
+  transition: transform var(--fluent-duration-normal) var(--fluent-curve-decelerate),
+              margin-bottom var(--fluent-duration-normal) var(--fluent-curve-decelerate);
+  will-change: transform;
+}
+
+/* Fluent Ribbon Collapsible Transition */
+.fluent-ribbon-collapsible {
+  transition: max-height var(--fluent-duration-gentle) var(--fluent-curve-decelerate),
+              opacity var(--fluent-duration-normal) var(--fluent-curve-decelerate),
+              border-color var(--fluent-duration-normal) var(--fluent-curve-decelerate);
+}
+
 @media print {
   html,
   body,

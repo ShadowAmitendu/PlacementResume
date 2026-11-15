@@ -24,7 +24,7 @@ export const DesignTab: React.FC = () => {
                 title={theme.label}
                 aria-label={theme.label}
                 style={{ backgroundColor: theme.color }}
-                className={`w-6 h-6 rounded-full cursor-pointer transition-all hover:scale-115 border-2 ${isActive
+                className={`fluent-btn w-6 h-6 rounded-full cursor-pointer transition-all hover:scale-115 border-2 ${isActive
                     ? 'border-foreground shadow-sm ring-2 ring-primary/40 scale-110'
                     : 'border-transparent hover:opacity-90'
                   }`}

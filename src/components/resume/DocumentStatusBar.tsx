@@ -139,7 +139,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
           type="button"
           onClick={() => setIsFindReplaceModalOpen(true)}
           title="Find & Replace (Ctrl+F)"
-          className="flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary transition-colors cursor-pointer text-xs touch-manipulation"
+          className="fluent-btn flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary transition-colors cursor-pointer text-xs touch-manipulation"
         >
           <Search className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Find</span>
@@ -154,7 +154,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             onClick={() => handleZoomChange(-0.1)}
             disabled={zoom <= 0.4}
             title="Zoom Out"
-            className="p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
+            className="fluent-btn p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation"
           >
             <ZoomOut className="w-3.5 h-3.5" />
           </button>
@@ -163,7 +163,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             type="button"
             onClick={handleResetZoom}
             title="Reset Zoom to 100%"
-            className="px-1 sm:px-1.5 py-0.5 rounded hover:bg-(--ui-surface2) font-mono text-[11px] sm:text-xs font-semibold text-foreground cursor-pointer touch-manipulation"
+            className="fluent-btn px-1 sm:px-1.5 py-0.5 rounded hover:bg-(--ui-surface2) font-mono text-[11px] sm:text-xs font-semibold text-foreground cursor-pointer touch-manipulation"
           >
             {Math.round(zoom * 100)}%
           </button>
@@ -173,7 +173,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
             onClick={() => handleZoomChange(0.1)}
             disabled={zoom >= 2.0}
             title="Zoom In"
-            className="p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation active:scale-90"
+            className="fluent-btn p-1 sm:p-1.5 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary disabled:opacity-40 cursor-pointer touch-manipulation"
           >
             <ZoomIn className="w-3.5 h-3.5" />
           </button>

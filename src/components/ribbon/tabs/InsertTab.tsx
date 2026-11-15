@@ -40,7 +40,7 @@ export const InsertTab: React.FC = () => {
             type="button"
             onClick={() => addSection('text')}
             title="Add a text paragraph section"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-blue-500/10 dark:bg-blue-500/20 text-[#0f6cbd] dark:text-[#2886de] flex items-center justify-center">
               <FileText className="w-4 h-4" />
@@ -52,7 +52,7 @@ export const InsertTab: React.FC = () => {
             type="button"
             onClick={() => addSection('table')}
             title="Add a structured data table"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <TableIcon className="w-4 h-4" />
@@ -64,7 +64,7 @@ export const InsertTab: React.FC = () => {
             type="button"
             onClick={() => addSection('list')}
             title="Add bullet or numbered skills list"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <List className="w-4 h-4" />
@@ -76,7 +76,7 @@ export const InsertTab: React.FC = () => {
             type="button"
             onClick={() => addSection('hr')}
             title="Add a horizontal line separator"
-            className="w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-13 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
               <Minus className="w-4 h-4" />
@@ -108,7 +108,7 @@ export const InsertTab: React.FC = () => {
                 type="button"
                 onClick={() => openCropModal(resumeData.meta.photo)}
                 title="Crop, rotate, and adjust profile photo"
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
+                className="fluent-btn flex items-center gap-1.5 px-2 py-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
               >
                 <Crop className="w-3.5 h-3.5 text-primary" />
                 <span>Crop / Adjust</span>
@@ -140,7 +140,7 @@ export const InsertTab: React.FC = () => {
                 type="button"
                 onClick={() => setIsSignatureModalOpen(true)}
                 title="Upload handwritten signature and vectorize cleanly"
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
+                className="fluent-btn flex items-center gap-1.5 px-2 py-1 rounded-md border border-(--ui-border) bg-(--ui-surface) hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-xs font-medium text-foreground cursor-pointer shadow-2xs transition-colors"
               >
                 <PenTool className="w-3.5 h-3.5 text-primary" />
                 <span>Clean Signature</span>
@@ -162,7 +162,7 @@ export const InsertTab: React.FC = () => {
             type="button"
             onClick={handleOpenAddLink}
             title="Add portfolio, GitHub, LinkedIn, or social link"
-            className="w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
+            className="fluent-btn w-14 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-[#0f6cbd]/10 dark:bg-[#2886de]/20 text-[#0f6cbd] dark:text-[#2886de] flex items-center justify-center">
               <LinkIcon className="w-4 h-4" />
