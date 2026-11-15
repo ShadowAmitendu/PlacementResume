@@ -24,16 +24,17 @@ export const THEMES: Record<string, ThemeConfig> = {
 
 export const FONT_OPTIONS = [
   {
-    group: 'Computer Modern (LaTeX)',
+    group: 'Computer Modern (LaTeX / CMU)',
     options: [
-      { label: 'CM Serif (Regular)', value: "'Computer Modern Serif', serif" },
-      { label: 'CM Serif Slanted', value: "'Computer Modern Serif Slanted', serif" },
-      { label: 'CM Classical Serif Italic', value: "'Computer Modern Classical Serif Italic', serif" },
-      { label: 'CM Upright Italic', value: "'Computer Modern Upright Italic', serif" },
-      { label: 'CM Concrete', value: "'Computer Modern Concrete', serif" },
-      { label: 'CM Bright', value: "'Computer Modern Bright', sans-serif" },
-      { label: 'CM Sans', value: "'Computer Modern Sans', sans-serif" },
-      { label: 'CM Typewriter', value: "'Computer Modern Typewriter', monospace" },
+      { label: 'CMU Serif (Regular LaTeX)', value: "'CMU Serif', 'Computer Modern Serif', serif" },
+      { label: 'CMU Serif Slanted', value: "'CMU Serif Extra', 'Computer Modern Serif Slanted', serif" },
+      { label: 'CMU Classical Serif Italic', value: "'CMU Classical Serif', 'Computer Modern Classical Serif Italic', serif" },
+      { label: 'CMU Upright Italic', value: "'CMU Serif Upright Italic', 'Computer Modern Upright Italic', serif" },
+      { label: 'CMU Concrete', value: "'CMU Concrete', 'Computer Modern Concrete', serif" },
+      { label: 'CMU Bright', value: "'CMU Bright', 'Computer Modern Bright', sans-serif" },
+      { label: 'CMU Sans Serif', value: "'CMU Sans Serif', 'Computer Modern Sans', sans-serif" },
+      { label: 'CMU Typewriter Text', value: "'CMU Typewriter Text', 'Computer Modern Typewriter', monospace" },
+      { label: 'CMU Typewriter Variable', value: "'CMU Typewriter Text Variable Width', monospace" },
     ],
   },
   {
@@ -109,7 +110,7 @@ export const DEFAULT_RESUME_DATA: ResumeData = {
   version: 4,
   meta: {
     theme: 'classic',
-    font: "'Computer Modern Serif', serif",
+    font: "'CMU Serif', 'Computer Modern Serif', serif",
     tableStyle: 'standard',
     marker: '➢ ',
     showDeclaration: true,

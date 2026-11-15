@@ -1,0 +1,435 @@
+/* ── Computer Modern Unicode (CMU) Local Fonts ───────────────────────── */
+
+/* ── 1. CMU Serif / Computer Modern Serif ── */
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('../fonts/cmunrm.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('../fonts/cmunrm.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('../fonts/cmunbx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('../fonts/cmunbx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('../fonts/cmunti.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('../fonts/cmunti.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif';
+  src: url('../fonts/cmunbi.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif';
+  src: url('../fonts/cmunbi.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 2. CMU Serif Slanted / CMU Serif Extra ── */
+@font-face {
+  font-family: 'CMU Serif Extra';
+  src: url('../fonts/cmunsl.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif Slanted';
+  src: url('../fonts/cmunsl.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif Extra';
+  src: url('../fonts/cmunbl.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Serif Slanted';
+  src: url('../fonts/cmunbl.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── 3. CMU Classical Serif Italic ── */
+@font-face {
+  font-family: 'CMU Classical Serif';
+  src: url('../fonts/cmunci.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Classical Serif Italic';
+  src: url('../fonts/cmunci.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 4. CMU Serif Upright Italic ── */
+@font-face {
+  font-family: 'CMU Serif Upright Italic';
+  src: url('../fonts/cmunui.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Serif Upright Italic';
+  src: url('../fonts/cmunui.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Upright Italic';
+  src: url('../fonts/cmunui.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Upright Italic';
+  src: url('../fonts/cmunui.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 5. CMU Concrete / Computer Modern Concrete ── */
+@font-face {
+  font-family: 'CMU Concrete';
+  src: url('../fonts/cmunorm.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Concrete';
+  src: url('../fonts/cmunorm.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Concrete';
+  src: url('../fonts/cmunobx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Concrete';
+  src: url('../fonts/cmunobx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Concrete';
+  src: url('../fonts/cmunoti.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Concrete';
+  src: url('../fonts/cmunoti.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Concrete';
+  src: url('../fonts/cmunobi.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Concrete';
+  src: url('../fonts/cmunobi.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 6. CMU Sans Serif / Computer Modern Sans ── */
+@font-face {
+  font-family: 'CMU Sans Serif';
+  src: url('../fonts/cmunss.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Sans';
+  src: url('../fonts/cmunss.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Sans Serif';
+  src: url('../fonts/cmunsx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Sans';
+  src: url('../fonts/cmunsx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Sans Serif';
+  src: url('../fonts/cmunsi.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Sans';
+  src: url('../fonts/cmunsi.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Sans Serif';
+  src: url('../fonts/cmunso.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Sans';
+  src: url('../fonts/cmunso.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 7. CMU Sans Serif Demi Condensed ── */
+@font-face {
+  font-family: 'CMU Sans Serif Demi Condensed';
+  src: url('../fonts/cmunssdc.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── 8. CMU Bright / Computer Modern Bright ── */
+@font-face {
+  font-family: 'CMU Bright';
+  src: url('../fonts/cmunbmr.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Bright';
+  src: url('../fonts/cmunbmr.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Bright';
+  src: url('../fonts/cmunbmo.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Bright';
+  src: url('../fonts/cmunbmo.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Bright';
+  src: url('../fonts/cmunbsr.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Bright';
+  src: url('../fonts/cmunbso.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 9. CMU Typewriter Text / Computer Modern Typewriter ── */
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmuntt.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('../fonts/cmuntt.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmuntb.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('../fonts/cmuntb.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmunit.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('../fonts/cmunit.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmuntx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Computer Modern Typewriter';
+  src: url('../fonts/cmuntx.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmunbtl.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text';
+  src: url('../fonts/cmunbto.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── 10. CMU Typewriter Text Variable Width ── */
+@font-face {
+  font-family: 'CMU Typewriter Text Variable Width';
+  src: url('../fonts/cmunvt.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CMU Typewriter Text Variable Width';
+  src: url('../fonts/cmunvi.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}

@@ -1,5 +1,5 @@
 :root {
-  --main-font: "Computer Modern Serif", serif;
+  --main-font: "CMU Serif", "Computer Modern Serif", serif;
   --section-marker: "➢ ";
   --theme-color: #000000;
   --theme-bg-light: #d9d9d9;
