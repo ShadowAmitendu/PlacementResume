@@ -69,7 +69,7 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ section, childre
       {section.type !== 'hr' && (
         <div className="section-title">
           <EditableContent
-            tagName="h2"
+            tagName="span"
             html={section.title}
             onChange={(val) => updateSection(section.id, { title: val })}
             placeholder="Section Title"

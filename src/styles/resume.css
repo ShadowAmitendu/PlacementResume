@@ -513,10 +513,25 @@ ol.skills-list-numbered li {
   margin: 5px 0 4px 0;
   font-variant: small-caps;
   color: var(--theme-color);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
 }
 
 .section-title::before {
   content: var(--section-marker);
+  display: inline-block;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.section-title .editable-text,
+.section-title h2,
+.section-title span {
+  display: inline;
+  font: inherit;
+  margin: 0;
+  padding: 0 2px;
 }
 
 .section-text {
