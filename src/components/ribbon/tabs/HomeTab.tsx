@@ -151,9 +151,9 @@ export const HomeTab: React.FC = () => {
   };
 
   return (
-    <div className="flex items-stretch h-full gap-2 sm:gap-3 py-1 px-2 overflow-x-auto scrollbar-none flex-nowrap">
+    <div className="flex items-stretch h-full gap-1.5 sm:gap-2.5 py-1 px-1 overflow-x-auto scrollbar-none flex-nowrap">
       {/* ── Undo / History Group ── */}
-      <div className="flex flex-col items-center justify-between shrink-0 px-1">
+      <div className="flex flex-col items-center justify-between shrink-0 px-1 py-0.5">
         <div className="flex items-center gap-1 my-auto">
           <button
             type="button"
@@ -161,10 +161,10 @@ export const HomeTab: React.FC = () => {
             disabled={!canUndo}
             title="Undo (Ctrl+Z)"
             aria-label="Undo"
-            className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
+            className="w-12 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
           >
-            <Undo2 className="w-4 h-4" />
-            <span className="text-[10px] mt-0.5 font-medium leading-none">Undo</span>
+            <Undo2 className="w-4 h-4 text-primary" />
+            <span className="text-[10px] mt-1 font-medium leading-none">Undo</span>
           </button>
           <button
             type="button"
@@ -172,29 +172,29 @@ export const HomeTab: React.FC = () => {
             disabled={!canRedo}
             title="Redo (Ctrl+Y)"
             aria-label="Redo"
-            className="flex flex-col items-center justify-center p-1.5 rounded hover:bg-(--ui-surface2) text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
+            className="w-12 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors active:scale-95"
           >
-            <Redo2 className="w-4 h-4" />
-            <span className="text-[10px] mt-0.5 font-medium leading-none">Redo</span>
+            <Redo2 className="w-4 h-4 text-primary" />
+            <span className="text-[10px] mt-1 font-medium leading-none">Redo</span>
           </button>
         </div>
-        <span className="text-[9px] uppercase tracking-wider text-(--ui-text-dim) font-semibold select-none">
+        <span className="text-[10px] font-medium text-muted-foreground select-none">
           Undo
         </span>
       </div>
 
-      <div className="w-px h-13 my-auto bg-(--ui-border) shrink-0" />
+      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
 
-      {/* ── Font & Text Formatting Group ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1">
-        <div className="flex flex-col gap-1 my-auto">
-          {/* Top row: Font Family & Font Size & Sizing buttons */}
+      {/* ── Font Group (Two-Row Microsoft Word Layout) ── */}
+      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
+        <div className="flex flex-col gap-1.5 my-auto">
+          {/* Row 1: Font Family, Size Preset, Sizing Actions */}
           <div className="flex items-center gap-1.5">
             <select
               value={resumeData.meta.font}
               onChange={(e) => setFont(e.target.value)}
               title="Resume Font Family"
-              className="h-6.5 text-xs px-2 rounded border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none w-36 sm:w-44 truncate"
+              className="h-6 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-38 sm:w-44 truncate shadow-2xs"
             >
               {FONT_OPTIONS.map((group) => (
                 <optgroup key={group.group} label={group.group}>
@@ -214,7 +214,7 @@ export const HomeTab: React.FC = () => {
                 e.target.value = 'inherit';
               }}
               title="Font Size"
-              className="h-6.5 text-xs px-1.5 rounded border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none w-18"
+              className="h-6 text-xs px-1.5 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-16 shadow-2xs"
             >
               {FONT_SIZES.map((sz) => (
                 <option key={sz.value} value={sz.value}>
@@ -229,7 +229,7 @@ export const HomeTab: React.FC = () => {
                 onMouseDown={preventBlur}
                 onClick={() => adjustFontSize('up')}
                 title="Increase Font Size (A+)"
-                className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground text-xs font-bold cursor-pointer"
+                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground text-xs font-bold cursor-pointer"
               >
                 A<sup>+</sup>
               </button>
@@ -238,7 +238,7 @@ export const HomeTab: React.FC = () => {
                 onMouseDown={preventBlur}
                 onClick={() => adjustFontSize('down')}
                 title="Decrease Font Size (A-)"
-                className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground text-xs font-bold cursor-pointer"
+                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground text-xs font-bold cursor-pointer"
               >
                 A<sup>-</sup>
               </button>
@@ -247,21 +247,21 @@ export const HomeTab: React.FC = () => {
                 onMouseDown={preventBlur}
                 onClick={clearFormatting}
                 title="Clear Formatting"
-                className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-(--ui-text-dim) hover:text-destructive cursor-pointer"
+                className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-muted-foreground hover:text-destructive cursor-pointer"
               >
                 <RemoveFormatting className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Bottom row: Inline Style buttons */}
+          {/* Row 2: Inline Styles */}
           <div className="flex items-center gap-1">
             <button
               type="button"
               onMouseDown={preventBlur}
               onClick={() => formatText('bold')}
               title="Bold (Ctrl+B)"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer"
             >
               <Bold className="w-3.5 h-3.5" />
             </button>
@@ -270,7 +270,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatText('italic')}
               title="Italic (Ctrl+I)"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer"
             >
               <Italic className="w-3.5 h-3.5" />
             </button>
@@ -279,7 +279,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatText('underline')}
               title="Underline (Ctrl+U)"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer"
             >
               <Underline className="w-3.5 h-3.5" />
             </button>
@@ -288,7 +288,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatText('strikeThrough')}
               title="Strikethrough"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer"
             >
               <Strikethrough className="w-3.5 h-3.5" />
             </button>
@@ -297,7 +297,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatText('subscript')}
               title="Subscript (X₂)"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground text-[11px] font-semibold cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground text-[11px] font-semibold cursor-pointer"
             >
               X₂
             </button>
@@ -306,7 +306,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatText('superscript')}
               title="Superscript (X²)"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground text-[11px] font-semibold cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground text-[11px] font-semibold cursor-pointer"
             >
               X²
             </button>
@@ -315,7 +315,7 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatCustom('', 'code-inline')}
               title="Inline Code"
-              className="w-6.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
             >
               <Code className="w-3.5 h-3.5" />
             </button>
@@ -332,17 +332,17 @@ export const HomeTab: React.FC = () => {
                   setShowHighlightPicker(false);
                 }}
                 title="Font Color"
-                className="w-7 h-6.5 flex flex-col items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+                className="w-7 h-6 flex flex-col items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
               >
                 <Baseline className="w-3.5 h-3.5" />
                 <span
-                  className="w-4 h-1 rounded-full mt-0.5"
+                  className="w-4 h-1 rounded-full mt-0.5 shadow-2xs"
                   style={{ backgroundColor: activeTextColor }}
                 />
               </button>
 
               {showTextColorPicker && (
-                <div className="absolute left-0 top-full mt-1 z-50 p-2 bg-(--ui-surface) border border-(--ui-border) rounded-md shadow-xl w-48 space-y-2">
+                <div className="absolute left-0 top-full mt-1.5 z-50 p-2.5 bg-(--ui-surface) border border-(--ui-border) rounded-lg shadow-xl w-48 space-y-2 animate-in fade-in zoom-in-95 duration-100">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Text Color
                   </span>
@@ -354,12 +354,12 @@ export const HomeTab: React.FC = () => {
                         onMouseDown={preventBlur}
                         onClick={() => applyTextColor(c.value)}
                         title={c.label}
-                        className="w-5 h-5 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer"
+                        className="w-5 h-5 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
                         style={{ backgroundColor: c.value }}
                       />
                     ))}
                   </div>
-                  <div className="pt-1 flex items-center gap-1.5 border-t border-(--ui-border)">
+                  <div className="pt-1.5 flex items-center gap-1.5 border-t border-(--ui-border)">
                     <span className="text-[10px] text-muted-foreground">Custom:</span>
                     <input
                       type="color"
@@ -382,17 +382,17 @@ export const HomeTab: React.FC = () => {
                   setShowTextColorPicker(false);
                 }}
                 title="Highlight Color"
-                className="w-7 h-6.5 flex flex-col items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+                className="w-7 h-6 flex flex-col items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
               >
                 <Highlighter className="w-3.5 h-3.5" />
                 <span
-                  className="w-4 h-1 rounded-full mt-0.5"
+                  className="w-4 h-1 rounded-full mt-0.5 shadow-2xs"
                   style={{ backgroundColor: activeHighlightColor }}
                 />
               </button>
 
               {showHighlightPicker && (
-                <div className="absolute left-0 top-full mt-1 z-50 p-2 bg-(--ui-surface) border border-(--ui-border) rounded-md shadow-xl w-48 space-y-2">
+                <div className="absolute left-0 top-full mt-1.5 z-50 p-2.5 bg-(--ui-surface) border border-(--ui-border) rounded-lg shadow-xl w-48 space-y-2 animate-in fade-in zoom-in-95 duration-100">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Highlight Color
                   </span>
@@ -404,7 +404,7 @@ export const HomeTab: React.FC = () => {
                         onMouseDown={preventBlur}
                         onClick={() => applyHighlightColor(c.value)}
                         title={c.label}
-                        className="w-5 h-5 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer"
+                        className="w-5 h-5 rounded-full border border-black/20 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
                         style={{ backgroundColor: c.value }}
                       />
                     ))}
@@ -419,29 +419,29 @@ export const HomeTab: React.FC = () => {
               onMouseDown={preventBlur}
               onClick={() => formatCustom('font-variant:small-caps')}
               title="Small Caps"
-              className="px-1.5 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground text-[10px] font-bold cursor-pointer"
+              className="px-1.5 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground text-[10px] font-bold cursor-pointer"
               style={{ fontVariant: 'small-caps' }}
             >
               Sc
             </button>
           </div>
         </div>
-        <span className="text-[9px] uppercase tracking-wider text-(--ui-text-dim) font-semibold select-none text-center">
+        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
           Font
         </span>
       </div>
 
-      <div className="w-px h-13 my-auto bg-(--ui-border) shrink-0" />
+      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
 
-      {/* ── Paragraph / Alignment Group ── */}
-      <div className="flex flex-col items-center justify-between shrink-0 px-1">
+      {/* ── Paragraph Group (Fluent 2x2 Grid) ── */}
+      <div className="flex flex-col items-center justify-between shrink-0 px-1 py-0.5">
         <div className="grid grid-cols-2 gap-1 my-auto">
           <button
             type="button"
             onMouseDown={preventBlur}
             onClick={() => formatAlignment('justifyLeft')}
             title="Align Left (Ctrl+L)"
-            className="w-7 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+            className="w-7 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
           >
             <AlignLeft className="w-3.5 h-3.5" />
           </button>
@@ -450,7 +450,7 @@ export const HomeTab: React.FC = () => {
             onMouseDown={preventBlur}
             onClick={() => formatAlignment('justifyCenter')}
             title="Center (Ctrl+E)"
-            className="w-7 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+            className="w-7 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
           >
             <AlignCenter className="w-3.5 h-3.5" />
           </button>
@@ -459,7 +459,7 @@ export const HomeTab: React.FC = () => {
             onMouseDown={preventBlur}
             onClick={() => formatAlignment('justifyRight')}
             title="Align Right (Ctrl+R)"
-            className="w-7 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+            className="w-7 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
           >
             <AlignRight className="w-3.5 h-3.5" />
           </button>
@@ -468,32 +468,34 @@ export const HomeTab: React.FC = () => {
             onMouseDown={preventBlur}
             onClick={() => formatAlignment('justifyFull')}
             title="Justify (Ctrl+J)"
-            className="w-7 h-6.5 flex items-center justify-center rounded hover:bg-(--ui-surface2) text-foreground cursor-pointer"
+            className="w-7 h-6 flex items-center justify-center rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer"
           >
             <AlignJustify className="w-3.5 h-3.5" />
           </button>
         </div>
-        <span className="text-[9px] uppercase tracking-wider text-(--ui-text-dim) font-semibold select-none">
+        <span className="text-[10px] font-medium text-muted-foreground select-none">
           Paragraph
         </span>
       </div>
 
-      <div className="w-px h-13 my-auto bg-(--ui-border) shrink-0" />
+      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
 
-      {/* ── Editing Group (Find & Replace) ── */}
-      <div className="flex flex-col items-center justify-between shrink-0 px-1">
+      {/* ── Editing Group (Tall Fluent Find & Replace Button) ── */}
+      <div className="flex flex-col items-center justify-between shrink-0 px-1 py-0.5">
         <div className="flex items-center my-auto">
           <button
             type="button"
             onClick={() => setIsFindReplaceModalOpen(true)}
-            title="Find & Replace (Ctrl+F)"
-            className="flex flex-col items-center justify-center p-2 rounded hover:bg-(--ui-surface2) text-foreground hover:text-primary cursor-pointer transition-colors"
+            title="Find & Replace text across entire resume (Ctrl+F)"
+            className="w-16 h-14 flex flex-col items-center justify-center p-1 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-all active:scale-95"
           >
             <Search className="w-4 h-4 text-primary" />
-            <span className="text-[10px] mt-0.5 font-medium leading-none">Find &amp; Replace</span>
+            <span className="text-[10px] mt-1 font-medium leading-none text-center">
+              Find &amp; Replace
+            </span>
           </button>
         </div>
-        <span className="text-[9px] uppercase tracking-wider text-(--ui-text-dim) font-semibold select-none">
+        <span className="text-[10px] font-medium text-muted-foreground select-none">
           Editing
         </span>
       </div>
