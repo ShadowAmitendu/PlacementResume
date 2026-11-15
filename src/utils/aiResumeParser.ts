@@ -36,6 +36,116 @@ export interface ParsedResumeResult {
 
 export type AiEngineType = 'auto' | 'gemini' | 'window-ai' | 'local';
 
+export interface GeminiModelInfo {
+  name: string; // e.g. "models/gemini-2.5-flash"
+  id: string; // e.g. "gemini-2.5-flash"
+  displayName: string; // e.g. "Gemini 2.5 Flash"
+  description?: string;
+  supportedGenerationMethods?: string[];
+}
+
+export const DEFAULT_GEMINI_MODELS: GeminiModelInfo[] = [
+  {
+    name: 'models/gemini-2.5-flash',
+    id: 'gemini-2.5-flash',
+    displayName: 'Gemini 2.5 Flash',
+    description: 'Ultra-fast and cost-effective multimodal model for high-frequency tasks',
+    supportedGenerationMethods: ['generateContent'],
+  },
+  {
+    name: 'models/gemini-2.5-pro',
+    id: 'gemini-2.5-pro',
+    displayName: 'Gemini 2.5 Pro',
+    description: 'Advanced reasoning model for complex structured extraction',
+    supportedGenerationMethods: ['generateContent'],
+  },
+  {
+    name: 'models/gemini-2.0-flash',
+    id: 'gemini-2.0-flash',
+    displayName: 'Gemini 2.0 Flash',
+    description: 'Next-generation fast and capable model',
+    supportedGenerationMethods: ['generateContent'],
+  },
+  {
+    name: 'models/gemini-2.0-flash-lite',
+    id: 'gemini-2.0-flash-lite',
+    displayName: 'Gemini 2.0 Flash Lite',
+    description: 'Lightweight, ultra-low latency model',
+    supportedGenerationMethods: ['generateContent'],
+  },
+  {
+    name: 'models/gemini-1.5-flash',
+    id: 'gemini-1.5-flash',
+    displayName: 'Gemini 1.5 Flash',
+    description: 'Standard Gemini 1.5 Flash model with 1M token window',
+    supportedGenerationMethods: ['generateContent'],
+  },
+  {
+    name: 'models/gemini-1.5-pro',
+    id: 'gemini-1.5-pro',
+    displayName: 'Gemini 1.5 Pro',
+    description: 'Mid-size multimodal model with 2M token window',
+    supportedGenerationMethods: ['generateContent'],
+  },
+];
+
+export async function fetchGeminiModels(apiKey: string): Promise<GeminiModelInfo[]> {
+  if (!apiKey || apiKey.trim().length < 10) {
+    return DEFAULT_GEMINI_MODELS;
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `Failed to fetch Gemini models (${response.status})`);
+  }
+
+  const data = await response.json();
+  const rawList: any[] = data.models || [];
+
+  const filtered: GeminiModelInfo[] = rawList
+    .filter((m) => {
+      const methods: string[] = m.supportedGenerationMethods || [];
+      const hasGenerate = methods.includes('generateContent');
+      const isGemini = (m.name || '').toLowerCase().includes('gemini');
+      return hasGenerate && isGemini;
+    })
+    .map((m) => {
+      const rawName: string = m.name || '';
+      const id = rawName.startsWith('models/') ? rawName.slice(7) : rawName;
+      return {
+        name: rawName.startsWith('models/') ? rawName : `models/${rawName}`,
+        id,
+        displayName: m.displayName || id,
+        description: m.description || '',
+        supportedGenerationMethods: m.supportedGenerationMethods,
+      };
+    });
+
+  if (filtered.length === 0) {
+    return DEFAULT_GEMINI_MODELS;
+  }
+
+  // Sort so recommended models appear at the top
+  filtered.sort((a, b) => {
+    const rank = (id: string) => {
+      if (id.includes('2.5-flash')) return 100;
+      if (id.includes('2.5-pro')) return 90;
+      if (id.includes('2.0-flash')) return 80;
+      if (id.includes('2.0-flash-lite')) return 75;
+      if (id.includes('1.5-flash')) return 60;
+      if (id.includes('1.5-pro')) return 50;
+      if (id.includes('flash')) return 40;
+      if (id.includes('pro')) return 30;
+      return 10;
+    };
+    return rank(b.id) - rank(a.id);
+  });
+
+  return filtered;
+}
+
 export async function checkAvailableAiEngines(): Promise<{
   hasWindowAi: boolean;
   hasGeminiKey: boolean;
@@ -301,7 +411,8 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
  */
 export async function parseResumeWithGemini(
   rawText: string,
-  apiKey: string
+  apiKey: string,
+  modelName: string = 'gemini-2.5-flash'
 ): Promise<ParsedResumeResult> {
   const systemInstruction = `
 You are an expert resume parsing AI. Extract and structure the candidate's resume text into a strict, valid JSON object matching this schema:
@@ -363,7 +474,8 @@ You are an expert resume parsing AI. Extract and structure the candidate's resum
 Return ONLY valid JSON.
 `;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}`;
+  const cleanModel = modelName.replace(/^models\//, '');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
 
   const response = await fetch(url, {
     method: 'POST',

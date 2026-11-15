@@ -17,6 +17,9 @@ import {
   ParsedResumeResult,
   AiEngineType,
   checkAvailableAiEngines,
+  fetchGeminiModels,
+  DEFAULT_GEMINI_MODELS,
+  GeminiModelInfo,
 } from '../../utils/aiResumeParser';
 import {
   Sparkles,
@@ -32,6 +35,7 @@ import {
   EyeOff,
   RefreshCw,
   X,
+  Bot,
 } from 'lucide-react';
 
 export const PdfAiImportModal: React.FC = () => {
@@ -51,6 +55,17 @@ export const PdfAiImportModal: React.FC = () => {
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [hasWindowAi, setHasWindowAi] = useState<boolean>(false);
 
+  // Gemini model fetching & selection
+  const [geminiModels, setGeminiModels] = useState<GeminiModelInfo[]>(DEFAULT_GEMINI_MODELS);
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    return (
+      (typeof window !== 'undefined' && localStorage.getItem('placement_gemini_selected_model')) ||
+      'gemini-2.5-flash'
+    );
+  });
+  const [isLoadingModels, setIsLoadingModels] = useState<boolean>(false);
+  const [modelsFetchStatus, setModelsFetchStatus] = useState<string | null>(null);
+
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,6 +74,45 @@ export const PdfAiImportModal: React.FC = () => {
   const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFetchModels = async (keyToUse?: string) => {
+    const key = (keyToUse !== undefined ? keyToUse : apiKey).trim();
+    if (!key) {
+      setModelsFetchStatus('Enter an API key to fetch models.');
+      return;
+    }
+
+    setIsLoadingModels(true);
+    setModelsFetchStatus(null);
+    try {
+      const models = await fetchGeminiModels(key);
+      setGeminiModels(models);
+      setModelsFetchStatus(`Found ${models.length} models`);
+
+      if (!models.some((m) => m.id === selectedModel)) {
+        const best =
+          models.find((m) => m.id.includes('2.5-flash'))?.id ||
+          models[0]?.id ||
+          'gemini-2.5-flash';
+        setSelectedModel(best);
+        try {
+          localStorage.setItem('placement_gemini_selected_model', best);
+        } catch {}
+      }
+    } catch (err: any) {
+      console.warn('Failed to fetch Gemini models:', err);
+      setModelsFetchStatus(err.message || 'Could not fetch models. Using presets.');
+    } finally {
+      setIsLoadingModels(false);
+    }
+  };
+
+  const handleModelChange = (val: string) => {
+    setSelectedModel(val);
+    try {
+      localStorage.setItem('placement_gemini_selected_model', val);
+    } catch {}
+  };
 
   // Check saved API key & available browser AI
   useEffect(() => {
@@ -76,6 +130,10 @@ export const PdfAiImportModal: React.FC = () => {
           setEngine('local');
         }
       });
+
+      if (savedKey.trim().length > 10) {
+        handleFetchModels(savedKey);
+      }
 
       if (pdfImportInitialFile) {
         setSelectedFile(pdfImportInitialFile);
@@ -98,6 +156,10 @@ export const PdfAiImportModal: React.FC = () => {
       localStorage.setItem('placement_gemini_api_key', val.trim());
     } catch {
       // Ignore storage errors
+    }
+
+    if (val.trim().length > 25) {
+      handleFetchModels(val);
     }
   };
 
@@ -151,7 +213,18 @@ export const PdfAiImportModal: React.FC = () => {
       }
 
       // Step 2: AI Parsing
-      setStatusMessage(`Analyzing resume structure with ${engine === 'gemini' ? 'Gemini AI' : engine === 'window-ai' ? 'Chrome Built-in AI' : 'Local Parser'}...`);
+      const currentModel = geminiModels.find((m) => m.id === selectedModel);
+      const modelDisplayName = currentModel?.displayName || selectedModel;
+
+      setStatusMessage(
+        `Analyzing resume structure with ${
+          engine === 'gemini'
+            ? modelDisplayName
+            : engine === 'window-ai'
+            ? 'Chrome Built-in AI'
+            : 'Local Parser'
+        }...`
+      );
 
       let result: ParsedResumeResult;
 
@@ -159,7 +232,7 @@ export const PdfAiImportModal: React.FC = () => {
         if (!apiKey.trim()) {
           throw new Error('Please enter a Google Gemini API Key, or switch to the Local Parser.');
         }
-        result = await parseResumeWithGemini(rawText, apiKey);
+        result = await parseResumeWithGemini(rawText, apiKey, selectedModel);
       } else if (engine === 'window-ai') {
         result = await parseResumeWithWindowAi(rawText);
       } else {
@@ -183,6 +256,8 @@ export const PdfAiImportModal: React.FC = () => {
     applyAiParsedResume(finalData);
     setIsPdfAiModalOpen(false);
   };
+
+  const currentModelInfo = geminiModels.find((m) => m.id === selectedModel);
 
   return (
     <Dialog open={isPdfAiModalOpen} onOpenChange={setIsPdfAiModalOpen}>
@@ -283,7 +358,7 @@ export const PdfAiImportModal: React.FC = () => {
               >
                 <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
-                  <span>Gemini Flash</span>
+                  <span>{currentModelInfo?.displayName || 'Google Gemini'}</span>
                 </div>
                 <p className="text-[10px] text-[var(--ui-text-dim)] leading-tight">
                   High-accuracy extraction using Google Gemini API.
@@ -333,39 +408,85 @@ export const PdfAiImportModal: React.FC = () => {
               </button>
             </div>
 
-            {/* Gemini API Key Input */}
+            {/* Gemini API Key & Model Selection */}
             {engine === 'gemini' && (
-              <div className="p-3 rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface2)] space-y-1.5 mt-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-[var(--ui-text)] flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5 text-primary" />
-                    Google Gemini API Key
-                  </span>
-                  <a
-                    href="https://aistudio.google.com/app/apikey"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] text-primary hover:underline font-medium"
-                  >
-                    Get Free API Key ↗
-                  </a>
+              <div className="p-3 rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface2)] space-y-3 mt-2">
+                {/* API Key */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-[var(--ui-text)] flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-primary" />
+                      Google Gemini API Key
+                    </span>
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-primary hover:underline font-medium"
+                    >
+                      Get Free API Key ↗
+                    </a>
+                  </div>
+                  <div className="relative flex items-center">
+                    <input
+                      type={showApiKey ? 'text' : 'password'}
+                      value={apiKey}
+                      onChange={(e) => handleApiKeyChange(e.target.value)}
+                      placeholder="AIzaSy..."
+                      className="w-full pr-8 pl-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)] focus:outline-none focus:border-primary font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      className="absolute right-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
-                <div className="relative flex items-center">
-                  <input
-                    type={showApiKey ? 'text' : 'password'}
-                    value={apiKey}
-                    onChange={(e) => handleApiKeyChange(e.target.value)}
-                    placeholder="AIzaSy..."
-                    className="w-full pr-8 pl-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)] focus:outline-none focus:border-primary font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-2 text-muted-foreground hover:text-foreground cursor-pointer"
+
+                {/* Model Selection Dropdown */}
+                <div className="space-y-1.5 pt-2 border-t border-[var(--ui-border)]/70">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-[var(--ui-text)] flex items-center gap-1.5">
+                      <Bot className="w-3.5 h-3.5 text-primary" />
+                      Select Gemini Model
+                    </span>
+                    <button
+                      type="button"
+                      disabled={isLoadingModels || !apiKey.trim()}
+                      onClick={() => handleFetchModels()}
+                      className="text-[11px] text-primary hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Fetch live model list from Google Gemini API"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${isLoadingModels ? 'animate-spin' : ''}`} />
+                      <span>{isLoadingModels ? 'Fetching...' : 'Fetch Models'}</span>
+                    </button>
+                  </div>
+
+                  <select
+                    value={selectedModel}
+                    onChange={(e) => handleModelChange(e.target.value)}
+                    disabled={isLoadingModels}
+                    className="w-full px-2.5 py-1.5 text-xs rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface)] text-[var(--ui-text)] focus:outline-none focus:border-primary cursor-pointer font-medium"
                   >
-                    {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                  </button>
+                    {geminiModels.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.displayName} ({m.id})
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="flex items-center justify-between text-[10px] text-[var(--ui-text-dim)] pt-0.5">
+                    <span className="truncate max-w-[70%]">
+                      {currentModelInfo?.description || 'Select a Gemini model for resume parsing.'}
+                    </span>
+                    {modelsFetchStatus && (
+                      <span className="shrink-0 text-primary font-medium">{modelsFetchStatus}</span>
+                    )}
+                  </div>
                 </div>
+
                 <p className="text-[10px] text-[var(--ui-text-dim)]">
                   Your key is stored securely in your browser's local storage and used directly via client-side fetch.
                 </p>
