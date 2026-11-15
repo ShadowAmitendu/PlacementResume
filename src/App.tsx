@@ -11,6 +11,7 @@ import { SignatureModal } from './components/modals/SignatureModal';
 import { PdfAiImportModal } from './components/modals/PdfAiImportModal';
 import { ImageCropModal } from './components/modals/ImageCropModal';
 import { Toast } from './components/ui/toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Menu } from 'lucide-react';
 
 const ResumeAppContent: React.FC = () => {
@@ -43,19 +44,23 @@ const ResumeAppContent: React.FC = () => {
 
       {/* Main View Area */}
       <main className="flex-1 lg:ml-72 min-h-screen p-4 sm:p-8 pb-16 flex flex-col items-center justify-start overflow-x-hidden print:m-0 print:p-0 print:bg-transparent print:min-h-0 print:block">
-        <ResumeCanvas />
+        <ErrorBoundary>
+          <ResumeCanvas />
+        </ErrorBoundary>
       </main>
 
       {/* Modals & Notifications */}
-      <LinkModal />
-      <ExportModal />
-      <FindReplaceModal />
-      <SignatureModal />
-      <PdfAiImportModal />
-      <ImageCropModal />
-      <ConfirmModal />
-      <AlertModal />
-      <Toast />
+      <ErrorBoundary>
+        <LinkModal />
+        <ExportModal />
+        <FindReplaceModal />
+        <SignatureModal />
+        <PdfAiImportModal />
+        <ImageCropModal />
+        <ConfirmModal />
+        <AlertModal />
+        <Toast />
+      </ErrorBoundary>
     </div>
   );
 };

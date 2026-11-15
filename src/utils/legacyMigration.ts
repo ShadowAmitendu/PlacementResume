@@ -13,9 +13,17 @@ import {
 export function parseLegacyResume(data: any): ResumeData {
   if (!data) return DEFAULT_RESUME_DATA;
 
-  // Already modern schema
+  // Already modern schema: merge any missing fields from defaults
   if (data.version === 4 && data.sections && data.header) {
-    return data as ResumeData;
+    const merged: ResumeData = {
+      ...DEFAULT_RESUME_DATA,
+      ...data,
+      meta: { ...DEFAULT_RESUME_DATA.meta, ...data.meta },
+      header: { ...DEFAULT_RESUME_DATA.header, ...data.header },
+      declaration: { ...DEFAULT_RESUME_DATA.declaration, ...data.declaration },
+      sections: data.sections || DEFAULT_RESUME_DATA.sections,
+    };
+    return merged;
   }
 
   const parser = new DOMParser();
@@ -33,6 +41,26 @@ export function parseLegacyResume(data: any): ResumeData {
   } else if (data.hideLinkIcons !== undefined) {
     result.meta.showLinkIcons = !data.hideLinkIcons;
   }
+
+  // Migrate newer meta fields (added in recent iterations)
+  if (data.meta?.showPhoto !== undefined) result.meta.showPhoto = !!data.meta.showPhoto;
+  else if (data.showPhoto !== undefined) result.meta.showPhoto = !!data.showPhoto;
+
+  if (data.meta?.fitSignatureToPage !== undefined) result.meta.fitSignatureToPage = !!data.meta.fitSignatureToPage;
+  else if (data.fitSignatureToPage !== undefined) result.meta.fitSignatureToPage = !!data.fitSignatureToPage;
+
+  if (data.meta?.margin) result.meta.margin = data.meta.margin;
+  else if (data.margin) result.meta.margin = data.margin;
+
+  if (data.meta?.lineHeight) result.meta.lineHeight = data.meta.lineHeight;
+  else if (data.lineHeight) result.meta.lineHeight = data.lineHeight;
+
+  // Migrate declaration fields
+  if (data.declaration?.signatureImage) result.declaration.signatureImage = data.declaration.signatureImage;
+  else if (data.signatureImage) result.declaration.signatureImage = data.signatureImage;
+  if (data.declaration?.place) result.declaration.place = data.declaration.place;
+  if (data.declaration?.date) result.declaration.date = data.declaration.date;
+  if (data.declaration?.signature) result.declaration.signature = data.declaration.signature;
 
   // Handle version 3 format (array of { type, html })
   if (Array.isArray(data.sections)) {

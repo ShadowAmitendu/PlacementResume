@@ -97,6 +97,10 @@ export function useHistory<T>(initialPresent: T, maxHistory = 60) {
           ? (newPresent as (prev: T) => T)(presentRef.current)
           : newPresent;
 
+      if (presentRef.current === resolved) {
+        return;
+      }
+
       if (JSON.stringify(presentRef.current) === JSON.stringify(resolved)) {
         return;
       }

@@ -40,6 +40,8 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ section, childre
         <span
           {...attributes}
           {...listeners}
+          aria-label="Drag to reorder section"
+          aria-roledescription="sortable"
           className="drag-handle cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground"
           title="Drag to reorder"
         >
@@ -67,6 +69,7 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ section, childre
       {section.type !== 'hr' && (
         <div className="section-title">
           <EditableContent
+            tagName="h2"
             html={section.title}
             onChange={(val) => updateSection(section.id, { title: val })}
             placeholder="Section Title"

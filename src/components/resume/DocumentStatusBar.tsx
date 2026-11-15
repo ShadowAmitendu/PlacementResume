@@ -78,7 +78,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({ wrapperHei
       <div className="flex items-center gap-3 flex-wrap">
         <span className="flex items-center gap-1 font-medium text-foreground">
           <FileText className="w-3.5 h-3.5 text-primary" />
-          <span>Page {estimatedPages} of {estimatedPages}</span>
+          <span>Page 1 of {estimatedPages}</span>
         </span>
 
         <span className="text-[var(--ui-border)]">|</span>

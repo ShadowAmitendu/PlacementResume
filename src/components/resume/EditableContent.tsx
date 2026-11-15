@@ -5,7 +5,7 @@ interface EditableContentProps {
   onChange: (value: string) => void;
   className?: string;
   style?: React.CSSProperties;
-  tagName?: 'span' | 'div' | 'p' | 'h1';
+  tagName?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'li';
   placeholder?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }

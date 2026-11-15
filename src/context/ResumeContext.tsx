@@ -136,19 +136,35 @@ const ResumeContext = createContext<ResumeContextType | null>(null);
 
 const STORAGE_KEY = 'mySavedResume';
 const DARK_MODE_KEY = 'resumeAppDarkMode';
+const ZOOM_KEY = 'resumeAppZoom';
 
 export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Load saved state or default
   const getInitialState = (): ResumeData => {
+    let initial = DEFAULT_RESUME_DATA;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return parseLegacyResume(JSON.parse(saved));
+        initial = parseLegacyResume(JSON.parse(saved));
       }
     } catch (e) {
       console.warn('Failed to load initial resume data from localStorage', e);
     }
-    return DEFAULT_RESUME_DATA;
+    try {
+      const savedZoom = localStorage.getItem(ZOOM_KEY);
+      if (savedZoom) {
+        const parsedZoom = parseFloat(savedZoom);
+        if (!isNaN(parsedZoom) && parsedZoom >= 0.4 && parsedZoom <= 2.0) {
+          initial = {
+            ...initial,
+            meta: { ...initial.meta, zoom: parsedZoom },
+          };
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return initial;
   };
 
   const {
@@ -314,23 +330,33 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   }, [resetHistory, showToast]);
 
-  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Esc)
+  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Ctrl+S, Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsMobileSidebarOpen(false);
-        setIsLinkModalOpen(false);
-        setIsExportModalOpen(false);
-        setIsFindReplaceModalOpen(false);
-        setIsSignatureModalOpen(false);
-        closeAlert();
-        closeConfirm();
+      // Ctrl+S → Save to browser with toast
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(resumeData));
+          showToast('Saved to browser ✓');
+        } catch {
+          showToast('Save failed — storage may be full');
+        }
+        return;
       }
 
       if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'h')) {
         e.preventDefault();
         setIsFindReplaceModalOpen(true);
         return;
+      }
+
+      // Escape: only close non-Radix modals (Radix Dialog handles its own Esc internally)
+      if (e.key === 'Escape') {
+        setIsMobileSidebarOpen(false);
+        closeAlert();
+        closeConfirm();
+        // Link, Export, FindReplace, Signature modals use Radix Dialog → let them handle Esc
       }
 
       const target = e.target as HTMLElement;
@@ -352,7 +378,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, showToast, closeAlert, closeConfirm]);
+  }, [undo, redo, showToast, closeAlert, closeConfirm, resumeData]);
 
   // --- Meta Actions ---
   const updateMeta = useCallback(
@@ -369,7 +395,17 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const setFont = useCallback((font: string) => updateMeta({ font }), [updateMeta]);
   const setTableStyle = useCallback((tableStyle: string) => updateMeta({ tableStyle }), [updateMeta]);
   const setMarker = useCallback((marker: string) => updateMeta({ marker }), [updateMeta]);
-  const setZoom = useCallback((zoom: number) => updateMeta({ zoom }), [updateMeta]);
+  const setZoom = useCallback(
+    (newZoom: number) => {
+      updateMeta({ zoom: newZoom });
+      try {
+        localStorage.setItem(ZOOM_KEY, String(newZoom));
+      } catch {
+        // ignore
+      }
+    },
+    [updateMeta]
+  );
   const setPhoto = useCallback((photo: string | null) => updateMeta({ photo }), [updateMeta]);
 
   // --- Header Actions ---
@@ -745,7 +781,14 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const exportResume = useCallback(
     (fileName: string) => {
       const sanitizedName = fileName.trim() || 'my_resume';
-      const blob = new Blob([JSON.stringify(resumeData, null, 2)], {
+      const exportData = {
+        ...resumeData,
+        meta: {
+          ...resumeData.meta,
+          zoom: 1,
+        },
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
         type: 'application/json',
       });
       const url = URL.createObjectURL(blob);
