@@ -292,7 +292,8 @@ ol.skills-list-numbered li {
   transition: border 0.2s;
 }
 
-.section-block:hover {
+.section-block:hover,
+.section-block:focus-within {
   border: 1px dashed #bbb;
   border-radius: 4px;
 }
@@ -321,7 +322,8 @@ ol.skills-list-numbered li {
   z-index: 50;
 }
 
-.section-block:hover .block-controls {
+.section-block:hover .block-controls,
+.section-block:focus-within .block-controls {
   display: flex;
 }
 
@@ -367,6 +369,17 @@ ol.skills-list-numbered li {
 .block-controls .drag-handle:hover {
   color: var(--ui-text, #333);
   background: var(--ui-surface2, #e0e0e0);
+}
+
+@media (pointer: coarse) {
+  .block-controls button {
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .table-controls button {
+    min-height: 32px;
+    padding: 6px 10px;
+  }
 }
 
 .editable-text {

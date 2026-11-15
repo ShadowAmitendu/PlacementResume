@@ -197,6 +197,28 @@ export const ImageCropModal: React.FC = () => {
     setIsDragging(false);
   };
 
+  // Touch handlers for mobile / tablet gestures
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({ x: touch.clientX - pan.x, y: touch.clientY - pan.y });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    setPan({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y,
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   // Mouse wheel zoom
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -307,13 +329,16 @@ export const ImageCropModal: React.FC = () => {
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
               onWheel={handleWheel}
-              className={`rounded cursor-move select-none touch-none ${
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className={`rounded cursor-move select-none touch-none max-w-full h-auto aspect-[460/360] ${
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               }`}
               title="Click and drag to reposition image, use scroll wheel to zoom"
             />
             <div className="absolute bottom-3 left-4 text-[10px] text-neutral-400 bg-neutral-900/80 px-2 py-0.5 rounded pointer-events-none select-none">
-              Drag to reposition • Scroll to zoom
+              Drag or touch to reposition • Scroll to zoom
             </div>
           </div>
 

@@ -134,45 +134,52 @@ export const ResumeCanvas: React.FC = () => {
   return (
     <>
       <div
-        id="resumeContainer"
+        className="w-full flex justify-center items-start overflow-x-auto overflow-y-visible px-1 py-1 print:p-0 print:m-0 print:block"
         style={{
-          transform: `scale(${zoom})`,
-          transformOrigin: 'top center',
-          marginBottom: zoom < 1 && wrapperHeight ? `${wrapperHeight * (zoom - 1)}px` : undefined,
+          minHeight: wrapperHeight && zoom ? `${Math.round(wrapperHeight * zoom)}px` : undefined,
         }}
       >
-        <div className="print-border" />
-
         <div
-          ref={wrapperRef}
-          className={wrapperClasses}
-          data-table-style={tableStyle}
-          data-margin={resumeData.meta.margin || 'normal'}
-          data-line-height={resumeData.meta.lineHeight || 'normal'}
-          id="resumeWrapper"
+          id="resumeContainer"
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: 'top center',
+            marginBottom: zoom < 1 && wrapperHeight ? `${wrapperHeight * (zoom - 1)}px` : undefined,
+          }}
         >
-          <ResumeHeader />
+          <div className="print-border" />
 
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
+          <div
+            ref={wrapperRef}
+            className={wrapperClasses}
+            data-table-style={tableStyle}
+            data-margin={resumeData.meta.margin || 'normal'}
+            data-line-height={resumeData.meta.lineHeight || 'normal'}
+            id="resumeWrapper"
           >
-            <SortableContext
-              items={sections.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div id="sortable-sections">
-                {sections.map((section) => (
-                  <SectionWrapper key={section.id} section={section}>
-                    {renderSectionContent(section)}
-                  </SectionWrapper>
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+            <ResumeHeader />
 
-          <DeclarationSection />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={sections.map((s) => s.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div id="sortable-sections">
+                  {sections.map((section) => (
+                    <SectionWrapper key={section.id} section={section}>
+                      {renderSectionContent(section)}
+                    </SectionWrapper>
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+
+            <DeclarationSection />
+          </div>
         </div>
       </div>
 

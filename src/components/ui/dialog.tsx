@@ -38,7 +38,7 @@ const DialogContent = React.forwardRef<
         transform: 'translate(-50%, -50%)',
       }}
       className={cn(
-        'z-50 w-[calc(100vw-2rem)] max-w-md bg-[var(--ui-surface)] text-[var(--ui-text)] border border-[var(--ui-border)] p-5 sm:p-6 shadow-2xl rounded-xl focus:outline-none flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150',
+        'z-50 w-[calc(100vw-2rem)] max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain bg-[var(--ui-surface)] text-[var(--ui-text)] border border-[var(--ui-border)] p-4 sm:p-6 shadow-2xl rounded-xl focus:outline-none flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150',
         className
       )}
       {...props}

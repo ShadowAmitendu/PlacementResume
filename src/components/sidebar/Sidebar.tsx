@@ -26,12 +26,12 @@ export const Sidebar: React.FC = () => {
 
       {/* Main Sidebar */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-[var(--ui-surface)] border-r border-[var(--ui-border)] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-72 sm:w-80 max-w-[85vw] bg-[var(--ui-surface)] border-r border-[var(--ui-border)] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isMobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-        } no-print`}
+        } no-print overscroll-contain`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[var(--ui-border)] bg-[var(--ui-surface2)] shrink-0">
+        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-[var(--ui-border)] bg-[var(--ui-surface2)] shrink-0">
           <div>
             <h2 className="text-sm font-bold tracking-wider uppercase text-[var(--ui-text)]">
               Resume Builder
@@ -42,14 +42,15 @@ export const Sidebar: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => setIsMobileSidebarOpen(false)}
-            className="lg:hidden h-8 w-8 p-0"
+            aria-label="Close sidebar"
+            className="lg:hidden h-8 w-8 p-1.5 rounded-lg hover:bg-[var(--ui-surface3)] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </Button>
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5 text-sm">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-5 text-sm overscroll-contain">
           <HistoryPanel />
           <hr className="border-[var(--ui-border)]" />
 
