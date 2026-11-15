@@ -57,8 +57,27 @@ select optgroup {
   color: var(--ui-text);
 }
 
+/* ── UI FONT SYSTEM: Everything in the UI strictly uses the INTER font ── */
+body,
+#root,
+button,
+input,
+select,
+textarea,
+optgroup,
+option,
+dialog,
+aside,
+nav,
+[role="dialog"],
+[role="menu"],
+[role="tooltip"],
+[data-radix-popper-content-wrapper],
+.no-print {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--ui-bg);
   color: var(--ui-text);
   margin: 0;

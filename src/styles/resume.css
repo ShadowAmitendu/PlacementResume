@@ -39,6 +39,53 @@
   box-sizing: border-box;
 }
 
+/* ── RESUME CONTENT FONT: Everything inside the resume strictly uses the selected font ── */
+.resume-wrapper,
+.resume-wrapper h1,
+.resume-wrapper h2,
+.resume-wrapper h3,
+.resume-wrapper h4,
+.resume-wrapper p:not(.no-print):not(.no-print *),
+.resume-wrapper span:not(.no-print):not(.no-print *),
+.resume-wrapper a:not(.no-print):not(.no-print *),
+.resume-wrapper li:not(.no-print):not(.no-print *),
+.resume-wrapper table,
+.resume-wrapper thead,
+.resume-wrapper tbody,
+.resume-wrapper tr,
+.resume-wrapper th,
+.resume-wrapper td,
+.resume-wrapper .editable-text,
+.resume-wrapper .section-title,
+.resume-wrapper .section-text,
+.resume-wrapper .subtitle-line,
+.resume-wrapper .links-line,
+.resume-wrapper .link-item,
+.resume-wrapper .declaration,
+.resume-wrapper .signature-area {
+  font-family: var(--main-font), serif !important;
+}
+
+/* ── UI CONTROLS & OVERLAYS IN CANVAS: Strictly use the INTER font ── */
+.resume-wrapper .no-print,
+.resume-wrapper .no-print *,
+.resume-wrapper .block-controls,
+.resume-wrapper .block-controls *,
+.resume-wrapper .table-controls,
+.resume-wrapper .table-controls *,
+.resume-wrapper .column-actions-pill,
+.resume-wrapper .column-actions-pill *,
+.resume-wrapper .cell-context-toolbar,
+.resume-wrapper .cell-context-toolbar *,
+.resume-wrapper .resizer,
+.resume-wrapper .add-link-btn,
+.resume-wrapper .photo-box button,
+.resume-wrapper .photo-box button *,
+.resume-wrapper .photo-box #photo-label,
+.resume-wrapper button {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
 #sortable-sections {
   flex-shrink: 0;
 }
@@ -835,7 +882,6 @@ table.show-col-borders td {
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 8px;
-  font-family: "Georgia", serif;
 }
 
 [data-table-style="elegant-serif"] th {
