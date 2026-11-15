@@ -91,42 +91,40 @@ export const FindReplaceModal: React.FC = () => {
 
   return (
     <Dialog open={isFindReplaceModalOpen} onOpenChange={setIsFindReplaceModalOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <Search className="w-4 h-4 text-primary" />
+            <Search className="w-5 h-5 text-primary shrink-0" />
             <DialogTitle>Find & Replace</DialogTitle>
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-1">
           {/* Find Input */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
                 Find
               </label>
               {searchQuery.trim() && (
-                <span className="text-[11px] font-medium text-primary">
+                <span className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   {matchCount} match{matchCount === 1 ? '' : 'es'} found
                 </span>
               )}
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Text to find..."
-                className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
-              />
-            </div>
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Text to find..."
+              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
+            />
           </div>
 
           {/* Replace Input */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block">
               Replace With
             </label>
             <input
@@ -134,18 +132,18 @@ export const FindReplaceModal: React.FC = () => {
               value={replaceQuery}
               onChange={(e) => setReplaceQuery(e.target.value)}
               placeholder="Replacement text..."
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
+              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
             />
           </div>
 
           {/* Options */}
           <div className="flex items-center gap-2 pt-1">
-            <label className="flex items-center gap-2 text-xs font-medium text-foreground cursor-pointer select-none">
+            <label className="flex items-center gap-2 text-xs font-medium text-[var(--ui-text)] cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={matchCase}
                 onChange={(e) => setMatchCase(e.target.checked)}
-                className="rounded border-input text-primary focus:ring-primary h-3.5 w-3.5 cursor-pointer"
+                className="rounded border-[var(--ui-border)] text-primary focus:ring-primary h-4 w-4 cursor-pointer"
               />
               <span>Match Case</span>
             </label>

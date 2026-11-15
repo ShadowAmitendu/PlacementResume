@@ -1,6 +1,28 @@
 @import "tailwindcss";
 @import "./resume.css";
 
+@theme {
+  --color-background: var(--ui-bg);
+  --color-foreground: var(--ui-text);
+  --color-card: var(--ui-surface);
+  --color-card-foreground: var(--ui-text);
+  --color-popover: var(--ui-surface);
+  --color-popover-foreground: var(--ui-text);
+  --color-primary: var(--ui-accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--ui-surface2);
+  --color-secondary-foreground: var(--ui-text);
+  --color-muted: var(--ui-surface2);
+  --color-muted-foreground: var(--ui-text-dim);
+  --color-accent: var(--ui-surface2);
+  --color-accent-foreground: var(--ui-text);
+  --color-destructive: #dc3545;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--ui-border);
+  --color-input: var(--ui-border);
+  --color-ring: var(--ui-accent);
+}
+
 :root {
   --ui-bg: #f4f6f8;
   --ui-surface: #ffffff;
@@ -9,28 +31,6 @@
   --ui-text: #1a1a1a;
   --ui-text-dim: #6b7280;
   --ui-border: #d1d5db;
-
-  /* Tailwind / shadcn mapped to the exact original palette */
-  --background: 210 20% 97%;   /* #f4f6f8 */
-  --foreground: 0 0% 10%;      /* #1a1a1a */
-  --card: 0 0% 100%;           /* #ffffff */
-  --card-foreground: 0 0% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --primary: 211 100% 35%;     /* #0056b3 (Original deep classic blue, not neon electric) */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 216 22% 95%;    /* #eef1f5 */
-  --secondary-foreground: 0 0% 10%;
-  --muted: 216 22% 95%;        /* #eef1f5 */
-  --muted-foreground: 218 11% 46%; /* #6b7280 */
-  --accent: 216 22% 95%;       /* #eef1f5 */
-  --accent-foreground: 0 0% 10%;
-  --destructive: 0 72% 51%;    /* #dc3545 */
-  --destructive-foreground: 0 0% 100%;
-  --border: 218 11% 84%;       /* #d1d5db */
-  --input: 218 11% 84%;        /* #d1d5db */
-  --ring: 211 100% 35%;
-  --radius: 6px;
 }
 
 body.dark-mode {
@@ -41,26 +41,6 @@ body.dark-mode {
   --ui-text: #e0e0e0;
   --ui-text-dim: #a0aec0;
   --ui-border: #3f3f46;
-
-  --background: 0 0% 7%;       /* #121212 */
-  --foreground: 0 0% 88%;      /* #e0e0e0 */
-  --card: 0 0% 12%;            /* #1e1e1e */
-  --card-foreground: 0 0% 88%;
-  --popover: 0 0% 12%;
-  --popover-foreground: 0 0% 88%;
-  --primary: 217 91% 60%;      /* #3b82f6 */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 18%;       /* #2d2d2d */
-  --secondary-foreground: 0 0% 88%;
-  --muted: 0 0% 18%;
-  --muted-foreground: 215 19% 69%; /* #a0aec0 */
-  --accent: 0 0% 18%;
-  --accent-foreground: 0 0% 88%;
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 240 6% 26%;        /* #3f3f46 */
-  --input: 240 6% 26%;
-  --ring: 217 91% 60%;
 }
 
 body {

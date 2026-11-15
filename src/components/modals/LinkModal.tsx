@@ -3,7 +3,7 @@ import { useResume } from '../../context/ResumeContext';
 import { LinkIconType } from '../../types/resume';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { Globe, Mail, Link as LinkIcon } from 'lucide-react';
+import { Globe, Mail, Link as LinkIcon, Trash2 } from 'lucide-react';
 
 interface IconOption {
   key: LinkIconType;
@@ -124,15 +124,18 @@ export const LinkModal: React.FC = () => {
 
   return (
     <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{editingLink ? 'Edit Link' : 'Add New Link'}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <LinkIcon className="w-5 h-5 text-primary shrink-0" />
+            <DialogTitle>{editingLink ? 'Edit Link' : 'Add New Link'}</DialogTitle>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
+        <div className="space-y-4 py-1">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
-              Icon Style
+            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-2">
+              Icon
             </label>
             <div className="grid grid-cols-3 gap-2">
               {ICON_OPTIONS.map((opt) => (
@@ -140,10 +143,10 @@ export const LinkModal: React.FC = () => {
                   key={opt.key}
                   type="button"
                   onClick={() => setIcon(opt.key)}
-                  className={`flex items-center gap-2 p-2 rounded-md border text-xs font-medium cursor-pointer transition-colors ${
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
                     icon === opt.key
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border bg-background hover:bg-muted text-foreground'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold shadow-xs'
+                      : 'border-[var(--ui-border)] bg-[var(--ui-surface2)] hover:bg-[var(--ui-border)] text-[var(--ui-text)]'
                   }`}
                 >
                   {renderIconBadge(opt.key)}
@@ -154,7 +157,7 @@ export const LinkModal: React.FC = () => {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-1">
               Display Text
             </label>
             <input
@@ -162,12 +165,12 @@ export const LinkModal: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="e.g. GitHub"
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
+              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+            <label className="text-[11px] font-semibold text-[var(--ui-text-dim)] uppercase tracking-wider block mb-1">
               URL
             </label>
             <input
@@ -175,15 +178,21 @@ export const LinkModal: React.FC = () => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
+              className="w-full px-3 py-2 rounded-md border border-[var(--ui-border)] bg-[var(--ui-surface2)] text-[var(--ui-text)] text-sm focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
 
         <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
           {editingLink ? (
-            <Button variant="destructive" size="sm" onClick={handleDelete}>
-              Delete
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              className="gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
             </Button>
           ) : (
             <div />
@@ -193,7 +202,7 @@ export const LinkModal: React.FC = () => {
               Cancel
             </Button>
             <Button size="sm" onClick={handleSave}>
-              Save
+              Save Link
             </Button>
           </div>
         </DialogFooter>

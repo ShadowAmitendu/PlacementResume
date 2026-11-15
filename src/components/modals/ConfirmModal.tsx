@@ -2,27 +2,31 @@ import React from 'react';
 import { useResume } from '../../context/ResumeContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { Button } from '../ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 export const ConfirmModal: React.FC = () => {
   const { confirmDialog, closeConfirm } = useResume();
 
   return (
     <Dialog open={confirmDialog.isOpen} onOpenChange={(open) => !open && closeConfirm()}>
-      <DialogContent className="sm:max-w-xs">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>{confirmDialog.title}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
+            <DialogTitle>{confirmDialog.title || 'Confirmation'}</DialogTitle>
+          </div>
         </DialogHeader>
 
-        <p className="text-sm text-muted-foreground py-2 leading-relaxed">
+        <p className="text-sm text-[var(--ui-text)] py-2 leading-relaxed">
           {confirmDialog.message}
         </p>
 
-        <DialogFooter className="flex justify-end gap-2">
+        <DialogFooter className="gap-2">
           <Button variant="outline" size="sm" onClick={closeConfirm}>
             Cancel
           </Button>
           <Button variant="destructive" size="sm" onClick={confirmDialog.onConfirm}>
-            {confirmDialog.confirmLabel}
+            {confirmDialog.confirmLabel || 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>
