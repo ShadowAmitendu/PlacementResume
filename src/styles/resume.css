@@ -258,8 +258,10 @@ ol.skills-list-numbered li {
 .header {
   display: flex;
   justify-content: space-between;
+  margin-top: 4px;
   margin-bottom: 10px;
   border-bottom: 2px solid var(--theme-color);
+  padding-top: 6px;
   padding-bottom: 10px;
   align-items: flex-start;
   gap: 15px;
@@ -291,6 +293,7 @@ ol.skills-list-numbered li {
   width: 100px;
   height: 125px;
   border: 2px solid var(--theme-color);
+  margin-top: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1005,16 +1008,16 @@ ul.skills-list li::before {
   }
 
   .resume-wrapper[data-margin="compact"] {
-    padding: 0mm 2mm !important;
+    padding: 4mm 4mm !important;
   }
   .resume-wrapper[data-margin="normal"] {
-    padding: 2mm 4mm !important;
+    padding: 6mm 6mm !important;
   }
   .resume-wrapper[data-margin="moderate"] {
-    padding: 5mm 7mm !important;
+    padding: 8mm 8mm !important;
   }
   .resume-wrapper[data-margin="wide"] {
-    padding: 8mm 10mm !important;
+    padding: 11mm 11mm !important;
   }
 
   .section-block {
