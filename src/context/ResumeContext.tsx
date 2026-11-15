@@ -573,10 +573,13 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           const tableSec = sec as TableSectionData;
           const newHeaders = tableSec.headers ? [...tableSec.headers, '[Header]'] : undefined;
           const newRows = tableSec.rows.map((row) => [...row, '[Data]']);
+          const newColsCount = (tableSec.headers?.length || (tableSec.rows[0]?.length || 0)) + 1;
+          const newColWidths = Array(newColsCount).fill(Math.round((100 / newColsCount) * 10) / 10);
           return {
             ...tableSec,
             headers: newHeaders,
             rows: newRows,
+            colWidths: newColWidths,
           };
         }),
       }));
@@ -599,10 +602,17 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           const targetIndex = colIndex !== undefined ? colIndex : currentCols - 1;
           const newHeaders = tableSec.headers ? tableSec.headers.filter((_, idx) => idx !== targetIndex) : undefined;
           const newRows = tableSec.rows.map((row) => row.filter((_, idx) => idx !== targetIndex));
+          let newColWidths: number[] | undefined = undefined;
+          if (tableSec.colWidths && tableSec.colWidths.length > 0) {
+            const remaining = tableSec.colWidths.filter((_, idx) => idx !== targetIndex);
+            const total = remaining.reduce((a, b) => a + b, 0) || 1;
+            newColWidths = remaining.map((w) => Math.round(((w / total) * 100) * 10) / 10);
+          }
           return {
             ...tableSec,
             headers: newHeaders,
             rows: newRows,
+            colWidths: newColWidths,
           };
         }),
       }));

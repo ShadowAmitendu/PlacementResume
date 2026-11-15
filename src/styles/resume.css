@@ -796,6 +796,41 @@ table.show-col-borders td {
   width: 35%;
 }
 
+/* Column Resizer Handle */
+.resizer {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 9px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 20;
+  background: transparent;
+}
+
+.resizer::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  border-radius: 1px;
+  transition: background-color 0.15s ease;
+}
+
+.resizer:hover::after,
+.resizer.resizing::after {
+  background: var(--theme-color);
+}
+
+.resizer:hover,
+.resizer.resizing {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 /* Table Controls */
 .table-controls {
   display: flex;
