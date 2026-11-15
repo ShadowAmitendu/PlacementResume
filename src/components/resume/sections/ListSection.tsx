@@ -46,26 +46,27 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
     <div className="relative">
       <ul className="skills-list">
         {section.items.map((item, index) => (
-          <li key={index} className="group/item flex items-center gap-1.5">
-            <div className="flex-1">
-              <EditableContent
-                html={item}
-                onChange={(val) => handleItemChange(index, val)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                placeholder="[Skill / List item]"
-              />
-            </div>
+          <EditableContent
+            key={index}
+            tagName="li"
+            html={item}
+            onChange={(val) => handleItemChange(index, val)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            placeholder="[Skill / List item]"
+            className="group/item relative mb-0.5"
+          >
             {section.items.length > 1 && (
               <button
                 type="button"
+                contentEditable={false}
                 onClick={() => handleRemoveItem(index)}
-                className="opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-destructive p-0.5 rounded no-print transition-opacity"
+                className="opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-destructive p-0.5 rounded no-print transition-opacity ml-2 inline-flex items-center align-middle cursor-pointer"
                 title="Remove item"
               >
                 <X className="w-3 h-3" />
               </button>
             )}
-          </li>
+          </EditableContent>
         ))}
       </ul>
 

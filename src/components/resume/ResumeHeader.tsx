@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { useResume } from '../../context/ResumeContext';
 import { EditableContent } from './EditableContent';
 import { SocialLinks } from './SocialLinks';
+import { Trash2 } from 'lucide-react';
 
 export const ResumeHeader: React.FC = () => {
   const { resumeData, updateHeader, setPhoto } = useResume();
@@ -55,7 +56,7 @@ export const ResumeHeader: React.FC = () => {
     <div className="header">
       {/* Profile Photo */}
       <div
-        className="photo-box cursor-pointer"
+        className="photo-box cursor-pointer group/photo relative"
         onClick={() => fileInputRef.current?.click()}
         role="button"
         tabIndex={0}
@@ -65,7 +66,20 @@ export const ResumeHeader: React.FC = () => {
         }}
       >
         {photo ? (
-          <img src={photo} alt="Profile" className="block w-full h-full object-cover" />
+          <>
+            <img src={photo} alt="Profile" className="block w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPhoto(null);
+              }}
+              title="Remove photo"
+              className="absolute top-1 right-1 opacity-0 group-hover/photo:opacity-100 bg-neutral-900/80 hover:bg-destructive text-white rounded p-1 transition-opacity no-print cursor-pointer"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          </>
         ) : (
           <span id="photo-label" className="leading-tight text-center px-1">
             Click to

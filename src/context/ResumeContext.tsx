@@ -256,6 +256,23 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => clearTimeout(timer);
   }, [resumeData]);
 
+  // Check for URL hash import (#import=<base64>)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#import=')) {
+      try {
+        const b64 = hash.substring(8);
+        const json = atob(b64);
+        const data = parseLegacyResume(JSON.parse(json));
+        resetHistory(data);
+        window.location.hash = '';
+        showToast('Resume imported from URL');
+      } catch (e) {
+        console.error('URL import failed', e);
+      }
+    }
+  }, [resetHistory, showToast]);
+
   // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

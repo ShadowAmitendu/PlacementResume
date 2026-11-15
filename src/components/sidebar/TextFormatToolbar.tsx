@@ -17,8 +17,13 @@ export const TextFormatToolbar: React.FC = () => {
     try {
       range.surroundContents(span);
     } catch {
-      // Ignore cross-boundary errors
+      document.execCommand(style ? 'formatBlock' : 'fontName', false, undefined);
     }
+  };
+
+  // Prevent button from stealing focus from the highlighted text
+  const preventBlur = (e: React.MouseEvent) => {
+    e.preventDefault();
   };
 
   return (
@@ -30,6 +35,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('bold')}
           title="Bold"
           className="h-8 p-0"
@@ -39,6 +45,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('italic')}
           title="Italic"
           className="h-8 p-0"
@@ -48,6 +55,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('underline')}
           title="Underline"
           className="h-8 p-0"
@@ -57,6 +65,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('strikeThrough')}
           title="Strikethrough"
           className="h-8 p-0"
@@ -66,6 +75,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('superscript')}
           title="Superscript"
           className="h-8 p-0 text-xs font-semibold"
@@ -75,6 +85,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatText('subscript')}
           title="Subscript"
           className="h-8 p-0 text-xs font-semibold"
@@ -84,6 +95,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatCustom('font-variant:small-caps')}
           title="Small Caps"
           className="h-8 p-0 text-xs font-semibold"
@@ -94,6 +106,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatCustom('text-transform:uppercase')}
           title="All Caps"
           className="h-8 p-0 text-xs font-semibold"
@@ -103,6 +116,7 @@ export const TextFormatToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => formatCustom('', 'code-inline')}
           title="Inline Code"
           className="col-span-2 h-8 flex items-center justify-center gap-1 text-xs font-mono"

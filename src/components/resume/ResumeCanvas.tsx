@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -33,6 +33,24 @@ export const ResumeCanvas: React.FC = () => {
   const { resumeData, reorderSections } = useResume();
   const { zoom, tableStyle, showLinkIcons } = resumeData.meta;
   const sections = resumeData.sections;
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [wrapperHeight, setWrapperHeight] = useState<number>(0);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (wrapperRef.current) {
+        setWrapperHeight(wrapperRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    const timer = setTimeout(updateHeight, 100);
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [sections, resumeData]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -84,12 +102,13 @@ export const ResumeCanvas: React.FC = () => {
       style={{
         transform: `scale(${zoom})`,
         transformOrigin: 'top center',
-        marginBottom: zoom < 1 ? `calc((297mm * (${zoom} - 1)))` : undefined,
+        marginBottom: zoom < 1 && wrapperHeight ? `${wrapperHeight * (zoom - 1)}px` : undefined,
       }}
     >
       <div className="print-border" />
 
       <div
+        ref={wrapperRef}
         className={wrapperClasses}
         data-table-style={tableStyle}
         id="resumeWrapper"

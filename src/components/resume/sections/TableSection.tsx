@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useResume } from '../../../context/ResumeContext';
 import { TableSectionData } from '../../../types/resume';
 import { EditableContent } from '../EditableContent';
-import { Plus, Minus, Columns } from 'lucide-react';
+import { Plus, Minus, Columns, Trash2 } from 'lucide-react';
 
 interface TableSectionProps {
   section: TableSectionData;
@@ -18,7 +18,9 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     updateTableCell,
   } = useResume();
 
+  const tableRef = useRef<HTMLTableElement>(null);
   const isProfile = section.variant === 'profile';
+
   const tableClasses = [
     isProfile ? 'profile-table' : 'striped',
     section.showColBorders ? 'show-col-borders' : '',
@@ -26,38 +28,100 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     .filter(Boolean)
     .join(' ');
 
+  // Column Resizer Handler
+  const handleResizerMouseDown = (colIndex: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!tableRef.current) return;
+    const table = tableRef.current;
+    const firstRow = table.querySelector('tr');
+    if (!firstRow) return;
+
+    const cell = firstRow.children[colIndex] as HTMLElement;
+    if (!cell) return;
+
+    const startX = e.clientX;
+    const startW = cell.offsetWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(30, startW + (moveEvent.clientX - startX));
+      cell.style.width = `${newWidth}px`;
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const colCount = section.headers?.length || (section.rows[0] ? section.rows[0].length : 0);
+
   return (
-    <div>
-      <table className={tableClasses}>
+    <div className="relative group/table">
+      <table ref={tableRef} className={tableClasses}>
         {section.headers && section.headers.length > 0 && (
           <thead>
             <tr>
               {section.headers.map((headerText, colIdx) => (
-                <th key={colIdx}>
-                  <EditableContent
-                    tagName="span"
-                    html={headerText}
-                    onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
-                    placeholder="[Header]"
-                  />
-                </th>
+                <EditableContent
+                  key={colIdx}
+                  tagName="th"
+                  html={headerText}
+                  onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
+                  placeholder="[Header]"
+                  className="relative"
+                >
+                  {colIdx < colCount - 1 && (
+                    <div
+                      onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
+                      className="resizer no-print"
+                      title="Drag to resize column"
+                    />
+                  )}
+                </EditableContent>
               ))}
             </tr>
           </thead>
         )}
         <tbody>
           {section.rows.map((row, rowIdx) => (
-            <tr key={rowIdx}>
+            <tr key={rowIdx} className="group/row relative">
               {row.map((cellText, colIdx) => (
-                <td key={colIdx} className={isProfile || colIdx === 0 ? 'text-left' : ''}>
-                  <EditableContent
-                    tagName="span"
-                    html={cellText}
-                    onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
-                    placeholder="[Data]"
-                  />
-                </td>
+                <EditableContent
+                  key={colIdx}
+                  tagName="td"
+                  className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
+                  html={cellText}
+                  onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
+                  placeholder="[Data]"
+                >
+                  {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
+                    <div
+                      onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
+                      className="resizer no-print"
+                      title="Drag to resize column"
+                    />
+                  )}
+                </EditableContent>
               ))}
+
+              {/* Hover row delete button */}
+              {section.rows.length > 1 && (
+                <td className="no-print !p-0 !border-none !w-6 text-center select-none">
+                  <button
+                    type="button"
+                    onClick={() => deleteTableRow(section.id, rowIdx)}
+                    title="Delete this row"
+                    className="opacity-0 group-hover/row:opacity-100 text-muted-foreground hover:text-destructive p-1 rounded transition-opacity"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -1,18 +1,32 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 
 export const AlignmentToolbar: React.FC = () => {
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('[contenteditable="true"]')) {
+        lastFocusedRef.current = target.closest('[contenteditable="true"]') as HTMLElement;
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    return () => document.removeEventListener('focusin', handleFocusIn);
+  }, []);
+
   const handleAlign = (align: 'left' | 'center' | 'right' | 'justify') => {
-    const sel = window.getSelection();
-    if (!sel || !sel.rangeCount) return;
-    const node = sel.anchorNode;
-    const editable = node instanceof HTMLElement ? node.closest('[contenteditable="true"]') : node?.parentElement?.closest('[contenteditable="true"]');
-    if (editable instanceof HTMLElement) {
-      editable.style.textAlign = align;
-    } else {
-      document.execCommand(`justify${align.charAt(0).toUpperCase() + align.slice(1)}`, false, undefined);
+    if (lastFocusedRef.current) {
+      lastFocusedRef.current.style.textAlign = align;
     }
+    const cmd = align === 'justify' ? 'justifyFull' : `justify${align.charAt(0).toUpperCase() + align.slice(1)}`;
+    document.execCommand(cmd, false, undefined);
+  };
+
+  const preventBlur = (e: React.MouseEvent) => {
+    e.preventDefault();
   };
 
   return (
@@ -24,6 +38,7 @@ export const AlignmentToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => handleAlign('left')}
           title="Align Left"
           className="h-8 p-0"
@@ -33,6 +48,7 @@ export const AlignmentToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => handleAlign('center')}
           title="Align Center"
           className="h-8 p-0"
@@ -42,6 +58,7 @@ export const AlignmentToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => handleAlign('right')}
           title="Align Right"
           className="h-8 p-0"
@@ -51,6 +68,7 @@ export const AlignmentToolbar: React.FC = () => {
         <Button
           variant="outline"
           size="sm"
+          onMouseDown={preventBlur}
           onClick={() => handleAlign('justify')}
           title="Justify"
           className="h-8 p-0"
