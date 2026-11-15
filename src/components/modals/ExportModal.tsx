@@ -41,7 +41,7 @@ export const ExportModal: React.FC = () => {
               if (e.key === 'Enter') handleExport();
             }}
             placeholder="my_resume"
-            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
             autoFocus
           />
         </div>

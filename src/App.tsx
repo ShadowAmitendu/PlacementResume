@@ -23,7 +23,7 @@ const ResumeAppContent: React.FC = () => {
   }, [setZoom]);
 
   return (
-    <div className="min-h-screen bg-muted/20 text-foreground flex">
+    <div className="min-h-screen bg-[var(--ui-bg)] text-[var(--ui-text)] flex">
       {/* Mobile Menu Button */}
       <button
         type="button"

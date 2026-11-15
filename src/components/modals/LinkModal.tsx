@@ -162,7 +162,7 @@ export const LinkModal: React.FC = () => {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="e.g. GitHub"
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -175,7 +175,7 @@ export const LinkModal: React.FC = () => {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm focus:outline-none focus:border-primary"
             />
           </div>
         </div>

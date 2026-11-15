@@ -22,10 +22,10 @@ export const ThemePicker: React.FC = () => {
               title={theme.label}
               aria-label={theme.label}
               style={{ backgroundColor: theme.color }}
-              className={`w-7 h-7 rounded-full cursor-pointer transition-transform hover:scale-110 relative ${
+              className={`w-7 h-7 rounded-full cursor-pointer transition-transform hover:scale-110 border-2 ${
                 isActive
-                  ? 'ring-2 ring-offset-2 ring-primary scale-110 shadow-sm'
-                  : 'hover:opacity-90'
+                  ? 'border-neutral-800 dark:border-white shadow-sm ring-2 ring-black/20 dark:ring-white/30 scale-105'
+                  : 'border-transparent hover:opacity-90'
               }`}
             />
           );

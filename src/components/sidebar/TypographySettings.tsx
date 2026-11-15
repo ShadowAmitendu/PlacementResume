@@ -17,7 +17,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={font}
           onChange={(e) => setFont(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary"
         >
           {FONT_OPTIONS.map((group) => (
             <optgroup key={group.group} label={group.group}>
@@ -39,7 +39,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={tableStyle}
           onChange={(e) => setTableStyle(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary"
         >
           {TABLE_STYLES.map((st) => (
             <option key={st.value} value={st.value}>
@@ -57,7 +57,7 @@ export const TypographySettings: React.FC = () => {
         <select
           value={marker}
           onChange={(e) => setMarker(e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:border-primary"
         >
           {SECTION_MARKERS.map((m) => (
             <option key={m.value} value={m.value}>

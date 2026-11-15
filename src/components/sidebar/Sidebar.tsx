@@ -26,17 +26,17 @@ export const Sidebar: React.FC = () => {
 
       {/* Main Sidebar */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 left-0 bottom-0 z-50 w-72 bg-[var(--ui-surface)] border-r border-[var(--ui-border)] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isMobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         } no-print`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border bg-muted/40 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-[var(--ui-border)] bg-[var(--ui-surface2)] shrink-0">
           <div>
-            <h2 className="text-sm font-bold tracking-wider uppercase text-foreground">
+            <h2 className="text-sm font-bold tracking-wider uppercase text-[var(--ui-text)]">
               Resume Builder
             </h2>
-            <p className="text-[11px] text-muted-foreground">Click any field to edit</p>
+            <p className="text-[11px] text-[var(--ui-text-dim)]">Click any field to edit</p>
           </div>
           <Button
             variant="ghost"
@@ -51,32 +51,32 @@ export const Sidebar: React.FC = () => {
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-5 text-sm">
           <HistoryPanel />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <ThemePicker />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <TypographySettings />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <ZoomPanel />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <TextFormatToolbar />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <AlignmentToolbar />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <AddSectionPanel />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           <StoragePanel />
-          <hr className="border-border" />
+          <hr className="border-[var(--ui-border)]" />
 
           {/* App Theme Toggle */}
           <div className="space-y-1.5 pt-1">
-            <span className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground block">
+            <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--ui-text-dim)] block">
               App Interface
             </span>
             <Button
