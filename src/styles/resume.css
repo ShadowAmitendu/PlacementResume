@@ -168,39 +168,71 @@ ol.skills-list-numbered li {
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
-  gap: 3px 6px;
+  gap: 2px 6px;
   font-size: 9.5pt;
+  line-height: 1.3;
   color: #333;
+  width: 100%;
 }
 
-.links-no-icons .link-item svg {
+.links-no-icons .link-item svg,
+.links-no-icons .link-item .link-icon {
   display: none !important;
 }
 
 .link-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  vertical-align: middle;
+  gap: 3.5px;
   white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.2;
 }
 
 .link-item:not(:last-of-type)::after {
   content: "|";
   margin-left: 6px;
   color: #555;
+  display: inline-block;
+  line-height: 1;
 }
 
 .link-item.no-sep::after {
   content: none !important;
 }
 
-.link-item svg {
-  width: 13px;
-  height: 13px;
+.link-item svg,
+.link-item .link-icon {
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
   flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
   fill: var(--theme-color);
   color: var(--theme-color);
   stroke: none;
+  margin-top: -1px;
+}
+
+.link-item .editable-text,
+.link-item a,
+.link-item span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.link-item .editable-text {
+  padding: 0 1.5px;
+}
+
+.phone-number:empty {
+  min-width: 90px;
 }
 
 .section-block {
@@ -387,13 +419,13 @@ ol.skills-list-numbered li {
 .header-details {
   text-align: right;
   flex: 1;
-  padding-left: 20px;
-  min-width: 250px;
+  padding-left: 12px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-end;
-  max-width: 520px;
+  width: 100%;
 }
 
 .header-details h1 {
@@ -404,7 +436,6 @@ ol.skills-list-numbered li {
   color: var(--theme-color);
   line-height: 1.1;
   width: 100%;
-  max-width: 500px;
   word-wrap: break-word;
 }
 
@@ -418,7 +449,6 @@ ol.skills-list-numbered li {
   line-height: 1.4;
   margin-bottom: 6px;
   width: 100%;
-  max-width: 480px;
 }
 
 .subtitle-sep {

@@ -19,20 +19,20 @@ export const SocialLinks: React.FC = () => {
         return null;
       case 'globe':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm6.92 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04a13.62 13.62 0 0 1 1.84 3.96h-3.68A13.62 13.62 0 0 1 12 4.04zM4.26 14a7.82 7.82 0 0 1 0-4h3.38a16.74 16.74 0 0 0-.14 2c0 .68.05 1.35.14 2zm.82 2h2.95a15.65 15.65 0 0 0 1.38 3.56A8.03 8.03 0 0 1 5.08 16zm2.95-8H5.08a8.03 8.03 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zm3.97 11.96a13.62 13.62 0 0 1-1.84-3.96h3.68a13.62 13.62 0 0 1-1.84 3.96zM10.16 14a14.77 14.77 0 0 1-.16-2c0-.68.05-1.35.16-2h3.68c.11.65.16 1.32.16 2 0 .68-.05 1.35-.16 2zm4.43 5.56a15.65 15.65 0 0 0 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.09-.65.14-1.32.14-2 0-.68-.05-1.32-.14-2h3.38a7.82 7.82 0 0 1 0 4z" />
           </svg>
         );
       case 'email':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67z" />
             <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908z" />
           </svg>
         );
       case 'github':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -42,19 +42,19 @@ export const SocialLinks: React.FC = () => {
         );
       case 'linkedin':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
           </svg>
         );
       case 'twitter':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.264 5.633 5.9-5.633zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
           </svg>
         );
       case 'instagram':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -64,19 +64,19 @@ export const SocialLinks: React.FC = () => {
         );
       case 'youtube':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
           </svg>
         );
       case 'facebook':
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
           </svg>
         );
       default:
         return (
-          <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+          <svg className="link-icon shrink-0" viewBox="0 0 24 24">
             <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm6.92 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04a13.62 13.62 0 0 1 1.84 3.96h-3.68A13.62 13.62 0 0 1 12 4.04zM4.26 14a7.82 7.82 0 0 1 0-4h3.38a16.74 16.74 0 0 0-.14 2c0 .68.05 1.35.14 2zm.82 2h2.95a15.65 15.65 0 0 0 1.38 3.56A8.03 8.03 0 0 1 5.08 16zm2.95-8H5.08a8.03 8.03 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zm3.97 11.96a13.62 13.62 0 0 1-1.84-3.96h3.68a13.62 13.62 0 0 1-1.84 3.96zM10.16 14a14.77 14.77 0 0 1-.16-2c0-.68.05-1.35.16-2h3.68c.11.65.16 1.32.16 2 0 .68-.05 1.35-.16 2zm4.43 5.56a15.65 15.65 0 0 0 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.09-.65.14-1.32.14-2 0-.68-.05-1.32-.14-2h3.38a7.82 7.82 0 0 1 0 4z" />
           </svg>
         );
@@ -96,7 +96,7 @@ export const SocialLinks: React.FC = () => {
   return (
     <div className="links-line" id="linksContainer">
       <span className="link-item">
-        <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+        <svg className="link-icon shrink-0" viewBox="0 0 24 24">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -111,7 +111,7 @@ export const SocialLinks: React.FC = () => {
       </span>
 
       <span className="link-item">
-        <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+        <svg className="link-icon shrink-0" viewBox="0 0 24 24">
           <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67z" />
           <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908z" />
         </svg>
@@ -123,7 +123,7 @@ export const SocialLinks: React.FC = () => {
       </span>
 
       <span className="link-item">
-        <svg className="w-3.5 h-3.5 fill-[var(--theme-color)] shrink-0" viewBox="0 0 24 24">
+        <svg className="link-icon shrink-0" viewBox="0 0 24 24">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -134,7 +134,7 @@ export const SocialLinks: React.FC = () => {
           html={phone}
           onChange={handlePhoneChange}
           placeholder="+91 00000 00000"
-          className="phone-number inline-block min-w-[110px]"
+          className="phone-number"
         />
       </span>
 
@@ -157,10 +157,10 @@ export const SocialLinks: React.FC = () => {
       <button
         type="button"
         onClick={handleAddLink}
-        className="add-link-btn no-print flex items-center gap-1 cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white rounded px-1.5 py-0.5 text-[10px] font-bold"
+        title="Add Link"
+        className="add-link-btn no-print inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer shrink-0 ml-1"
       >
-        <Plus className="w-3 h-3" />
-        <span>Add Link</span>
+        <Plus className="w-2.5 h-2.5" />
       </button>
     </div>
   );
