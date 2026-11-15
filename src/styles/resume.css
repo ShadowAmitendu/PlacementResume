@@ -619,7 +619,7 @@ table.show-col-borders td {
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 0 0 1px var(--theme-bg-light);
 }
 
@@ -1043,6 +1043,7 @@ ul.skills-list li::before {
   .table-controls,
   .add-link-btn,
   .resizer,
+  .column-actions-pill,
   .link-item:has(.editable-text:empty),
   aside,
   header,

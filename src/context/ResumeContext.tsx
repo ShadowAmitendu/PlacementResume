@@ -64,9 +64,9 @@ interface ResumeContextType {
   reorderSections: (newSections: SectionData[]) => void;
 
   // Table actions
-  addTableRow: (sectionId: string) => void;
+  addTableRow: (sectionId: string, rowIndex?: number) => void;
   deleteTableRow: (sectionId: string, rowIndex?: number) => void;
-  addTableColumn: (sectionId: string) => void;
+  addTableColumn: (sectionId: string, atIndex?: number) => void;
   deleteTableColumn: (sectionId: string, colIndex?: number) => void;
   toggleTableBorders: (sectionId: string) => void;
   updateTableCell: (
@@ -525,7 +525,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // --- Table Actions ---
   const addTableRow = useCallback(
-    (sectionId: string) => {
+    (sectionId: string, rowIndex?: number) => {
       setResumeData((prev) => ({
         ...prev,
         sections: prev.sections.map((sec) => {
@@ -533,9 +533,16 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           const tableSec = sec as TableSectionData;
           const colCount = tableSec.headers?.length || (tableSec.rows[0] ? tableSec.rows[0].length : 2);
           const newRow = Array(colCount).fill('[Data]');
+          let newRows: string[][];
+          if (rowIndex !== undefined && rowIndex >= 0 && rowIndex <= tableSec.rows.length) {
+            newRows = [...tableSec.rows];
+            newRows.splice(rowIndex, 0, newRow);
+          } else {
+            newRows = [...tableSec.rows, newRow];
+          }
           return {
             ...tableSec,
-            rows: [...tableSec.rows, newRow],
+            rows: newRows,
           };
         }),
       }));
@@ -567,15 +574,26 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 
   const addTableColumn = useCallback(
-    (sectionId: string) => {
+    (sectionId: string, atIndex?: number) => {
       setResumeData((prev) => ({
         ...prev,
         sections: prev.sections.map((sec) => {
           if (sec.id !== sectionId || sec.type !== 'table') return sec;
           const tableSec = sec as TableSectionData;
-          const newHeaders = tableSec.headers ? [...tableSec.headers, '[Header]'] : undefined;
-          const newRows = tableSec.rows.map((row) => [...row, '[Data]']);
-          const newColsCount = (tableSec.headers?.length || (tableSec.rows[0]?.length || 0)) + 1;
+          const currentCols = tableSec.headers?.length || (tableSec.rows[0]?.length || 0);
+          const insertIdx = atIndex !== undefined ? Math.max(0, Math.min(atIndex, currentCols)) : currentCols;
+
+          let newHeaders: string[] | undefined = undefined;
+          if (tableSec.headers) {
+            newHeaders = [...tableSec.headers];
+            newHeaders.splice(insertIdx, 0, '[Header]');
+          }
+          const newRows = tableSec.rows.map((row) => {
+            const copy = [...row];
+            copy.splice(insertIdx, 0, '[Data]');
+            return copy;
+          });
+          const newColsCount = currentCols + 1;
           const newColWidths = Array(newColsCount).fill(Math.round((100 / newColsCount) * 10) / 10);
           return {
             ...tableSec,
