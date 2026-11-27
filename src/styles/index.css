@@ -2,81 +2,16 @@
 @import "./fonts.css";
 @import "./resume.css";
 
-@theme {
-  --color-background: var(--ui-bg);
-  --color-foreground: var(--ui-text);
-  --color-card: var(--ui-surface);
-  --color-card-foreground: var(--ui-text);
-  --color-popover: var(--ui-surface);
-  --color-popover-foreground: var(--ui-text);
-  --color-primary: var(--ui-accent);
-  --color-primary-foreground: #ffffff;
-  --color-secondary: var(--ui-surface2);
-  --color-secondary-foreground: var(--ui-text);
-  --color-muted: var(--ui-surface2);
-  --color-muted-foreground: var(--ui-text-dim);
-  --color-accent: var(--ui-surface2);
-  --color-accent-foreground: var(--ui-text);
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-border: var(--ui-border);
-  --color-input: var(--ui-border);
-  --color-ring: var(--ui-accent);
-}
+@custom-variant dark (&:where(.dark, .dark *, .dark-mode, .dark-mode *));
 
 :root {
-  --ui-bg: #f5f5f5;
-  --ui-surface: #ffffff;
-  --ui-surface2: #f0f0f0;
-  --ui-surface3: #e5e5e5;
-  --ui-accent: #0f6cbd;
-  --ui-text: #242424;
-  --ui-text-dim: #616161;
-  --ui-border: #e0e0e0;
   color-scheme: light;
 }
 
 html.dark,
 body.dark-mode,
 .dark {
-  --ui-bg: #1f1f1f;
-  --ui-surface: #292929;
-  --ui-surface2: #333333;
-  --ui-surface3: #3d3d3d;
-  --ui-accent: #2886de;
-  --ui-text: #ffffff;
-  --ui-text-dim: #a6a6a6;
-  --ui-border: #3d3d3d;
   color-scheme: dark;
-}
-
-/* Ensure native select and options render cleanly with high contrast in dark mode across all browsers */
-select option,
-select optgroup {
-  background-color: var(--ui-surface);
-  color: var(--ui-text);
-}
-
-/* ── UI FONT SYSTEM: Strictly uses Microsoft Segoe UI / Fluent with Inter fallbacks ── */
-body,
-#root,
-button,
-input,
-select,
-textarea,
-optgroup,
-option,
-dialog,
-aside,
-nav,
-header,
-footer,
-[role="dialog"],
-[role="menu"],
-[role="tooltip"],
-[data-radix-popper-content-wrapper],
-.no-print {
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif !important;
 }
 
 html,
@@ -89,102 +24,47 @@ body,
 }
 
 body {
-  background-color: var(--ui-bg);
-  color: var(--ui-text);
+  background-color: #f3f3f3;
+  color: #242424;
+  font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── MICROSOFT FLUENT 2 MOTION SYSTEM ── */
-:root {
-  --fluent-curve-decelerate: cubic-bezier(0.1, 0.9, 0.2, 1.0);
-  --fluent-curve-accelerate: cubic-bezier(0.9, 0.1, 1, 0.2);
-  --fluent-curve-standard: cubic-bezier(0.33, 0, 0.67, 1);
-  --fluent-duration-fast: 120ms;
-  --fluent-duration-normal: 180ms;
-  --fluent-duration-gentle: 240ms;
+html.dark body {
+  background-color: #181818;
+  color: #ffffff;
 }
 
-@keyframes fluentTabEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.995);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.no-print {
+  font-family: 'Segoe UI Variable', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif;
 }
 
-@keyframes fluentFlyoutEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes fluentUnderlineGlide {
-  0% {
-    transform: scaleX(0.7);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-}
-
-.animate-fluent-tab {
-  animation: fluentTabEnter var(--fluent-duration-normal) var(--fluent-curve-decelerate) forwards;
-}
-
-.animate-fluent-flyout {
-  animation: fluentFlyoutEnter var(--fluent-duration-fast) var(--fluent-curve-decelerate) forwards;
-}
-
-.animate-fluent-underline {
-  animation: fluentUnderlineGlide var(--fluent-duration-normal) var(--fluent-curve-decelerate) forwards;
-}
-
-/* Fluent Interactive Button Micro-Interactions */
-.fluent-btn {
-  transition: all var(--fluent-duration-fast) var(--fluent-curve-decelerate);
-  touch-action: manipulation;
-}
-.fluent-btn:hover {
-  filter: brightness(0.97);
-}
-.dark .fluent-btn:hover {
-  filter: brightness(1.08);
-}
-.fluent-btn:active {
-  transform: scale(0.96) translateY(0.5px);
-  filter: brightness(0.93);
-}
-
-/* Smooth Canvas Zoom */
+/* Smooth Canvas Zoom transition matching Fluent motion curves */
 .fluent-canvas-zoom {
-  transition: transform var(--fluent-duration-normal) var(--fluent-curve-decelerate),
-              margin-bottom var(--fluent-duration-normal) var(--fluent-curve-decelerate);
+  transition: transform 180ms cubic-bezier(0.1, 0.9, 0.2, 1),
+              margin-bottom 180ms cubic-bezier(0.1, 0.9, 0.2, 1);
   will-change: transform;
 }
 
-/* Fluent Ribbon Collapsible Transition */
+/* Fluent Ribbon Collapsible body transition */
 .fluent-ribbon-collapsible {
-  transition: max-height var(--fluent-duration-gentle) var(--fluent-curve-decelerate),
-              opacity var(--fluent-duration-normal) var(--fluent-curve-decelerate),
-              border-color var(--fluent-duration-normal) var(--fluent-curve-decelerate);
+  transition: max-height 220ms cubic-bezier(0.1, 0.9, 0.2, 1),
+              opacity 160ms cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
 @media print {
+  :root,
   html,
+  html.dark,
   body,
+  body.dark-mode,
+  .dark,
   #root {
+    color-scheme: light !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
+    background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
   }

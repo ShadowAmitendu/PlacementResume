@@ -1,7 +1,7 @@
 import React from 'react';
+import { SignatureRegular, DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
 import { EditableContent } from './EditableContent';
-import { PenTool, Trash2, Edit3 } from 'lucide-react';
 
 export const DeclarationSection: React.FC = () => {
   const { resumeData, updateDeclaration, setIsSignatureModalOpen } = useResume();
@@ -42,30 +42,37 @@ export const DeclarationSection: React.FC = () => {
         </div>
 
         <div className="text-right flex flex-col items-end">
-          {/* Handwritten / Cleaned Vector Signature Image */}
           {signatureImage ? (
-            <div className="relative group/sig inline-flex items-center justify-center mb-0.5">
+            <div className="sig-box relative inline-flex items-center justify-center mb-0.5">
               <img
                 src={signatureImage}
                 alt="Signature"
-                className="max-h-14 max-w-40 object-contain inline-block filter contrast-125"
+                className="max-h-14 max-w-40 object-contain inline-block contrast-125"
               />
-              <div className="absolute top-0 -right-7 opacity-0 group-hover/sig:opacity-100 flex flex-col gap-1 no-print bg-(--ui-surface) p-1 rounded-md shadow-md border border-(--ui-border) transition-opacity">
+              <div
+                className="sig-actions-pill absolute top-0 -right-7 flex flex-col gap-0.5 no-print p-0.5 rounded shadow-sm"
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d4d4d4',
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setIsSignatureModalOpen(true)}
-                  title="Adjust & clean signature"
-                  className="p-1 hover:text-primary rounded cursor-pointer"
+                  title="Edit signature"
+                  className="p-0.5 hover:bg-neutral-100 rounded cursor-pointer flex items-center transition-colors"
+                  style={{ color: '#242424' }}
                 >
-                  <Edit3 className="w-3 h-3" />
+                  <EditRegular fontSize={12} />
                 </button>
                 <button
                   type="button"
                   onClick={() => updateDeclaration({ signatureImage: null })}
                   title="Remove signature image"
-                  className="p-1 hover:text-destructive rounded cursor-pointer"
+                  className="p-0.5 hover:bg-red-50 rounded cursor-pointer flex items-center transition-colors"
+                  style={{ color: '#c42b1c' }}
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <DeleteRegular fontSize={12} />
                 </button>
               </div>
             </div>
@@ -73,11 +80,11 @@ export const DeclarationSection: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsSignatureModalOpen(true)}
-              className="text-[10px] text-primary hover:underline flex items-center gap-1 mb-1 no-print font-sans cursor-pointer transition-colors"
-              title="Upload handwritten signature and remove paper shading"
+              className="text-[11px] text-neutral-600 hover:text-neutral-950 hover:underline flex items-center gap-1 mb-1 no-print font-sans cursor-pointer"
+              title="Upload and clean handwritten signature"
             >
-              <PenTool className="w-3 h-3" />
-              <span>Add Sign (SVG / Clean)</span>
+              <SignatureRegular fontSize={12} />
+              <span>Add signature image</span>
             </button>
           )}
 

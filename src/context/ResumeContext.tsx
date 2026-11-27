@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   ResumeData,
   ResumeMeta,
@@ -12,8 +12,13 @@ import {
   SectionType,
 } from '../types/resume';
 import { DEFAULT_RESUME_DATA, THEMES } from '../constants/themes';
+import { buildEqualColWidths, normalizeColWidths } from '../utils/tableWidths';
+import { createUniqueId, sanitizeLinkUrl } from '../utils/sanitize';
+import { MAX_ZOOM, MIN_ZOOM } from '../utils/documentMetrics';
 import { useHistory } from '../hooks/useHistory';
 import { parseLegacyResume } from '../utils/legacyMigration';
+
+export type SaveStatus = 'saved' | 'saving' | 'error';
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -32,6 +37,7 @@ interface AlertDialogState {
 interface ToastState {
   show: boolean;
   message: string;
+  id?: number;
 }
 
 interface ResumeContextType {
@@ -47,7 +53,8 @@ interface ResumeContextType {
   setFont: (font: string) => void;
   setTableStyle: (style: string) => void;
   setMarker: (marker: string) => void;
-  setZoom: (zoom: number) => void;
+  setZoom: (zoom: number | ((prev: number) => number)) => void;
+  setResponsiveZoom: (zoom: number | null) => void;
   setPhoto: (photoBase64: string | null) => void;
 
   // Header actions
@@ -89,8 +96,7 @@ interface ResumeContextType {
   // Theme & App UI
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  isMobileSidebarOpen: boolean;
-  setIsMobileSidebarOpen: (open: boolean) => void;
+  saveStatus: SaveStatus;
 
   // Modals & Feedback
   isLinkModalOpen: boolean;
@@ -150,25 +156,11 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (e) {
       console.warn('Failed to load initial resume data from localStorage', e);
     }
-    try {
-      const savedZoom = localStorage.getItem(ZOOM_KEY);
-      if (savedZoom) {
-        const parsedZoom = parseFloat(savedZoom);
-        if (!isNaN(parsedZoom) && parsedZoom >= 0.4 && parsedZoom <= 2.0) {
-          initial = {
-            ...initial,
-            meta: { ...initial.meta, zoom: parsedZoom },
-          };
-        }
-      }
-    } catch {
-      // ignore
-    }
     return initial;
   };
 
   const {
-    state: resumeData,
+    state: storedResumeData,
     set: setResumeData,
     setDebounced: setResumeDataDebounced,
     undo,
@@ -178,6 +170,34 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     resetHistory,
   } = useHistory<ResumeData>(getInitialState());
 
+  const [zoomState, setZoomState] = useState<number>(() => {
+    try {
+      const savedZoom = localStorage.getItem(ZOOM_KEY);
+      if (savedZoom) {
+        const parsedZoom = parseFloat(savedZoom);
+        if (!isNaN(parsedZoom) && parsedZoom >= MIN_ZOOM && parsedZoom <= MAX_ZOOM) {
+          return parsedZoom;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_RESUME_DATA.meta.zoom || 1;
+  });
+  const [responsiveZoom, setResponsiveZoom] = useState<number | null>(null);
+  const effectiveZoom = responsiveZoom ?? zoomState;
+
+  const resumeData = useMemo<ResumeData>(
+    () => ({
+      ...storedResumeData,
+      meta: {
+        ...storedResumeData.meta,
+        zoom: effectiveZoom,
+      },
+    }),
+    [storedResumeData, effectiveZoom]
+  );
+
   // Dark mode state
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -186,8 +206,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return false;
     }
   });
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
 
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<HeaderLink | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -211,7 +231,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 
   // Modals & Toast
-  const [toast, setToast] = useState<ToastState>({ show: false, message: '' });
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', id: 0 });
   const [alertDialog, setAlertDialog] = useState<AlertDialogState>({
     isOpen: false,
     title: '',
@@ -229,10 +249,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const confirmResolverRef = useRef<((val: boolean) => void) | null>(null);
 
   const showToast = useCallback((message: string) => {
-    setToast({ show: true, message });
-    setTimeout(() => {
-      setToast({ show: false, message: '' });
-    }, 2200);
+    setToast({ show: true, message, id: Date.now() + Math.random() });
   }, []);
 
   const showAlert = useCallback((message: string, title = 'Notice') => {
@@ -245,6 +262,10 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const showConfirm = useCallback(
     (message: string, title = 'Are you sure?', confirmLabel = 'Delete'): Promise<boolean> => {
+      if (confirmResolverRef.current) {
+        confirmResolverRef.current(false);
+        confirmResolverRef.current = null;
+      }
       return new Promise((resolve) => {
         confirmResolverRef.current = resolve;
         setConfirmDialog({
@@ -302,16 +323,24 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [resumeData.meta.theme, resumeData.meta.font, resumeData.meta.marker]);
 
   // Auto-save to localStorage with debounce
+  const hasMountedAutoSaveRef = useRef(false);
   useEffect(() => {
+    if (!hasMountedAutoSaveRef.current) {
+      hasMountedAutoSaveRef.current = true;
+      return;
+    }
+    setSaveStatus('saving');
     const timer = setTimeout(() => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(resumeData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storedResumeData));
+        setSaveStatus('saved');
       } catch (e) {
         console.warn('Auto-save error', e);
+        setSaveStatus('error');
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [resumeData]);
+  }, [storedResumeData]);
 
   // Check for URL hash import (#import=<base64>)
   useEffect(() => {
@@ -319,66 +348,139 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (hash && hash.startsWith('#import=')) {
       try {
         const b64 = hash.substring(8);
-        const json = atob(b64);
+        const binary = atob(b64);
+        const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+        const json = new TextDecoder().decode(bytes);
         const data = parseLegacyResume(JSON.parse(json));
         resetHistory(data);
         window.location.hash = '';
         showToast('Resume imported from URL');
       } catch (e) {
         console.error('URL import failed', e);
+        showToast('Could not import resume from URL');
       }
     }
   }, [resetHistory, showToast]);
 
-  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Ctrl+S, Esc)
+  const shortcutStateRef = useRef({
+    storedResumeData,
+    undo,
+    redo,
+    showToast,
+    closeAlert,
+    closeConfirm,
+    adjustZoom: (_delta: number) => {},
+    resetZoom: () => {},
+  });
+  shortcutStateRef.current = {
+    storedResumeData,
+    undo,
+    redo,
+    showToast,
+    closeAlert,
+    closeConfirm,
+    adjustZoom: shortcutStateRef.current.adjustZoom,
+    resetZoom: shortcutStateRef.current.resetZoom,
+  };
+
+  // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Ctrl+S, Ctrl+Plus/Minus/0, Ctrl+Scroll, Esc)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+S → Save to browser with toast
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      const latest = shortcutStateRef.current;
+
+      if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+        if (
+          e.key === '+' ||
+          e.key === '=' ||
+          e.code === 'NumpadAdd' ||
+          e.code === 'Equal'
+        ) {
+          e.preventDefault();
+          latest.adjustZoom(0.1);
+          return;
+        }
+        if (
+          e.key === '-' ||
+          e.key === '_' ||
+          e.code === 'NumpadSubtract' ||
+          e.code === 'Minus'
+        ) {
+          e.preventDefault();
+          latest.adjustZoom(-0.1);
+          return;
+        }
+        if (e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0') {
+          e.preventDefault();
+          latest.resetZoom();
+          return;
+        }
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(resumeData));
-          showToast('Saved to browser ✓');
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(latest.storedResumeData));
+          setSaveStatus('saved');
+          latest.showToast('Saved to browser');
         } catch {
-          showToast('Save failed — storage may be full');
+          setSaveStatus('error');
+          latest.showToast('Save failed, storage may be full');
         }
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'h')) {
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'h')) {
         e.preventDefault();
         setIsFindReplaceModalOpen(true);
         return;
       }
 
-      // Escape: only close non-Radix modals (Radix Dialog handles its own Esc internally)
       if (e.key === 'Escape') {
-        setIsMobileSidebarOpen(false);
-        closeAlert();
-        closeConfirm();
-        // Link, Export, FindReplace, Signature modals use Radix Dialog → let them handle Esc
+        latest.closeAlert();
+        latest.closeConfirm();
       }
 
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+      const target = e.target as HTMLElement | null;
+      if (
+        !target ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      ) {
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      const keyLower = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && keyLower === 'z' && !e.shiftKey) {
         e.preventDefault();
-        undo();
-        showToast('Undone');
+        latest.undo();
+        latest.showToast('Undone');
       }
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+      if ((e.ctrlKey || e.metaKey) && (keyLower === 'y' || (e.shiftKey && keyLower === 'z'))) {
         e.preventDefault();
-        redo();
-        showToast('Redone');
+        latest.redo();
+        latest.showToast('Redone');
       }
     };
 
+    const handleWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[role="dialog"] canvas')) return;
+      e.preventDefault();
+      if (e.deltaY === 0) return;
+      const step = Math.abs(e.deltaY) < 40 ? 0.02 : 0.1;
+      shortcutStateRef.current.adjustZoom(e.deltaY < 0 ? step : -step);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, showToast, closeAlert, closeConfirm, resumeData]);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // --- Meta Actions ---
   const updateMeta = useCallback(
@@ -395,17 +497,30 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const setFont = useCallback((font: string) => updateMeta({ font }), [updateMeta]);
   const setTableStyle = useCallback((tableStyle: string) => updateMeta({ tableStyle }), [updateMeta]);
   const setMarker = useCallback((marker: string) => updateMeta({ marker }), [updateMeta]);
+  const responsiveZoomRef = useRef<number | null>(null);
+  responsiveZoomRef.current = responsiveZoom;
+
   const setZoom = useCallback(
-    (newZoom: number) => {
-      updateMeta({ zoom: newZoom });
-      try {
-        localStorage.setItem(ZOOM_KEY, String(newZoom));
-      } catch {
-        // ignore
-      }
+    (zoomOrUpdater: number | ((prev: number) => number)) => {
+      const activeOverride = responsiveZoomRef.current;
+      responsiveZoomRef.current = null;
+      setResponsiveZoom(null);
+      setZoomState((prev) => {
+        const current = activeOverride ?? prev;
+        const raw = typeof zoomOrUpdater === 'function' ? zoomOrUpdater(current) : zoomOrUpdater;
+        const clamped = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(raw * 100) / 100));
+        try {
+          localStorage.setItem(ZOOM_KEY, String(clamped));
+        } catch {
+          // ignore
+        }
+        return clamped;
+      });
     },
-    [updateMeta]
+    []
   );
+  shortcutStateRef.current.adjustZoom = (delta: number) => setZoom((prev) => prev + delta);
+  shortcutStateRef.current.resetZoom = () => setZoom(1.0);
   const setPhoto = useCallback((photo: string | null) => updateMeta({ photo }), [updateMeta]);
 
   // --- Header Actions ---
@@ -421,7 +536,11 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const addLink = useCallback(
     (newLink: Omit<HeaderLink, 'id'>) => {
-      const link: HeaderLink = { ...newLink, id: `link-${Date.now()}` };
+      const link: HeaderLink = {
+        ...newLink,
+        url: sanitizeLinkUrl(newLink.url),
+        id: createUniqueId('link'),
+      };
       setResumeData((prev) => ({
         ...prev,
         header: {
@@ -436,11 +555,15 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const updateLink = useCallback(
     (id: string, linkUpdate: Partial<HeaderLink>) => {
+      const cleanUpdate =
+        linkUpdate.url !== undefined
+          ? { ...linkUpdate, url: sanitizeLinkUrl(linkUpdate.url) }
+          : linkUpdate;
       setResumeData((prev) => ({
         ...prev,
         header: {
           ...prev.header,
-          links: prev.header.links.map((l) => (l.id === id ? { ...l, ...linkUpdate } : l)),
+          links: prev.header.links.map((l) => (l.id === id ? { ...l, ...cleanUpdate } : l)),
         },
       }));
       showToast('Link updated');
@@ -472,7 +595,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // --- Section Actions ---
   const addSection = useCallback(
     (type: SectionType) => {
-      const id = `sec-${Date.now()}`;
+      const id = createUniqueId('sec');
       let newSection: SectionData;
 
       switch (type) {
@@ -555,7 +678,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (index === -1) return prev;
         const target = prev.sections[index];
         const clone = JSON.parse(JSON.stringify(target));
-        clone.id = `sec-${Date.now()}`;
+        clone.id = createUniqueId('sec');
 
         const newSections = [...prev.sections];
         newSections.splice(index + 1, 0, clone);
@@ -650,7 +773,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             return copy;
           });
           const newColsCount = currentCols + 1;
-          const newColWidths = Array(newColsCount).fill(Math.round((100 / newColsCount) * 10) / 10);
+          const newColWidths = buildEqualColWidths(newColsCount);
           return {
             ...tableSec,
             headers: newHeaders,
@@ -681,8 +804,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           let newColWidths: number[] | undefined = undefined;
           if (tableSec.colWidths && tableSec.colWidths.length > 0) {
             const remaining = tableSec.colWidths.filter((_, idx) => idx !== targetIndex);
-            const total = remaining.reduce((a, b) => a + b, 0) || 1;
-            newColWidths = remaining.map((w) => Math.round(((w / total) * 100) * 10) / 10);
+            newColWidths = normalizeColWidths(remaining);
           }
           return {
             ...tableSec,
@@ -758,12 +880,14 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // --- Storage ---
   const saveToBrowser = useCallback(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(resumeData));
-      showToast('Saved to browser!');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedResumeData));
+      setSaveStatus('saved');
+      showToast('Saved to browser');
     } catch {
-      showAlert('Could not save — browser storage may be full.', 'Save Failed');
+      setSaveStatus('error');
+      showAlert('Could not save because browser storage is full.', 'Save failed');
     }
-  }, [resumeData, showToast, showAlert]);
+  }, [storedResumeData, showToast, showAlert]);
 
   const clearBrowserSave = useCallback(async () => {
     const confirmed = await showConfirm(
@@ -772,8 +896,13 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       'Clear'
     );
     if (confirmed) {
-      localStorage.removeItem(STORAGE_KEY);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // ignore
+      }
       resetHistory(DEFAULT_RESUME_DATA);
+      setSaveStatus('saved');
       showToast('Browser save cleared');
     }
   }, [showConfirm, resetHistory, showToast]);
@@ -808,7 +937,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const applyAiParsedResume = useCallback(
     (parsedData: ResumeData) => {
       setResumeData(parsedData);
-      showToast('Resume updated from PDF using AI!');
+      showToast('Resume updated from PDF');
     },
     [setResumeData, showToast]
   );
@@ -840,6 +969,10 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             showAlert('Could not read file. Ensure it is a valid .resumeBuilder or .pdf file.', 'Invalid File');
             reject(err);
           }
+        };
+        reader.onerror = () => {
+          showAlert('Could not read the selected file.', 'Read error');
+          reject(new Error('File read error'));
         };
         reader.readAsText(file);
       });
@@ -931,73 +1064,132 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [setResumeData]
   );
 
-  const value = {
-    resumeData,
-    canUndo,
-    canRedo,
-    undo,
-    redo,
-    updateMeta,
-    setTheme,
-    setFont,
-    setTableStyle,
-    setMarker,
-    setZoom,
-    setPhoto,
-    updateHeader,
-    addLink,
-    updateLink,
-    removeLink,
-    addSection,
-    updateSection,
-    removeSection,
-    duplicateSection,
-    reorderSections,
-    addTableRow,
-    deleteTableRow,
-    addTableColumn,
-    deleteTableColumn,
-    toggleTableBorders,
-    updateTableCell,
-    updateDeclaration,
-    saveToBrowser,
-    clearBrowserSave,
-    exportResume,
-    importResume,
-    isDarkMode,
-    toggleDarkMode,
-    isMobileSidebarOpen,
-    setIsMobileSidebarOpen,
-    isLinkModalOpen,
-    setIsLinkModalOpen,
-    editingLink,
-    setEditingLink,
-    isExportModalOpen,
-    setIsExportModalOpen,
-    isFindReplaceModalOpen,
-    setIsFindReplaceModalOpen,
-    findAndReplaceAll,
-    isSignatureModalOpen,
-    setIsSignatureModalOpen,
-    isPdfAiModalOpen,
-    setIsPdfAiModalOpen,
-    pdfImportInitialFile,
-    setPdfImportInitialFile,
-    applyAiParsedResume,
-    isCropModalOpen,
-    setIsCropModalOpen,
-    cropImageSrc,
-    setCropImageSrc,
-    openCropModal,
-    confirmDialog,
-    showConfirm,
-    closeConfirm,
-    alertDialog,
-    showAlert,
-    closeAlert,
-    toast,
-    showToast,
-  };
+  const value = useMemo<ResumeContextType>(
+    () => ({
+      resumeData,
+      canUndo,
+      canRedo,
+      undo,
+      redo,
+      updateMeta,
+      setTheme,
+      setFont,
+      setTableStyle,
+      setMarker,
+      setZoom,
+      setResponsiveZoom,
+      setPhoto,
+      updateHeader,
+      addLink,
+      updateLink,
+      removeLink,
+      addSection,
+      updateSection,
+      removeSection,
+      duplicateSection,
+      reorderSections,
+      addTableRow,
+      deleteTableRow,
+      addTableColumn,
+      deleteTableColumn,
+      toggleTableBorders,
+      updateTableCell,
+      updateDeclaration,
+      saveToBrowser,
+      clearBrowserSave,
+      exportResume,
+      importResume,
+      isDarkMode,
+      toggleDarkMode,
+      saveStatus,
+      isLinkModalOpen,
+      setIsLinkModalOpen,
+      editingLink,
+      setEditingLink,
+      isExportModalOpen,
+      setIsExportModalOpen,
+      isFindReplaceModalOpen,
+      setIsFindReplaceModalOpen,
+      findAndReplaceAll,
+      isSignatureModalOpen,
+      setIsSignatureModalOpen,
+      isPdfAiModalOpen,
+      setIsPdfAiModalOpen,
+      pdfImportInitialFile,
+      setPdfImportInitialFile,
+      applyAiParsedResume,
+      isCropModalOpen,
+      setIsCropModalOpen,
+      cropImageSrc,
+      setCropImageSrc,
+      openCropModal,
+      confirmDialog,
+      showConfirm,
+      closeConfirm,
+      alertDialog,
+      showAlert,
+      closeAlert,
+      toast,
+      showToast,
+    }),
+    [
+      resumeData,
+      canUndo,
+      canRedo,
+      undo,
+      redo,
+      updateMeta,
+      setTheme,
+      setFont,
+      setTableStyle,
+      setMarker,
+      setZoom,
+      setPhoto,
+      updateHeader,
+      addLink,
+      updateLink,
+      removeLink,
+      addSection,
+      updateSection,
+      removeSection,
+      duplicateSection,
+      reorderSections,
+      addTableRow,
+      deleteTableRow,
+      addTableColumn,
+      deleteTableColumn,
+      toggleTableBorders,
+      updateTableCell,
+      updateDeclaration,
+      saveToBrowser,
+      clearBrowserSave,
+      exportResume,
+      importResume,
+      isDarkMode,
+      toggleDarkMode,
+      saveStatus,
+      isLinkModalOpen,
+      editingLink,
+      isExportModalOpen,
+      isFindReplaceModalOpen,
+      findAndReplaceAll,
+      isSignatureModalOpen,
+      isPdfAiModalOpen,
+      pdfImportInitialFile,
+      applyAiParsedResume,
+      isCropModalOpen,
+      cropImageSrc,
+      openCropModal,
+      confirmDialog,
+      showConfirm,
+      closeConfirm,
+      alertDialog,
+      showAlert,
+      closeAlert,
+      toast,
+      showToast,
+    ]
+  );
 
   return <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>;
 };

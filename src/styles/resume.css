@@ -21,6 +21,7 @@
 
 .resume-wrapper {
   background-color: white;
+  color-scheme: light;
   width: 210mm;
   min-height: 297mm;
   padding: 10mm 15mm;
@@ -45,7 +46,7 @@
 .resume-wrapper h3,
 .resume-wrapper h4,
 .resume-wrapper p:not(.no-print):not(.no-print *),
-.resume-wrapper span:not(.no-print):not(.no-print *),
+.resume-wrapper span:not(.no-print):not(.no-print *):not(.code-inline),
 .resume-wrapper a:not(.no-print):not(.no-print *),
 .resume-wrapper li:not(.no-print):not(.no-print *),
 .resume-wrapper table,
@@ -74,6 +75,12 @@
 .resume-wrapper .table-controls *,
 .resume-wrapper .column-actions-pill,
 .resume-wrapper .column-actions-pill *,
+.resume-wrapper .row-actions-pill,
+.resume-wrapper .row-actions-pill *,
+.resume-wrapper .photo-actions-pill,
+.resume-wrapper .photo-actions-pill *,
+.resume-wrapper .sig-actions-pill,
+.resume-wrapper .sig-actions-pill *,
 .resume-wrapper .cell-context-toolbar,
 .resume-wrapper .cell-context-toolbar *,
 .resume-wrapper .resizer,
@@ -83,6 +90,24 @@
 .resume-wrapper .photo-box #photo-label,
 .resume-wrapper button {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.resume-wrapper .block-controls,
+.resume-wrapper .block-controls *,
+.resume-wrapper .table-controls,
+.resume-wrapper .table-controls *,
+.resume-wrapper .column-actions-pill,
+.resume-wrapper .column-actions-pill *,
+.resume-wrapper .row-actions-pill,
+.resume-wrapper .row-actions-pill *,
+.resume-wrapper .photo-actions-pill,
+.resume-wrapper .photo-actions-pill *,
+.resume-wrapper .sig-actions-pill,
+.resume-wrapper .sig-actions-pill * {
+  font-variant: normal !important;
+  text-transform: none !important;
+  font-style: normal !important;
+  letter-spacing: normal !important;
 }
 
 #sortable-sections {
@@ -309,15 +334,16 @@ ol.skills-list-numbered li {
 
 .block-controls {
   position: absolute;
-  top: -12px;
-  right: 10px;
+  top: -14px;
+  right: 8px;
   display: none;
-  gap: 4px;
-  background: var(--ui-surface, #fff);
-  padding: 3px;
-  border: 1px solid var(--ui-border, #ccc);
+  align-items: center;
+  gap: 2px;
+  background: #ffffff;
+  padding: 2px;
+  border: 1px solid #d4d4d4;
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   z-index: 50;
 }
 
@@ -328,46 +354,42 @@ ol.skills-list-numbered li {
 
 .block-controls button {
   border: none;
-  background: var(--ui-surface2, #f0f0f0);
-  color: var(--ui-text, #111);
+  background: transparent;
+  color: #424242;
   cursor: pointer;
-  padding: 4px 7px;
+  padding: 4px 6px;
   border-radius: 4px;
-  font-size: 11px;
-  font-weight: bold;
-  transition: background 0.15s;
+  font-size: 12px;
+  transition: background-color 0.12s ease, color 0.12s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  min-height: 28px;
+  min-width: 26px;
+  min-height: 26px;
 }
 
 .block-controls button:hover {
-  background: var(--ui-surface3, #d0d0d0);
-}
-
-.block-controls button.btn-danger-small {
-  background: #dc3545;
-  color: white;
+  background: #f0f0f0;
+  color: #171717;
 }
 
 .block-controls button.btn-danger-small:hover {
-  background: #c82333;
+  background: #fdf3f4;
+  color: #c42b1c;
 }
 
 .block-controls .drag-handle {
   cursor: grab;
-  color: var(--ui-text-dim, #aaa);
-  font-size: 14px;
-  padding: 4px 6px;
+  color: #616161;
+  padding: 4px 5px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
 }
 
 .block-controls .drag-handle:hover {
-  color: var(--ui-text, #333);
-  background: var(--ui-surface2, #e0e0e0);
+  color: #171717;
+  background: #f0f0f0;
 }
 
 .block-controls .drag-handle:active {
@@ -385,10 +407,15 @@ ol.skills-list-numbered li {
   }
 }
 
+.resume-wrapper ::selection {
+  background-color: #b4d5fe;
+  color: #111111;
+}
+
 .editable-text {
   padding: 1px 3px;
   border-bottom: 1px dashed transparent;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   outline: none;
 }
 
@@ -402,14 +429,65 @@ ol.skills-list-numbered li {
 }
 
 .editable-text:hover {
-  background-color: var(--theme-bg-light);
-  border-bottom: 1px dashed #ccc;
+  background-color: rgba(0, 0, 0, 0.045);
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.25);
 }
 
 .editable-text:focus {
   outline: none;
-  background-color: var(--theme-bg-light);
+  background-color: rgba(15, 108, 189, 0.08);
   border-bottom: 1px dashed var(--theme-color);
+}
+
+.resume-wrapper .code-inline {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.9em;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+/* Preserve contrast on dark-filled table headers and profile labels */
+[data-table-style="standard"] th .editable-text:hover,
+[data-table-style="standard"] .profile-table td:first-child .editable-text:hover,
+[data-table-style="striped-alt"] th .editable-text:hover,
+[data-table-style="striped-alt"] .profile-table td:first-child .editable-text:hover,
+[data-table-style="clean-modern"] th .editable-text:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.55);
+}
+
+[data-table-style="standard"] th .editable-text:focus,
+[data-table-style="standard"] .profile-table td:first-child .editable-text:focus,
+[data-table-style="striped-alt"] th .editable-text:focus,
+[data-table-style="striped-alt"] .profile-table td:first-child .editable-text:focus,
+[data-table-style="clean-modern"] th .editable-text:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.85);
+}
+
+[data-table-style="standard"] th .editable-text::selection,
+[data-table-style="standard"] th .editable-text *::selection,
+[data-table-style="standard"] .profile-table td:first-child .editable-text::selection,
+[data-table-style="standard"] .profile-table td:first-child .editable-text *::selection,
+[data-table-style="striped-alt"] th .editable-text::selection,
+[data-table-style="striped-alt"] th .editable-text *::selection,
+[data-table-style="striped-alt"] .profile-table td:first-child .editable-text::selection,
+[data-table-style="striped-alt"] .profile-table td:first-child .editable-text *::selection,
+[data-table-style="clean-modern"] th .editable-text::selection,
+[data-table-style="clean-modern"] th .editable-text *::selection {
+  background-color: #ffffff;
+  color: var(--theme-color);
+}
+
+[data-table-style="standard"] th .editable-text:empty:before,
+[data-table-style="standard"] .profile-table td:first-child .editable-text:empty:before,
+[data-table-style="striped-alt"] th .editable-text:empty:before,
+[data-table-style="striped-alt"] .profile-table td:first-child .editable-text:empty:before,
+[data-table-style="clean-modern"] th .editable-text:empty:before {
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
 }
 
 .custom-hr {
@@ -608,10 +686,66 @@ table.show-col-borders td {
   background-color: var(--theme-bg-light) !important;
 }
 
-[data-table-style="standard"] .profile-table td:first-child {
+/* Profile column label styles across table presets (column widths are controlled by colgroup) */
+.profile-table td:first-child {
   font-weight: bold;
-  width: 35%;
+}
+
+[data-table-style="standard"] .profile-table td:first-child {
   letter-spacing: 1px;
+}
+
+[data-table-style="latex"] .profile-table td:first-child {
+  background: transparent !important;
+  color: var(--theme-color) !important;
+  border-right: 1px solid var(--theme-color);
+}
+
+[data-table-style="word-clean"] .profile-table td:first-child {
+  background-color: var(--theme-bg-light) !important;
+  color: #000 !important;
+}
+
+[data-table-style="invisible"] .profile-table td:first-child {
+  background: transparent !important;
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="striped-alt"] .profile-table td:first-child {
+  background-color: var(--theme-color) !important;
+  color: var(--theme-text-light) !important;
+}
+
+[data-table-style="rounded"] .profile-table td:first-child {
+  background: var(--theme-bg-light) !important;
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="bordered-accent"] .profile-table td:first-child {
+  color: var(--theme-color) !important;
+  border-right: 2px solid var(--theme-color);
+}
+
+[data-table-style="compact"] .profile-table td:first-child {
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="clean-modern"] .profile-table td:first-child {
+  font-weight: 600;
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="classic-double"] .profile-table td:first-child {
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="elegant-serif"] .profile-table td:first-child {
+  font-style: italic;
+  color: var(--theme-color) !important;
+}
+
+[data-table-style="simple-underline"] .profile-table td:first-child {
+  color: var(--theme-color) !important;
 }
 
 /* LaTeX Booktabs */
@@ -634,14 +768,6 @@ table.show-col-borders td {
   font-weight: bold;
 }
 
-[data-table-style="latex"] .profile-table td:first-child {
-  background: transparent !important;
-  color: var(--theme-color) !important;
-  font-weight: bold;
-  width: 35%;
-  border-right: 1px solid var(--theme-color);
-}
-
 /* Word Clean */
 [data-table-style="word-clean"] table {
   border-top: 2px solid var(--theme-color);
@@ -662,13 +788,6 @@ table.show-col-borders td {
   font-weight: bold;
 }
 
-[data-table-style="word-clean"] .profile-table td:first-child {
-  background-color: var(--theme-bg-light) !important;
-  color: #000 !important;
-  font-weight: bold;
-  width: 35%;
-}
-
 /* Minimal / Invisible */
 [data-table-style="invisible"] table,
 [data-table-style="invisible"] th,
@@ -681,13 +800,6 @@ table.show-col-borders td {
   color: var(--theme-color) !important;
   border-bottom: 1px dashed var(--theme-color) !important;
   font-weight: bold;
-}
-
-[data-table-style="invisible"] .profile-table td:first-child {
-  background: transparent !important;
-  color: var(--theme-color) !important;
-  font-weight: bold;
-  width: 35%;
 }
 
 /* Alternating Stripes */
@@ -715,13 +827,6 @@ table.show-col-borders td {
 
 [data-table-style="striped-alt"] tr:nth-child(even) td {
   background-color: transparent !important;
-}
-
-[data-table-style="striped-alt"] .profile-table td:first-child {
-  background-color: var(--theme-color) !important;
-  color: var(--theme-text-light) !important;
-  font-weight: bold;
-  width: 35%;
 }
 
 /* Rounded Modern */
@@ -768,13 +873,6 @@ table.show-col-borders td {
   border-bottom: 2px solid var(--theme-color);
 }
 
-[data-table-style="rounded"] .profile-table td:first-child {
-  background: var(--theme-bg-light) !important;
-  color: var(--theme-color) !important;
-  font-weight: bold;
-  width: 35%;
-}
-
 /* Bordered Accent */
 [data-table-style="bordered-accent"] table {
   border: 2px solid var(--theme-color);
@@ -796,13 +894,6 @@ table.show-col-borders td {
 [data-table-style="bordered-accent"] td {
   border-left: none;
   border-right: none;
-}
-
-[data-table-style="bordered-accent"] .profile-table td:first-child {
-  color: var(--theme-color) !important;
-  font-weight: bold;
-  width: 35%;
-  border-right: 2px solid var(--theme-color);
 }
 
 /* Compact Dense */
@@ -831,12 +922,6 @@ table.show-col-borders td {
 
 [data-table-style="compact"] tr:not(:last-child) td {
   border-bottom: 1px dotted rgba(0, 0, 0, 0.12);
-}
-
-[data-table-style="compact"] .profile-table td:first-child {
-  color: var(--theme-color) !important;
-  font-weight: bold;
-  width: 35%;
 }
 
 /* Clean Modern */
@@ -874,12 +959,6 @@ table.show-col-borders td {
   border-bottom-right-radius: 4px;
 }
 
-[data-table-style="clean-modern"] .profile-table td:first-child {
-  font-weight: 600;
-  color: var(--theme-color) !important;
-  width: 35%;
-}
-
 /* Classic Double Border */
 [data-table-style="classic-double"] table {
   border: 3px double var(--theme-color);
@@ -896,12 +975,6 @@ table.show-col-borders td {
   color: var(--theme-color) !important;
   font-weight: bold;
   border-bottom: 3px double var(--theme-color);
-}
-
-[data-table-style="classic-double"] .profile-table td:first-child {
-  font-weight: bold;
-  color: var(--theme-color) !important;
-  width: 35%;
 }
 
 /* Elegant Serif */
@@ -929,13 +1002,6 @@ table.show-col-borders td {
 
 [data-table-style="elegant-serif"] tr:last-child td {
   border-bottom: none;
-}
-
-[data-table-style="elegant-serif"] .profile-table td:first-child {
-  font-style: italic;
-  font-weight: bold;
-  color: var(--theme-color) !important;
-  width: 35%;
 }
 
 /* Simple Underline */
@@ -969,10 +1035,29 @@ table.show-col-borders td {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-[data-table-style="simple-underline"] .profile-table td:first-child {
-  font-weight: bold;
-  color: var(--theme-color) !important;
-  width: 35%;
+/* Hover pill visibility without brittle Tailwind group variants */
+.column-actions-pill,
+.row-actions-pill,
+.photo-actions-pill,
+.sig-actions-pill,
+.list-remove-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease;
+}
+
+th:hover > .column-actions-pill,
+th:focus-within > .column-actions-pill,
+td:hover > .column-actions-pill,
+td:focus-within > .column-actions-pill,
+td:hover > .row-actions-pill,
+td:focus-within > .row-actions-pill,
+.photo-box:hover > .photo-actions-pill,
+.sig-box:hover > .sig-actions-pill,
+.list-row-item:hover > .list-remove-btn,
+.list-row-item:focus-within > .list-remove-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Column Resizer Handle */
@@ -1010,53 +1095,49 @@ table.show-col-borders td {
   background: rgba(0, 0, 0, 0.04);
 }
 
-/* Table Controls */
+/* Table Controls (Subtle Word-style monochrome bar below tables) */
 .table-controls {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin: 4px 0 10px;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 8px;
   flex-wrap: wrap;
 }
 
 .table-controls button {
-  padding: 4px 8px;
-  color: white;
-  border: none;
+  padding: 3px 8px;
+  background: transparent;
+  color: #525252;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   cursor: pointer;
   font-size: 11px;
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-family: 'Segoe UI Variable', 'Segoe UI', 'Inter', sans-serif;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  min-height: 28px;
+  gap: 4px;
+  min-height: 24px;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
-.table-controls .add-btn {
-  background: #16a34a;
+.table-controls button:hover {
+  background: #f5f5f5;
+  border-color: #c7c7c7;
+  color: #171717;
 }
 
-.table-controls .add-btn:hover {
-  background: #15803d;
+.table-controls button.del-btn:hover {
+  background: #fdf3f4;
+  border-color: #e6b8bc;
+  color: #b10e1c;
 }
 
-.table-controls .del-btn {
-  background: #dc2626;
-}
-
-.table-controls .del-btn:hover {
-  background: #b91c1c;
-}
-
-.table-controls .toggle-border-btn {
-  background: #475569;
-}
-
-.table-controls .toggle-border-btn:hover {
-  background: #334155;
+.table-controls button.is-active {
+  background: #ebf3fc;
+  border-color: #0f6cbd;
+  color: #0f6cbd;
 }
 
 /* List */
@@ -1106,7 +1187,9 @@ ul.skills-list li::before {
   }
 
   html,
-  body {
+  body,
+  html.dark,
+  html.dark body {
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
@@ -1123,6 +1206,8 @@ ul.skills-list li::before {
   /* Reset all outer app containers so zero offset, padding, or grey background leaks into print */
   #root,
   #root > div,
+  .app-shell,
+  .resume-zoom-stage,
   main {
     background: transparent !important;
     background-color: transparent !important;
@@ -1137,6 +1222,12 @@ ul.skills-list li::before {
     display: block !important;
     overflow: visible !important;
     position: static !important;
+  }
+
+  /* Hide Fluent/Tabster focus sentinels and portal containers that add stray 1px lines */
+  [data-portal-node="true"],
+  body > i {
+    display: none !important;
   }
 
   .print-border {
@@ -1154,6 +1245,7 @@ ul.skills-list li::before {
   .add-link-btn,
   .resizer,
   .column-actions-pill,
+  .row-actions-pill,
   .link-item:has(.editable-text:empty),
   aside,
   header,
@@ -1168,7 +1260,10 @@ ul.skills-list li::before {
     transform: none !important;
     display: block !important;
     width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
     margin: 0 !important;
+    margin-bottom: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
     background: transparent !important;
@@ -1177,12 +1272,12 @@ ul.skills-list li::before {
   .resume-wrapper {
     box-shadow: none !important;
     border: none !important;
-    background: transparent !important;
-    background-color: transparent !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
-    min-height: 275mm !important;
+    min-height: 271mm !important;
     margin: 0 !important;
     overflow: visible !important;
     color: #1a1a1a !important;

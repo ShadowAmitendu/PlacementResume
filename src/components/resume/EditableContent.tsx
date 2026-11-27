@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
+import { sanitizeRichTextHtml } from '../../utils/sanitize';
 
 interface EditableContentProps {
   html: string;
@@ -8,6 +9,7 @@ interface EditableContentProps {
   tagName?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'li';
   placeholder?: string;
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
+  transformOnBlur?: (value: string) => string;
 }
 
 export const EditableContent: React.FC<EditableContentProps> = ({
@@ -18,23 +20,26 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   tagName: Tag = 'span',
   placeholder,
   onKeyDown,
+  transformOnBlur,
 }) => {
   const ref = useRef<HTMLElement>(null);
   const lastHtmlRef = useRef(html);
 
-  // Initialize innerHTML on mount
-  useEffect(() => {
+  // Initialize innerHTML synchronously before paint
+  useLayoutEffect(() => {
     if (ref.current) {
-      ref.current.innerHTML = html;
-      lastHtmlRef.current = html;
+      const cleanHtml = sanitizeRichTextHtml(html);
+      ref.current.innerHTML = cleanHtml;
+      lastHtmlRef.current = cleanHtml;
     }
   }, []);
 
   // Update DOM ONLY when the value was changed externally (e.g. Undo, Redo, File Import)
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (ref.current && html !== lastHtmlRef.current) {
-      ref.current.innerHTML = html;
-      lastHtmlRef.current = html;
+      const cleanHtml = sanitizeRichTextHtml(html);
+      ref.current.innerHTML = cleanHtml;
+      lastHtmlRef.current = cleanHtml;
     }
   }, [html]);
 
@@ -58,6 +63,13 @@ export const EditableContent: React.FC<EditableContentProps> = ({
     if (currentHtml === '<br>' || currentHtml === '<div><br></div>' || currentHtml.trim() === '') {
       currentHtml = '';
       ref.current.innerHTML = '';
+    }
+    if (transformOnBlur && currentHtml) {
+      const transformed = sanitizeRichTextHtml(transformOnBlur(ref.current.textContent || ''));
+      if (transformed !== currentHtml) {
+        currentHtml = transformed;
+        ref.current.innerHTML = transformed;
+      }
     }
     lastHtmlRef.current = currentHtml;
     onChange(currentHtml);

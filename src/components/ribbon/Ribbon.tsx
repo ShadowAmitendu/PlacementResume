@@ -1,4 +1,31 @@
 import React, { useState } from 'react';
+import {
+  Button,
+  TabList,
+  Tab,
+  Toolbar,
+  ToolbarButton,
+  Tooltip,
+  tokens,
+  SelectTabEvent,
+  SelectTabData,
+} from '@fluentui/react-components';
+import {
+  DocumentTextFilled,
+  SaveRegular,
+  ArrowUndoRegular,
+  ArrowRedoRegular,
+  PrintRegular,
+  DocumentPdfRegular,
+  SearchRegular,
+  WeatherMoonRegular,
+  WeatherSunnyRegular,
+  ChevronUpRegular,
+  ChevronDownRegular,
+  CheckmarkCircleRegular,
+  ArrowSyncRegular,
+  WarningRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
 import { HomeTab } from './tabs/HomeTab';
 import { InsertTab } from './tabs/InsertTab';
@@ -6,22 +33,16 @@ import { LayoutTab } from './tabs/LayoutTab';
 import { DesignTab } from './tabs/DesignTab';
 import { FileTab } from './tabs/FileTab';
 import { ViewTab } from './tabs/ViewTab';
-import {
-  Save,
-  Undo2,
-  Redo2,
-  Printer,
-  Sparkles,
-  Moon,
-  Sun,
-  ChevronUp,
-  ChevronDown,
-  Search,
-  CheckCircle2,
-  FileText,
-} from 'lucide-react';
 
 export type RibbonTabType = 'file' | 'home' | 'insert' | 'layout' | 'design' | 'view';
+
+const MAIN_TABS: Array<{ id: Exclude<RibbonTabType, 'file'>; label: string }> = [
+  { id: 'home', label: 'Home' },
+  { id: 'insert', label: 'Insert' },
+  { id: 'layout', label: 'Layout' },
+  { id: 'design', label: 'Design' },
+  { id: 'view', label: 'View' },
+];
 
 export const Ribbon: React.FC = () => {
   const {
@@ -32,6 +53,7 @@ export const Ribbon: React.FC = () => {
     canRedo,
     isDarkMode,
     toggleDarkMode,
+    saveStatus,
     setIsPdfAiModalOpen,
     setIsFindReplaceModalOpen,
   } = useResume();
@@ -39,9 +61,16 @@ export const Ribbon: React.FC = () => {
   const [activeTab, setActiveTab] = useState<RibbonTabType>('home');
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
-  const handleTabClick = (tab: RibbonTabType) => {
+  const handleMainTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
+    const tab = data.value as RibbonTabType;
+    setActiveTab(tab);
+    if (isCollapsed) {
+      setIsCollapsed(false);
+    }
+  };
+
+  const handleTabToggle = (tab: RibbonTabType) => {
     if (activeTab === tab) {
-      // Toggle collapse on clicking active tab (Microsoft Office Ribbon behavior)
       setIsCollapsed((prev) => !prev);
     } else {
       setActiveTab(tab);
@@ -52,174 +81,226 @@ export const Ribbon: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-40 bg-(--ui-surface) border-b border-(--ui-border) select-none no-print shadow-xs backdrop-blur-md shrink-0">
-      {/* ── Top Mica / Fluent Title Bar ── */}
-      <div className="h-10 px-3 sm:px-4 flex items-center justify-between border-b border-(--ui-border)/60 bg-black/[0.02] dark:bg-white/[0.02]">
-        {/* Left: Fluent App Icon, Title & Quick Access Toolbar */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6.5 h-6.5 rounded-md bg-[#0f6cbd] dark:bg-[#2886de] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-              <FileText className="w-3.5 h-3.5" />
+    <header
+      className="sticky top-0 left-0 right-0 z-40 select-none no-print shrink-0"
+      style={{
+        backgroundColor: tokens.colorNeutralBackground2,
+        borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+      }}
+    >
+      {/* Top Word Title Bar & Quick Access Toolbar */}
+      <div
+        className="h-10 px-3 sm:px-4 flex items-center justify-between gap-2"
+        style={{
+          borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+        }}
+      >
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: tokens.colorBrandBackground,
+                color: tokens.colorNeutralForegroundOnBrand,
+              }}
+            >
+              <DocumentTextFilled fontSize={14} />
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-xs sm:text-sm text-foreground tracking-tight">
-                PlacementResume
+            <span
+              className="font-semibold text-xs sm:text-sm tracking-tight"
+              style={{ color: tokens.colorNeutralForeground1 }}
+            >
+              PlacementResume
+            </span>
+            <span
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] pl-1"
+              style={{
+                color:
+                  saveStatus === 'error'
+                    ? tokens.colorPaletteRedForeground1
+                    : tokens.colorNeutralForeground3,
+              }}
+              title={
+                saveStatus === 'error'
+                  ? 'Browser storage is full or blocked'
+                  : saveStatus === 'saving'
+                  ? 'Saving changes to browser storage'
+                  : 'All changes saved to browser storage'
+              }
+            >
+              {saveStatus === 'error' ? (
+                <WarningRegular fontSize={12} />
+              ) : saveStatus === 'saving' ? (
+                <ArrowSyncRegular fontSize={12} />
+              ) : (
+                <CheckmarkCircleRegular fontSize={12} />
+              )}
+              <span>
+                {saveStatus === 'error'
+                  ? 'Save failed'
+                  : saveStatus === 'saving'
+                  ? 'Saving...'
+                  : 'Saved'}
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-muted-foreground bg-black/[0.04] dark:bg-white/[0.06] px-1.5 py-0.5 rounded">
-                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
-                <span>Saved</span>
-              </span>
-            </div>
+            </span>
           </div>
 
-          <span className="w-px h-4 bg-(--ui-border) mx-0.5" />
-
-          {/* Quick Access Toolbar */}
-          <div className="flex items-center gap-0.5">
-            <button
-              type="button"
-              onClick={saveToBrowser}
-              title="Save to browser (Ctrl+S)"
-              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors"
-            >
-              <Save className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={undo}
-              disabled={!canUndo}
-              title="Undo (Ctrl+Z)"
-              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors"
-            >
-              <Undo2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={redo}
-              disabled={!canRedo}
-              title="Redo (Ctrl+Y)"
-              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground disabled:opacity-30 cursor-pointer transition-colors"
-            >
-              <Redo2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              title="Print / Save PDF (Ctrl+P)"
-              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-foreground cursor-pointer transition-colors"
-            >
-              <Printer className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPdfAiModalOpen(true)}
-              title="AI Resume Parser (PDF)"
-              className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] active:bg-black/[0.08] dark:active:bg-white/[0.12] text-[#0f6cbd] dark:text-[#2886de] cursor-pointer transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <Toolbar size="small" aria-label="Quick Access Toolbar">
+            <Tooltip content="Save to browser (Ctrl+S)" relationship="label">
+              <ToolbarButton
+                aria-label="Save"
+                icon={<SaveRegular />}
+                onClick={saveToBrowser}
+              />
+            </Tooltip>
+            <Tooltip content="Undo (Ctrl+Z)" relationship="label">
+              <ToolbarButton
+                aria-label="Undo"
+                icon={<ArrowUndoRegular />}
+                disabled={!canUndo}
+                onClick={undo}
+              />
+            </Tooltip>
+            <Tooltip content="Redo (Ctrl+Y)" relationship="label">
+              <ToolbarButton
+                aria-label="Redo"
+                icon={<ArrowRedoRegular />}
+                disabled={!canRedo}
+                onClick={redo}
+              />
+            </Tooltip>
+            <Tooltip content="Print or save PDF (Ctrl+P)" relationship="label">
+              <ToolbarButton
+                aria-label="Print"
+                icon={<PrintRegular />}
+                onClick={() => window.print()}
+              />
+            </Tooltip>
+            <Tooltip content="Import resume PDF" relationship="label">
+              <ToolbarButton
+                aria-label="Import PDF"
+                icon={<DocumentPdfRegular />}
+                onClick={() => setIsPdfAiModalOpen(true)}
+              />
+            </Tooltip>
+          </Toolbar>
         </div>
 
-        {/* Center: Microsoft 365 Tell Me / Search Bar */}
+        {/* Center: Search Bar */}
         <div className="hidden md:flex items-center">
-          <button
-            type="button"
+          <Button
+            appearance="outline"
+            size="small"
+            icon={<SearchRegular />}
             onClick={() => setIsFindReplaceModalOpen(true)}
-            className="fluent-btn w-64 lg:w-76 h-7 px-2.5 rounded-md bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.06] dark:hover:bg-white/[0.1] hover:border-primary/50 border border-(--ui-border) flex items-center justify-between text-xs text-muted-foreground transition-all cursor-pointer shadow-2xs focus-visible:ring-2 focus-visible:ring-primary"
-            title="Search and Replace across document (Ctrl+F)"
+            title="Find and replace (Ctrl+F)"
+            style={{
+              width: 260,
+              justifyContent: 'space-between',
+              backgroundColor: tokens.colorNeutralBackground1,
+              color: tokens.colorNeutralForeground3,
+              fontWeight: 400,
+              fontSize: 12,
+            }}
           >
-            <div className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5 text-muted-foreground" />
-              <span>Search, replace, or commands</span>
-            </div>
-            <kbd className="text-[10px] bg-black/[0.06] dark:bg-white/[0.1] px-1.5 py-0.2 rounded font-sans text-muted-foreground">
+            <span className="flex-1 text-left">Find and replace</span>
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded ml-2"
+              style={{
+                backgroundColor: tokens.colorNeutralBackground3,
+                color: tokens.colorNeutralForeground3,
+              }}
+            >
               Ctrl+F
-            </kbd>
-          </button>
+            </span>
+          </Button>
         </div>
 
-        {/* Right: Theme Toggle & Ribbon Collapse */}
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={toggleDarkMode}
-            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-foreground cursor-pointer transition-colors"
+        {/* Right: Appearance & Collapse Controls */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          <Tooltip
+            content={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            relationship="label"
           >
-            {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-[#0f6cbd]" />}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsCollapsed((prev) => !prev)}
-            title={isCollapsed ? 'Expand Ribbon' : 'Collapse Ribbon'}
-            className="fluent-btn p-1.5 rounded-md hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+            <ToolbarButton
+              aria-label="Toggle theme"
+              icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
+              onClick={toggleDarkMode}
+            />
+          </Tooltip>
+          <Tooltip
+            content={isCollapsed ? 'Expand ribbon' : 'Collapse ribbon'}
+            relationship="label"
           >
-            {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
-          </button>
+            <ToolbarButton
+              aria-label={isCollapsed ? 'Expand ribbon' : 'Collapse ribbon'}
+              icon={isCollapsed ? <ChevronDownRegular /> : <ChevronUpRegular />}
+              onClick={() => setIsCollapsed((prev) => !prev)}
+            />
+          </Tooltip>
         </div>
       </div>
 
-      {/* ── Ribbon Tabs Navigation Bar (Fluent TabList) ── */}
+      {/* Ribbon Tab Navigation Strip */}
       <nav
         aria-label="Ribbon Tabs"
-        className="flex items-center px-2 sm:px-4 bg-(--ui-surface) border-b border-(--ui-border) overflow-x-auto scrollbar-none flex-nowrap h-9 gap-1"
+        className="flex items-center px-2 sm:px-4 overflow-x-auto scrollbar-none flex-nowrap h-9 gap-1"
       >
-        {/* File Tab Button (Fluent Blue Accent) */}
-        <button
-          type="button"
-          onClick={() => handleTabClick('file')}
-          className={`fluent-btn h-7 px-3.5 text-xs font-semibold rounded transition-all cursor-pointer shrink-0 flex items-center justify-center ${activeTab === 'file'
-              ? 'bg-[#0f6cbd] text-white shadow-xs'
-              : 'text-[#0f6cbd] dark:text-[#2886de] hover:bg-primary/10 font-bold'
-            }`}
+        <Button
+          size="small"
+          appearance={activeTab === 'file' ? 'primary' : 'subtle'}
+          onClick={() => handleTabToggle('file')}
+          style={{
+            minWidth: 'auto',
+            padding: '0 12px',
+            height: 26,
+            fontWeight: 600,
+            fontSize: 12,
+            ...(activeTab !== 'file'
+              ? { color: tokens.colorBrandForeground1 }
+              : undefined),
+          }}
         >
           File
-        </button>
+        </Button>
 
-        {/* Main Ribbon Tabs */}
-        {(
-          [
-            { id: 'home', label: 'Home' },
-            { id: 'insert', label: 'Insert' },
-            { id: 'layout', label: 'Layout' },
-            { id: 'design', label: 'Design' },
-            { id: 'view', label: 'View' },
-          ] as const
-        ).map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
+        <TabList
+          selectedValue={activeTab === 'file' ? '' : activeTab}
+          onTabSelect={handleMainTabSelect}
+          size="small"
+          aria-label="Word Ribbon Tabs"
+        >
+          {MAIN_TABS.map((tab) => (
+            <Tab
               key={tab.id}
-              type="button"
-              onClick={() => handleTabClick(tab.id)}
-              className={`fluent-btn relative h-full px-3.5 text-xs font-medium transition-all cursor-pointer shrink-0 flex items-center justify-center rounded-t-sm ${isActive
-                  ? 'text-[#0f6cbd] dark:text-[#2886de] font-bold'
-                  : 'text-foreground/80 hover:text-foreground hover:bg-black/[0.03] dark:hover:bg-white/[0.05]'
-                }`}
+              value={tab.id}
+              onClick={() => {
+                if (activeTab === tab.id) {
+                  setIsCollapsed((prev) => !prev);
+                }
+              }}
+              style={{ fontSize: 12, fontWeight: activeTab === tab.id ? 600 : 400 }}
             >
-              <span>{tab.label}</span>
-              {/* Fluent Active Indicator Underline with smooth glide entrance */}
-              {isActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-[#0f6cbd] dark:bg-[#2886de] rounded-t-full animate-fluent-underline origin-center" />
-              )}
-            </button>
-          );
-        })}
+              {tab.label}
+            </Tab>
+          ))}
+        </TabList>
       </nav>
 
-      {/* ── Ribbon Content Panel (Fluent Collapsible Toolbar Body) ── */}
+      {/* Collapsible Fluent Command Toolbar Body */}
       <div
-        className={`fluent-ribbon-collapsible bg-(--ui-surface) border-b overflow-hidden ${
-          isCollapsed
-            ? 'max-h-0 opacity-0 border-transparent pointer-events-none'
-            : 'max-h-[96px] opacity-100 border-(--ui-border)/40'
-        }`}
+        className="fluent-ribbon-collapsible overflow-hidden"
+        style={{
+          maxHeight: isCollapsed ? 0 : 96,
+          opacity: isCollapsed ? 0 : 1,
+          pointerEvents: isCollapsed ? 'none' : 'auto',
+          backgroundColor: tokens.colorNeutralBackground1,
+          borderTop: isCollapsed ? 'none' : `1px solid ${tokens.colorNeutralStroke2}`,
+        }}
       >
         <div
           key={activeTab}
-          className="h-[92px] px-2 sm:px-3 overflow-x-auto scrollbar-none flex items-center animate-fluent-tab"
+          className="h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none flex items-center"
         >
           {activeTab === 'home' && <HomeTab />}
           {activeTab === 'insert' && <InsertTab />}

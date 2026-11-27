@@ -1,32 +1,57 @@
 import React from 'react';
+import {
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  tokens,
+} from '@fluentui/react-components';
+import { InfoRegular, DismissRegular } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { AlertCircle } from 'lucide-react';
 
 export const AlertModal: React.FC = () => {
   const { alertDialog, closeAlert } = useResume();
 
   return (
-    <Dialog open={alertDialog.isOpen} onOpenChange={(open) => !open && closeAlert()}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-primary shrink-0" />
-            <DialogTitle>{alertDialog.title || 'Notice'}</DialogTitle>
-          </div>
-        </DialogHeader>
-
-        <p className="text-sm text-(--ui-text) py-2 leading-relaxed">
-          {alertDialog.message}
-        </p>
-
-        <DialogFooter>
-          <Button size="sm" onClick={closeAlert} className="min-w-20">
-            OK
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+    <Dialog
+      open={alertDialog.isOpen}
+      onOpenChange={(_, data) => {
+        if (!data.open) closeAlert();
+      }}
+    >
+      <DialogSurface style={{ maxWidth: 400 }}>
+        <DialogBody>
+          <DialogTitle
+            action={
+              <Button
+                appearance="subtle"
+                size="small"
+                aria-label="Close"
+                icon={<DismissRegular />}
+                onClick={closeAlert}
+              />
+            }
+          >
+            <span className="flex items-center gap-2">
+              <InfoRegular style={{ color: tokens.colorBrandForeground1 }} />
+              <span>{alertDialog.title || 'Notice'}</span>
+            </span>
+          </DialogTitle>
+          <DialogContent>
+            <p className="text-sm leading-relaxed py-1" style={{ color: tokens.colorNeutralForeground1 }}>
+              {alertDialog.message}
+            </p>
+          </DialogContent>
+          <DialogActions>
+            <Button appearance="primary" onClick={closeAlert}>
+              OK
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
     </Dialog>
   );
 };

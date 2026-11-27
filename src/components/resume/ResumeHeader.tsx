@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
+import { CropRegular, DeleteRegular } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
 import { EditableContent } from './EditableContent';
 import { SocialLinks } from './SocialLinks';
-import { Trash2, Crop } from 'lucide-react';
 
 export const ResumeHeader: React.FC = () => {
-  const { resumeData, updateHeader, setPhoto, openCropModal } = useResume();
+  const { resumeData, updateHeader, setPhoto, openCropModal, showAlert } = useResume();
   const { fullName, degreeTitle, universityCompany } = resumeData.header;
   const photo = resumeData.meta.photo;
   const showPhoto = resumeData.meta.showPhoto ?? true;
@@ -14,8 +14,16 @@ export const ResumeHeader: React.FC = () => {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showAlert('Select a valid image file.', 'Unsupported file');
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
+    reader.onerror = () => {
+      showAlert('Failed to read the selected image file.', 'Read error');
+    };
     reader.onload = (ev) => {
       if (typeof ev.target?.result === 'string') {
         openCropModal(ev.target.result);
@@ -27,32 +35,34 @@ export const ResumeHeader: React.FC = () => {
 
   return (
     <div className={`header ${!showPhoto ? 'no-photo' : ''}`}>
-      {/* Profile Photo */}
       {showPhoto && (
         <div
-          className="photo-box cursor-pointer group/photo relative"
+          className="photo-box cursor-pointer relative"
           onClick={() => fileInputRef.current?.click()}
           role="button"
           tabIndex={0}
-          title="Click to upload or change profile photo"
+          title="Upload or change profile photo"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') fileInputRef.current?.click();
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
           }}
         >
           {photo ? (
             <>
               <img src={photo} alt="Profile" className="block w-full h-full object-cover" />
-              <div className="absolute top-1 right-1 opacity-0 group-hover/photo:opacity-100 flex items-center gap-1 transition-opacity no-print z-10">
+              <div className="photo-actions-pill absolute top-1 right-1 flex items-center gap-0.5 no-print z-10 bg-white/95 border border-neutral-300 rounded p-0.5 shadow-sm">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     openCropModal(photo);
                   }}
-                  title="Crop / adjust photo"
-                  className="bg-neutral-900/80 hover:bg-neutral-800 text-white rounded p-1 cursor-pointer transition-colors"
+                  title="Crop photo"
+                  className="hover:bg-neutral-100 text-neutral-800 rounded p-0.5 cursor-pointer flex items-center"
                 >
-                  <Crop className="w-3 h-3" />
+                  <CropRegular fontSize={12} />
                 </button>
                 <button
                   type="button"
@@ -61,9 +71,9 @@ export const ResumeHeader: React.FC = () => {
                     setPhoto(null);
                   }}
                   title="Remove photo"
-                  className="bg-neutral-900/80 hover:bg-destructive text-white rounded p-1 cursor-pointer transition-colors"
+                  className="hover:bg-red-50 text-neutral-800 hover:text-red-700 rounded p-0.5 cursor-pointer flex items-center"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <DeleteRegular fontSize={12} />
                 </button>
               </div>
             </>
@@ -84,7 +94,6 @@ export const ResumeHeader: React.FC = () => {
         </div>
       )}
 
-      {/* Details */}
       <div className="header-details">
         <EditableContent
           tagName="h1"

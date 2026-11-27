@@ -1,18 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { tokens } from '@fluentui/react-components';
+import {
+  AddRegular,
+  SubtractRegular,
+  TableCellsSplitRegular,
+  DeleteRegular,
+  ArrowResetRegular,
+  ArrowLeftRegular,
+  ArrowRightRegular,
+  ArrowUpRegular,
+  ArrowDownRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { TableSectionData } from '../../../types/resume';
+import { buildEqualColWidths, normalizeColWidths } from '../../../utils/tableWidths';
 import { EditableContent } from '../EditableContent';
-import {
-  Plus,
-  Minus,
-  Columns,
-  Trash2,
-  RotateCcw,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  ArrowDown,
-} from 'lucide-react';
 
 interface TableSectionProps {
   section: TableSectionData;
@@ -22,12 +24,91 @@ interface ContextMenuState {
   x: number;
   y: number;
   colIdx: number;
-  rowIdx: number; // -1 for th
+  rowIdx: number;
 }
+
+interface ColumnActionsPillProps {
+  colIdx: number;
+  colCount: number;
+  onAddLeft: () => void;
+  onDelete: () => void;
+  onAddRight: () => void;
+}
+
+const ColumnActionsPill: React.FC<ColumnActionsPillProps> = ({
+  colIdx,
+  colCount,
+  onAddLeft,
+  onDelete,
+  onAddRight,
+}) => {
+  const alignClass =
+    colIdx === 0
+      ? 'left-0'
+      : colIdx === colCount - 1
+      ? 'right-0'
+      : 'left-1/2 -translate-x-1/2';
+
+  return (
+    <div
+      className={`column-actions-pill absolute -top-5.5 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px] leading-none ${alignClass}`}
+      style={{
+        backgroundColor: '#ffffff',
+        color: '#242424',
+        border: '1px solid #d4d4d4',
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddLeft();
+        }}
+        title="Insert column left"
+        className="px-1.5 py-0.5 hover:bg-neutral-100 rounded flex items-center gap-0.5 cursor-pointer leading-none transition-colors"
+        style={{ color: '#242424' }}
+      >
+        <AddRegular fontSize={11} />
+        <span className="text-[10px] font-medium">Left</span>
+      </button>
+      {colCount > 1 && (
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          title="Delete column"
+          className="px-1.5 py-0.5 hover:bg-red-50 rounded flex items-center gap-0.5 cursor-pointer leading-none transition-colors"
+          style={{ color: '#c42b1c' }}
+        >
+          <DeleteRegular fontSize={11} />
+        </button>
+      )}
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onAddRight();
+        }}
+        title="Insert column right"
+        className="px-1.5 py-0.5 hover:bg-neutral-100 rounded flex items-center gap-0.5 cursor-pointer leading-none transition-colors"
+        style={{ color: '#242424' }}
+      >
+        <span className="text-[10px] font-medium">Right</span>
+        <AddRegular fontSize={11} />
+      </button>
+    </div>
+  );
+};
 
 export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
   const {
-    resumeData,
     addTableRow,
     deleteTableRow,
     addTableColumn,
@@ -43,7 +124,6 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
 
   const isProfile = section.variant === 'profile';
 
-  // Close context menu on outside click or escape
   useEffect(() => {
     if (!contextMenu) return;
     const handleOutsideClick = (e: MouseEvent) => {
@@ -72,49 +152,40 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
 
   const colCount = section.headers?.length || (section.rows[0] ? section.rows[0].length : 0);
 
-  // Compute active column widths as percentages summing to 100%
   const getActiveWidths = (): number[] => {
     if (colCount <= 0) return [];
     if (section.colWidths && section.colWidths.length === colCount) {
-      return section.colWidths;
+      return normalizeColWidths(section.colWidths);
     }
     if (isProfile && colCount === 2) {
       return [35, 65];
     }
-    const defaultWidth = Math.round((100 / colCount) * 10) / 10;
-    return Array(colCount).fill(defaultWidth);
+    return buildEqualColWidths(colCount);
   };
 
   const activeWidths = getActiveWidths();
 
-  // Reset column widths to auto/balanced distribution
   const handleResetWidths = () => {
     if (colCount <= 0) return;
     const balanced =
-      isProfile && colCount === 2
-        ? [35, 65]
-        : Array(colCount).fill(Math.round((100 / colCount) * 10) / 10);
+      isProfile && colCount === 2 ? [35, 65] : buildEqualColWidths(colCount);
     updateSection(section.id, { colWidths: balanced });
   };
 
-  // Draggable Column Resizer Handler
   const handleResizerMouseDown = (colIndex: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!tableRef.current) return;
     const table = tableRef.current;
-    const tableRect = table.getBoundingClientRect();
-    const tableWidth = tableRect.width;
+    const tableWidth = table.getBoundingClientRect().width;
     if (tableWidth <= 0) return;
 
-    // Account for canvas CSS scale zoom
-    const zoom = resumeData.meta.zoom || 1.0;
     const startX = e.clientX;
-
     const currentWidths = [...activeWidths];
     const startWidthA = currentWidths[colIndex];
     const startWidthB = currentWidths[colIndex + 1];
+    const pairTotal = Math.round((startWidthA + startWidthB) * 10) / 10;
 
     const resizerEl = e.currentTarget as HTMLElement;
     resizerEl.classList.add('resizing');
@@ -124,34 +195,24 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     let latestWidths = currentWidths;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      // Calculate delta in percentage coordinates
-      const deltaPx = (moveEvent.clientX - startX) / zoom;
-      const deltaPercent = (deltaPx / (tableWidth / zoom)) * 100;
+      // clientX delta and table.getBoundingClientRect().width are both in zoomed screen pixels
+      const deltaPercent = ((moveEvent.clientX - startX) / tableWidth) * 100;
 
-      // Minimum width constraint (at least 6% per column)
-      const minPercent = 6;
-      let newWidthA = startWidthA + deltaPercent;
-      let newWidthB = startWidthB - deltaPercent;
-
-      if (newWidthA < minPercent) {
-        newWidthA = minPercent;
-        newWidthB = startWidthA + startWidthB - minPercent;
-      } else if (newWidthB < minPercent) {
-        newWidthB = minPercent;
-        newWidthA = startWidthA + startWidthB - minPercent;
-      }
+      const minPercent = Math.min(6, pairTotal / 2);
+      const maxPercentA = Math.max(minPercent, pairTotal - minPercent);
+      const rawA = Math.min(maxPercentA, Math.max(minPercent, startWidthA + deltaPercent));
+      const newWidthA = Math.round(rawA * 10) / 10;
+      const newWidthB = Math.round((pairTotal - newWidthA) * 10) / 10;
 
       const next = [...currentWidths];
-      next[colIndex] = Math.round(newWidthA * 10) / 10;
-      next[colIndex + 1] = Math.round(newWidthB * 10) / 10;
+      next[colIndex] = newWidthA;
+      next[colIndex + 1] = newWidthB;
       latestWidths = next;
 
-      // Update <colgroup> <col> widths in DOM for butter-smooth 60fps dragging
       const colElements = table.querySelectorAll('colgroup col');
       if (colElements.length === next.length) {
-        next.forEach((w, i) => {
-          (colElements[i] as HTMLElement).style.width = `${w}%`;
-        });
+        (colElements[colIndex] as HTMLElement).style.width = `${newWidthA}%`;
+        (colElements[colIndex + 1] as HTMLElement).style.width = `${newWidthB}%`;
       }
     };
 
@@ -161,8 +222,6 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
-
-      // Persist column widths in state
       updateSection(section.id, { colWidths: latestWidths });
     };
 
@@ -171,9 +230,8 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
   };
 
   return (
-    <div className="relative group/table pt-5.5 print:pt-0">
+    <div className="relative pt-5 print:pt-0">
       <table ref={tableRef} className={tableClasses}>
-        {/* Column Group for robust percentage width distribution */}
         {colCount > 0 && (
           <colgroup>
             {activeWidths.map((widthPct, idx) => (
@@ -182,15 +240,13 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           </colgroup>
         )}
 
-        {/* Headers */}
         {section.headers && section.headers.length > 0 && (
           <thead>
             <tr>
               {section.headers.map((headerText, colIdx) => (
                 <th
                   key={colIdx}
-                  style={activeWidths[colIdx] ? { width: `${activeWidths[colIdx]}%` } : undefined}
-                  className="relative group/th"
+                  className="relative"
                   onContextMenu={(e) => {
                     e.preventDefault();
                     setContextMenu({
@@ -201,59 +257,13 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                     });
                   }}
                 >
-                  {/* Floating Column Action Pill */}
-                  <div
-                    className={`column-actions-pill absolute -top-6.5 opacity-0 group-hover/th:opacity-100 group-focus-within/th:opacity-100 transition-all duration-150 bg-neutral-900 text-white rounded shadow-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[10px] pointer-events-auto border border-neutral-700/80 ${
-                      colIdx === 0
-                        ? 'left-0'
-                        : colIdx === colCount - 1
-                        ? 'right-0'
-                        : 'left-1/2 -translate-x-1/2'
-                    }`}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addTableColumn(section.id, colIdx);
-                      }}
-                      title="Insert column to the left"
-                      className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center gap-0.5 cursor-pointer leading-none"
-                    >
-                      <Plus className="w-2.5 h-2.5 text-emerald-400" />
-                      <span className="text-[9px] font-semibold">Left</span>
-                    </button>
-                    {colCount > 1 && (
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteTableColumn(section.id, colIdx);
-                        }}
-                        title="Delete this column"
-                        className="px-1 py-0.5 hover:bg-red-950 active:bg-red-900 rounded text-red-300 hover:text-red-200 flex items-center gap-0.5 cursor-pointer leading-none"
-                      >
-                        <Trash2 className="w-2.5 h-2.5 text-red-400" />
-                        <span className="text-[9px] font-semibold">Del</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addTableColumn(section.id, colIdx + 1);
-                      }}
-                      title="Insert column to the right"
-                      className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center gap-0.5 cursor-pointer leading-none"
-                    >
-                      <Plus className="w-2.5 h-2.5 text-emerald-400" />
-                      <span className="text-[9px] font-semibold">Right</span>
-                    </button>
-                  </div>
+                  <ColumnActionsPill
+                    colIdx={colIdx}
+                    colCount={colCount}
+                    onAddLeft={() => addTableColumn(section.id, colIdx)}
+                    onDelete={() => deleteTableColumn(section.id, colIdx)}
+                    onAddRight={() => addTableColumn(section.id, colIdx + 1)}
+                  />
 
                   <EditableContent
                     tagName="span"
@@ -267,7 +277,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                       onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
                       onDoubleClick={handleResetWidths}
                       className="resizer no-print"
-                      title="Drag to resize column (Double-click to reset)"
+                      title="Drag to resize column (Double-click to balance)"
                     />
                   )}
                 </th>
@@ -276,19 +286,13 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           </thead>
         )}
 
-        {/* Table Body */}
         <tbody>
           {section.rows.map((row, rowIdx) => (
-            <tr key={rowIdx} className="group/row relative">
+            <tr key={rowIdx}>
               {row.map((cellText, colIdx) => (
                 <td
                   key={colIdx}
-                  style={
-                    !section.headers && activeWidths[colIdx]
-                      ? { width: `${activeWidths[colIdx]}%` }
-                      : undefined
-                  }
-                  className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative group/td`}
+                  className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     setContextMenu({
@@ -299,60 +303,14 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                     });
                   }}
                 >
-                  {/* Floating Column Action Pill for headerless tables (on first row) */}
                   {!section.headers && rowIdx === 0 && (
-                    <div
-                      className={`column-actions-pill absolute -top-6.5 opacity-0 group-hover/td:opacity-100 group-focus-within/td:opacity-100 transition-all duration-150 bg-neutral-900 text-white rounded shadow-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[10px] pointer-events-auto border border-neutral-700/80 ${
-                        colIdx === 0
-                          ? 'left-0'
-                          : colIdx === colCount - 1
-                          ? 'right-0'
-                          : 'left-1/2 -translate-x-1/2'
-                      }`}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addTableColumn(section.id, colIdx);
-                        }}
-                        title="Insert column to the left"
-                        className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center gap-0.5 cursor-pointer leading-none"
-                      >
-                        <Plus className="w-2.5 h-2.5 text-emerald-400" />
-                        <span className="text-[9px] font-semibold">Left</span>
-                      </button>
-                      {colCount > 1 && (
-                        <button
-                          type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteTableColumn(section.id, colIdx);
-                          }}
-                          title="Delete this column"
-                          className="px-1 py-0.5 hover:bg-red-950 active:bg-red-900 rounded text-red-300 hover:text-red-200 flex items-center gap-0.5 cursor-pointer leading-none"
-                        >
-                          <Trash2 className="w-2.5 h-2.5 text-red-400" />
-                          <span className="text-[9px] font-semibold">Del</span>
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addTableColumn(section.id, colIdx + 1);
-                        }}
-                        title="Insert column to the right"
-                        className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center gap-0.5 cursor-pointer leading-none"
-                      >
-                        <Plus className="w-2.5 h-2.5 text-emerald-400" />
-                        <span className="text-[9px] font-semibold">Right</span>
-                      </button>
-                    </div>
+                    <ColumnActionsPill
+                      colIdx={colIdx}
+                      colCount={colCount}
+                      onAddLeft={() => addTableColumn(section.id, colIdx)}
+                      onDelete={() => deleteTableColumn(section.id, colIdx)}
+                      onAddRight={() => addTableColumn(section.id, colIdx + 1)}
+                    />
                   )}
 
                   <EditableContent
@@ -363,10 +321,14 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                     className="block w-full"
                   />
 
-                  {/* Floating Row Actions (hovering on the last column reveals row buttons outside the table) */}
                   {colIdx === row.length - 1 && (
                     <div
-                      className="row-actions-pill absolute -right-9 top-1/2 -translate-y-1/2 opacity-0 group-hover/td:opacity-100 group-focus-within/td:opacity-100 transition-all duration-150 bg-neutral-900 text-white rounded shadow-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[10px] pointer-events-auto border border-neutral-700/80"
+                      className="row-actions-pill absolute -right-10 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
+                      style={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #d4d4d4',
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+                      }}
                       onMouseDown={(e) => e.stopPropagation()}
                     >
                       <button
@@ -377,9 +339,10 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                           addTableRow(section.id, rowIdx + 1);
                         }}
                         title="Insert row below"
-                        className="px-1 py-0.5 hover:bg-neutral-800 active:bg-neutral-700 rounded text-neutral-200 hover:text-white flex items-center cursor-pointer leading-none"
+                        className="p-1 hover:bg-neutral-100 rounded flex items-center cursor-pointer leading-none transition-colors"
+                        style={{ color: '#242424' }}
                       >
-                        <Plus className="w-2.5 h-2.5 text-emerald-400" />
+                        <AddRegular fontSize={12} />
                       </button>
                       {section.rows.length > 1 && (
                         <button
@@ -389,22 +352,22 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                             e.stopPropagation();
                             deleteTableRow(section.id, rowIdx);
                           }}
-                          title="Delete this row"
-                          className="px-1 py-0.5 hover:bg-red-950 active:bg-red-900 rounded text-red-300 hover:text-red-200 flex items-center cursor-pointer leading-none"
+                          title="Delete row"
+                          className="p-1 hover:bg-red-50 rounded flex items-center cursor-pointer leading-none transition-colors"
+                          style={{ color: '#c42b1c' }}
                         >
-                          <Trash2 className="w-2.5 h-2.5 text-red-400" />
+                          <DeleteRegular fontSize={12} />
                         </button>
                       )}
                     </div>
                   )}
 
-                  {/* For headerless tables, place resizer handles on the first row */}
                   {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
                     <div
                       onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
                       onDoubleClick={handleResetWidths}
                       className="resizer no-print"
-                      title="Drag to resize column (Double-click to reset)"
+                      title="Drag to resize column (Double-click to balance)"
                     />
                   )}
                 </td>
@@ -414,171 +377,184 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
         </tbody>
       </table>
 
-      {/* Table Action Controls */}
+      {/* Monochrome Subtle Table Controls */}
       <div className="table-controls no-print">
         <button
           type="button"
           onClick={() => addTableRow(section.id)}
-          className="add-btn"
-          title="Add a row at the end"
+          title="Add row at end"
         >
-          <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+          <AddRegular fontSize={12} />
           <span>Row</span>
         </button>
         <button
           type="button"
           onClick={() => deleteTableRow(section.id)}
           className="del-btn"
-          title="Delete the last row"
+          title="Delete last row"
         >
-          <Minus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+          <SubtractRegular fontSize={12} />
           <span>Row</span>
         </button>
         <button
           type="button"
           onClick={() => addTableColumn(section.id)}
-          className="add-btn bg-cyan-700 hover:bg-cyan-800"
-          title="Add a column at the end"
+          title="Add column at end"
         >
-          <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
-          <span>Col</span>
+          <AddRegular fontSize={12} />
+          <span>Column</span>
         </button>
         <button
           type="button"
           onClick={() => deleteTableColumn(section.id)}
-          className="del-btn bg-amber-600 hover:bg-amber-700"
-          title="Delete the last column"
+          className="del-btn"
+          title="Delete last column"
         >
-          <Minus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
-          <span>Col</span>
+          <SubtractRegular fontSize={12} />
+          <span>Column</span>
         </button>
         <button
           type="button"
           onClick={() => toggleTableBorders(section.id)}
-          className={`toggle-border-btn ${
-            section.showColBorders ? 'bg-primary text-primary-foreground' : ''
-          }`}
-          title="Toggle vertical column lines"
+          className={section.showColBorders ? 'is-active' : ''}
+          title="Toggle vertical column borders"
         >
-          <Columns className="w-3.5 h-3.5 shrink-0" />
-          <span>Col Lines</span>
+          <TableCellsSplitRegular fontSize={12} />
+          <span>Borders</span>
         </button>
         <button
           type="button"
           onClick={handleResetWidths}
-          className="toggle-border-btn bg-neutral-600 hover:bg-neutral-700"
-          title="Reset and equalize column widths"
+          title="Equalize column widths"
         >
-          <RotateCcw className="w-3.5 h-3.5 shrink-0" />
-          <span>Auto Width</span>
+          <ArrowResetRegular fontSize={12} />
+          <span>Balance</span>
         </button>
       </div>
 
-      {/* Custom Context Menu on Right Click */}
+      {/* Fluent Right-Click Context Menu */}
       {contextMenu && (
         <div
           ref={contextMenuRef}
           style={{
             top: Math.min(contextMenu.y, window.innerHeight - 260),
             left: Math.min(contextMenu.x, window.innerWidth - 210),
+            backgroundColor: tokens.colorNeutralBackground1,
+            color: tokens.colorNeutralForeground1,
+            border: `1px solid ${tokens.colorNeutralStroke1}`,
+            boxShadow: tokens.shadow16,
           }}
-          className="fixed z-50 min-w-[190px] bg-neutral-900 text-neutral-100 border border-neutral-700 rounded-md shadow-2xl py-1 text-xs select-none no-print animate-in fade-in-50 zoom-in-95"
+          className="fixed z-50 min-w-47.5 rounded-md py-1 text-xs select-none no-print"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-3 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+          <div
+            className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: tokens.colorNeutralForeground3 }}
+          >
             Column {contextMenu.colIdx + 1}
           </div>
           <button
             type="button"
-            className="w-full text-left px-3 py-1.5 hover:bg-neutral-800 active:bg-neutral-700 flex items-center gap-2 cursor-pointer text-neutral-200 hover:text-white"
+            className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
             onClick={() => {
               addTableColumn(section.id, contextMenu.colIdx);
               setContextMenu(null);
             }}
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
+            <ArrowLeftRegular fontSize={14} />
             <span>Insert column left</span>
           </button>
           <button
             type="button"
-            className="w-full text-left px-3 py-1.5 hover:bg-neutral-800 active:bg-neutral-700 flex items-center gap-2 cursor-pointer text-neutral-200 hover:text-white"
+            className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
             onClick={() => {
               addTableColumn(section.id, contextMenu.colIdx + 1);
               setContextMenu(null);
             }}
           >
-            <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+            <ArrowRightRegular fontSize={14} />
             <span>Insert column right</span>
           </button>
           {colCount > 1 && (
             <button
               type="button"
-              className="w-full text-left px-3 py-1.5 hover:bg-red-950 active:bg-red-900 text-red-300 hover:text-red-200 flex items-center gap-2 cursor-pointer"
+              className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/50 flex items-center gap-2 cursor-pointer"
+              style={{ color: tokens.colorPaletteRedForeground1 }}
               onClick={() => {
                 deleteTableColumn(section.id, contextMenu.colIdx);
                 setContextMenu(null);
               }}
             >
-              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+              <DeleteRegular fontSize={14} />
               <span>Delete column</span>
             </button>
           )}
 
           {contextMenu.rowIdx >= 0 && (
             <>
-              <div className="h-px bg-neutral-800 my-1" />
-              <div className="px-3 py-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+              <div
+                className="h-px my-1"
+                style={{ backgroundColor: tokens.colorNeutralStroke2 }}
+              />
+              <div
+                className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                style={{ color: tokens.colorNeutralForeground3 }}
+              >
                 Row {contextMenu.rowIdx + 1}
               </div>
               <button
                 type="button"
-                className="w-full text-left px-3 py-1.5 hover:bg-neutral-800 active:bg-neutral-700 flex items-center gap-2 cursor-pointer text-neutral-200 hover:text-white"
+                className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
                 onClick={() => {
                   addTableRow(section.id, contextMenu.rowIdx);
                   setContextMenu(null);
                 }}
               >
-                <ArrowUp className="w-3.5 h-3.5 text-emerald-400" />
+                <ArrowUpRegular fontSize={14} />
                 <span>Insert row above</span>
               </button>
               <button
                 type="button"
-                className="w-full text-left px-3 py-1.5 hover:bg-neutral-800 active:bg-neutral-700 flex items-center gap-2 cursor-pointer text-neutral-200 hover:text-white"
+                className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
                 onClick={() => {
                   addTableRow(section.id, contextMenu.rowIdx + 1);
                   setContextMenu(null);
                 }}
               >
-                <ArrowDown className="w-3.5 h-3.5 text-emerald-400" />
+                <ArrowDownRegular fontSize={14} />
                 <span>Insert row below</span>
               </button>
               {section.rows.length > 1 && (
                 <button
                   type="button"
-                  className="w-full text-left px-3 py-1.5 hover:bg-red-950 active:bg-red-900 text-red-300 hover:text-red-200 flex items-center gap-2 cursor-pointer"
+                  className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/50 flex items-center gap-2 cursor-pointer"
+                  style={{ color: tokens.colorPaletteRedForeground1 }}
                   onClick={() => {
                     deleteTableRow(section.id, contextMenu.rowIdx);
                     setContextMenu(null);
                   }}
                 >
-                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                  <DeleteRegular fontSize={14} />
                   <span>Delete row</span>
                 </button>
               )}
             </>
           )}
 
-          <div className="h-px bg-neutral-800 my-1" />
+          <div
+            className="h-px my-1"
+            style={{ backgroundColor: tokens.colorNeutralStroke2 }}
+          />
           <button
             type="button"
-            className="w-full text-left px-3 py-1.5 hover:bg-neutral-800 active:bg-neutral-700 flex items-center gap-2 cursor-pointer text-neutral-200 hover:text-white"
+            className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
             onClick={() => {
               handleResetWidths();
               setContextMenu(null);
             }}
           >
-            <RotateCcw className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Reset & equalize widths</span>
+            <ArrowResetRegular fontSize={14} />
+            <span>Balance column widths</span>
           </button>
         </div>
       )}

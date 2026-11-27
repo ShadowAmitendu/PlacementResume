@@ -1,7 +1,18 @@
 import React from 'react';
+import {
+  Dropdown,
+  Option,
+  OptionGroup,
+  SwatchPicker,
+  ColorSwatch,
+  Tooltip,
+  Label,
+  tokens,
+} from '@fluentui/react-components';
+import { TextBulletListLtrRegular, TextFontRegular } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { THEMES, SECTION_MARKERS, FONT_OPTIONS } from '../../../constants/themes';
-import { Palette, ListFilter, Type } from 'lucide-react';
+import { RibbonGroup } from '../RibbonGroup';
 
 export const DesignTab: React.FC = () => {
   const { resumeData, setTheme, setMarker, setFont } = useResume();
@@ -9,90 +20,101 @@ export const DesignTab: React.FC = () => {
   const currentMarker = resumeData.meta.marker;
   const currentFont = resumeData.meta.font;
 
+  const selectedMarkerLabel =
+    SECTION_MARKERS.find((m) => m.value === currentMarker)?.label || 'Marker';
+  const selectedFontLabel =
+    FONT_OPTIONS.flatMap((g) => g.options).find((o) => o.value === currentFont)?.label ||
+    'Document Font';
+
   return (
-    <div className="flex items-stretch h-full gap-1.5 sm:gap-2.5 py-1 px-1 overflow-x-auto scrollbar-none flex-nowrap">
-      {/* ── Document Color Theme Swatches ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex items-center gap-1.5 my-auto">
-          {Object.values(THEMES).map((theme) => {
-            const isActive = currentTheme === theme.name;
-            return (
-              <button
-                key={theme.name}
-                type="button"
-                onClick={() => setTheme(theme.name)}
-                title={theme.label}
+    <div className="flex items-stretch h-full gap-1 overflow-x-auto scrollbar-none flex-nowrap">
+      {/* Document Color Themes */}
+      <RibbonGroup label="Accent theme">
+        <SwatchPicker
+          aria-label="Document accent color theme"
+          size="small"
+          shape="circular"
+          spacing="small"
+          selectedValue={currentTheme}
+          onSelectionChange={(_, data) => {
+            if (data.selectedValue) setTheme(data.selectedValue);
+          }}
+        >
+          {Object.values(THEMES).map((theme) => (
+            <Tooltip key={theme.name} content={theme.label} relationship="label">
+              <ColorSwatch
+                value={theme.name}
+                color={theme.color}
                 aria-label={theme.label}
-                style={{ backgroundColor: theme.color }}
-                className={`fluent-btn w-6 h-6 rounded-full cursor-pointer transition-all hover:scale-115 border-2 ${isActive
-                    ? 'border-foreground shadow-sm ring-2 ring-primary/40 scale-110'
-                    : 'border-transparent hover:opacity-90'
-                  }`}
               />
-            );
-          })}
-        </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none flex items-center justify-center gap-1">
-          <Palette className="w-2.5 h-2.5" />
-          <span>Color Themes</span>
-        </span>
-      </div>
+            </Tooltip>
+          ))}
+        </SwatchPicker>
+      </RibbonGroup>
 
-      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
-
-      {/* ── Section Marker Bullets ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex flex-col gap-1 my-auto">
-          <label className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-            <ListFilter className="w-3.5 h-3.5 text-primary" />
-            <span>Section Marker</span>
-          </label>
-          <select
-            value={currentMarker}
-            onChange={(e) => setMarker(e.target.value)}
-            className="h-6.5 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-32 shadow-2xs"
+      {/* Section Marker Bullets */}
+      <RibbonGroup label="Headings">
+        <div className="flex flex-col gap-1">
+          <Label
+            size="small"
+            className="flex items-center gap-1"
+            style={{ color: tokens.colorNeutralForeground2, fontSize: 11 }}
+          >
+            <TextBulletListLtrRegular fontSize={13} />
+            <span>Section marker</span>
+          </Label>
+          <Dropdown
+            aria-label="Section heading marker"
+            size="small"
+            value={selectedMarkerLabel}
+            selectedOptions={[currentMarker]}
+            onOptionSelect={(_, data) => {
+              if (data.optionValue !== undefined) setMarker(data.optionValue);
+            }}
+            style={{ minWidth: 145 }}
           >
             {SECTION_MARKERS.map((m) => (
-              <option key={m.value} value={m.value}>
+              <Option key={m.value || 'none'} value={m.value}>
                 {m.label}
-              </option>
+              </Option>
             ))}
-          </select>
+          </Dropdown>
         </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
-          Bullets &amp; Markers
-        </span>
-      </div>
+      </RibbonGroup>
 
-      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
-
-      {/* ── Base Font Family ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex flex-col gap-1 my-auto">
-          <label className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-            <Type className="w-3.5 h-3.5 text-primary" />
-            <span>Document Font</span>
-          </label>
-          <select
-            value={currentFont}
-            onChange={(e) => setFont(e.target.value)}
-            className="h-6.5 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-40 truncate shadow-2xs"
+      {/* Base Font Family */}
+      <RibbonGroup label="Typography" showDivider={false}>
+        <div className="flex flex-col gap-1">
+          <Label
+            size="small"
+            className="flex items-center gap-1"
+            style={{ color: tokens.colorNeutralForeground2, fontSize: 11 }}
+          >
+            <TextFontRegular fontSize={13} />
+            <span>Document font</span>
+          </Label>
+          <Dropdown
+            aria-label="Document base font"
+            size="small"
+            value={selectedFontLabel}
+            selectedOptions={[currentFont]}
+            onOptionSelect={(_, data) => {
+              if (data.optionValue) setFont(data.optionValue);
+            }}
+            style={{ minWidth: 185 }}
           >
             {FONT_OPTIONS.map((group) => (
-              <optgroup key={group.group} label={group.group}>
+              <OptionGroup key={group.group} label={group.group}>
                 {group.options.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
+                  <Option key={opt.value} value={opt.value}>
                     {opt.label}
-                  </option>
+                  </Option>
                 ))}
-              </optgroup>
+              </OptionGroup>
             ))}
-          </select>
+          </Dropdown>
         </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
-          Typography
-        </span>
-      </div>
+      </RibbonGroup>
     </div>
   );
 };

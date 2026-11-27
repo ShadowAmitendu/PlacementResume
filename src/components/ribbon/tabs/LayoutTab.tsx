@@ -1,115 +1,152 @@
 import React from 'react';
+import { Dropdown, Option, Switch, Label, tokens } from '@fluentui/react-components';
+import {
+  RulerRegular,
+  TextLineSpacingRegular,
+  TableRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import {
   MARGIN_OPTIONS,
   LINE_HEIGHT_OPTIONS,
   TABLE_STYLES,
 } from '../../../constants/themes';
-import { Switch } from '../../ui/switch';
-import { Columns3, AlignVerticalSpaceAround, Table2, Sparkles } from 'lucide-react';
+import { RibbonGroup } from '../RibbonGroup';
 
 export const LayoutTab: React.FC = () => {
   const { resumeData, updateMeta, setTableStyle } = useResume();
   const { margin, lineHeight, tableStyle } = resumeData.meta;
   const fitSignatureToPage = resumeData.meta.fitSignatureToPage ?? true;
 
+  const activeMargin = margin || 'normal';
+  const activeLineHeight = lineHeight || 'normal';
+
+  const selectedMarginLabel =
+    MARGIN_OPTIONS.find((o) => o.value === activeMargin)?.label || 'Normal';
+  const selectedLineHeightLabel =
+    LINE_HEIGHT_OPTIONS.find((o) => o.value === activeLineHeight)?.label || 'Normal';
+  const selectedTableStyleLabel =
+    TABLE_STYLES.find((s) => s.value === tableStyle)?.label || 'Standard Grid';
+
   return (
-    <div className="flex items-stretch h-full gap-1.5 sm:gap-2.5 py-1 px-1 overflow-x-auto scrollbar-none flex-nowrap">
-      {/* ── Page Setup Group (Margins & Spacing) ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex items-center gap-3 my-auto">
-          {/* Margins */}
+    <div className="flex items-stretch h-full gap-1 overflow-x-auto scrollbar-none flex-nowrap">
+      {/* Page Setup Group */}
+      <RibbonGroup label="Page setup">
+        <div className="flex items-center gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-              <Columns3 className="w-3.5 h-3.5 text-primary" />
+            <Label
+              size="small"
+              className="flex items-center gap-1"
+              style={{ color: tokens.colorNeutralForeground2, fontSize: 11 }}
+            >
+              <RulerRegular fontSize={13} />
               <span>Margins</span>
-            </label>
-            <select
-              value={margin || 'normal'}
-              onChange={(e) => updateMeta({ margin: e.target.value as any })}
-              className="h-6.5 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-28 shadow-2xs"
+            </Label>
+            <Dropdown
+              aria-label="Page margins"
+              size="small"
+              value={selectedMarginLabel}
+              selectedOptions={[activeMargin]}
+              onOptionSelect={(_, data) => {
+                if (data.optionValue) {
+                  updateMeta({ margin: data.optionValue as 'compact' | 'normal' | 'moderate' | 'wide' });
+                }
+              }}
+              style={{ minWidth: 136 }}
             >
               {MARGIN_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+                <Option key={opt.value} value={opt.value}>
                   {opt.label}
-                </option>
+                </Option>
               ))}
-            </select>
+            </Dropdown>
           </div>
 
-          {/* Line Spacing */}
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-              <AlignVerticalSpaceAround className="w-3.5 h-3.5 text-primary" />
-              <span>Line Spacing</span>
-            </label>
-            <select
-              value={lineHeight || 'normal'}
-              onChange={(e) => updateMeta({ lineHeight: e.target.value as any })}
-              className="h-6.5 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-28 shadow-2xs"
+            <Label
+              size="small"
+              className="flex items-center gap-1"
+              style={{ color: tokens.colorNeutralForeground2, fontSize: 11 }}
+            >
+              <TextLineSpacingRegular fontSize={13} />
+              <span>Line spacing</span>
+            </Label>
+            <Dropdown
+              aria-label="Line spacing"
+              size="small"
+              value={selectedLineHeightLabel}
+              selectedOptions={[activeLineHeight]}
+              onOptionSelect={(_, data) => {
+                if (data.optionValue) {
+                  updateMeta({ lineHeight: data.optionValue as 'tight' | 'normal' | 'relaxed' });
+                }
+              }}
+              style={{ minWidth: 154 }}
             >
               {LINE_HEIGHT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+                <Option key={opt.value} value={opt.value}>
                   {opt.label}
-                </option>
+                </Option>
               ))}
-            </select>
+            </Dropdown>
           </div>
         </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
-          Page Setup
-        </span>
-      </div>
+      </RibbonGroup>
 
-      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
-
-      {/* ── Tables Group ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex flex-col gap-1 my-auto">
-          <label className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
-            <Table2 className="w-3.5 h-3.5 text-primary" />
-            <span>Table Style Preset</span>
-          </label>
-          <select
-            value={tableStyle}
-            onChange={(e) => setTableStyle(e.target.value)}
-            className="h-6.5 text-xs px-2 rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) font-medium cursor-pointer focus:outline-none focus:border-primary w-34 shadow-2xs"
+      {/* Tables Group */}
+      <RibbonGroup label="Tables">
+        <div className="flex flex-col gap-1">
+          <Label
+            size="small"
+            className="flex items-center gap-1"
+            style={{ color: tokens.colorNeutralForeground2, fontSize: 11 }}
+          >
+            <TableRegular fontSize={13} />
+            <span>Table preset</span>
+          </Label>
+          <Dropdown
+            aria-label="Table style preset"
+            size="small"
+            value={selectedTableStyleLabel}
+            selectedOptions={[tableStyle]}
+            onOptionSelect={(_, data) => {
+              if (data.optionValue) setTableStyle(data.optionValue);
+            }}
+            style={{ minWidth: 158 }}
           >
             {TABLE_STYLES.map((st) => (
-              <option key={st.value} value={st.value}>
+              <Option key={st.value} value={st.value}>
                 {st.label}
-              </option>
+              </Option>
             ))}
-          </select>
+          </Dropdown>
         </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
-          Tables
-        </span>
-      </div>
+      </RibbonGroup>
 
-      <div className="w-px h-14 my-auto bg-(--ui-border) shrink-0" />
-
-      {/* ── Page Fit Group ── */}
-      <div className="flex flex-col justify-between shrink-0 px-1 py-0.5">
-        <div className="flex items-center gap-2.5 my-auto">
+      {/* Auto-Fit Group */}
+      <RibbonGroup label="Spacing fit" showDivider={false}>
+        <div className="flex items-center gap-2">
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-foreground flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Fit Signature to 1 Page</span>
+            <span
+              className="text-xs font-medium"
+              style={{ color: tokens.colorNeutralForeground1 }}
+            >
+              Fit signature to 1 page
             </span>
-            <span className="text-[10px] text-muted-foreground">
-              Auto-compresses vertical spacing if content overflows
+            <span
+              className="text-[11px]"
+              style={{ color: tokens.colorNeutralForeground3 }}
+            >
+              Tightens vertical spacing when content nears page end
             </span>
           </div>
           <Switch
+            aria-label="Fit signature to 1 page"
             checked={fitSignatureToPage}
-            onCheckedChange={(checked) => updateMeta({ fitSignatureToPage: checked })}
+            onChange={(_, data) => updateMeta({ fitSignatureToPage: data.checked })}
           />
         </div>
-        <span className="text-[10px] font-medium text-muted-foreground select-none text-center">
-          Auto-Fit Spacing
-        </span>
-      </div>
+      </RibbonGroup>
     </div>
   );
 };

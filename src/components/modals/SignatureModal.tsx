@@ -1,13 +1,31 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import {
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Slider,
+  Checkbox,
+  Field,
+  tokens,
+} from '@fluentui/react-components';
+import {
+  SignatureRegular,
+  ArrowUploadRegular,
+  CheckmarkRegular,
+  ArrowDownloadRegular,
+  DismissRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
-import { Button } from '../ui/button';
+import { THEMES } from '../../constants/themes';
 import {
   processSignatureImage,
   SignatureProcessOptions,
   ProcessedSignatureResult,
 } from '../../utils/signatureProcessor';
-import { Upload, PenTool, Check, Download } from 'lucide-react';
 
 export const SignatureModal: React.FC = () => {
   const {
@@ -16,13 +34,15 @@ export const SignatureModal: React.FC = () => {
     resumeData,
     updateDeclaration,
     showToast,
+    showAlert,
   } = useResume();
+
+  const activeThemeColor = THEMES[resumeData.meta.theme]?.color || '#000000';
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [sourceImg, setSourceImg] = useState<HTMLImageElement | null>(null);
   const [processed, setProcessed] = useState<ProcessedSignatureResult | null>(null);
 
-  // Tuning options
   const [threshold, setThreshold] = useState<number>(195);
   const [contrast, setContrast] = useState<number>(1.7);
   const [smoothness, setSmoothness] = useState<number>(2);
@@ -30,16 +50,6 @@ export const SignatureModal: React.FC = () => {
   const [customColor, setCustomColor] = useState<string>('#000000');
   const [autoCrop, setAutoCrop] = useState<boolean>(true);
 
-  // Reset or initialize when modal opens
-  useEffect(() => {
-    if (!isSignatureModalOpen) {
-      // Keep state or reset if desired
-    } else if (!sourceImg && resumeData.declaration.signatureImage) {
-      // If resume already has a signature image, we could offer editing it or uploading new
-    }
-  }, [isSignatureModalOpen, sourceImg, resumeData.declaration.signatureImage]);
-
-  // Re-process signature whenever image or settings change
   const runProcessing = useCallback(() => {
     if (!sourceImg) return;
     try {
@@ -49,7 +59,7 @@ export const SignatureModal: React.FC = () => {
         smoothness,
         inkColor,
         customColor,
-        themeColor: '#0056b3',
+        themeColor: activeThemeColor,
         autoCrop,
       };
       const result = processSignatureImage(sourceImg, options);
@@ -57,7 +67,7 @@ export const SignatureModal: React.FC = () => {
     } catch (err) {
       console.error('Signature processing failed', err);
     }
-  }, [sourceImg, threshold, contrast, smoothness, inkColor, customColor, autoCrop]);
+  }, [sourceImg, threshold, contrast, smoothness, inkColor, customColor, activeThemeColor, autoCrop]);
 
   useEffect(() => {
     runProcessing();
@@ -66,13 +76,24 @@ export const SignatureModal: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showAlert('Select a valid image file.', 'Unsupported file');
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
+    reader.onerror = () => {
+      showAlert('Failed to read the selected signature file.', 'Read error');
+    };
     reader.onload = (ev) => {
       const url = ev.target?.result as string;
       const img = new Image();
       img.onload = () => {
         setSourceImg(img);
+      };
+      img.onerror = () => {
+        showAlert('Could not decode the selected image.', 'Invalid image');
       };
       img.src = url;
     };
@@ -83,7 +104,7 @@ export const SignatureModal: React.FC = () => {
   const handleApply = () => {
     if (!processed) return;
     updateDeclaration({ signatureImage: processed.pngDataUrl });
-    showToast('Signature applied to resume!');
+    showToast('Signature applied to resume');
     setIsSignatureModalOpen(false);
   };
 
@@ -113,257 +134,258 @@ export const SignatureModal: React.FC = () => {
   };
 
   return (
-    <Dialog open={isSignatureModalOpen} onOpenChange={setIsSignatureModalOpen}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <PenTool className="w-5 h-5 text-primary shrink-0" />
-            <DialogTitle>Signature Cleaner & Vectorizer</DialogTitle>
-          </div>
-          <p className="text-xs text-(--ui-text-dim)">
-            Upload a photo of your handwritten signature. Paper shadows and shading are removed to produce a crisp, transparent vector signature.
-          </p>
-        </DialogHeader>
-
-        {!sourceImg ? (
-          /* Upload State */
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-(--ui-border) hover:border-primary rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer bg-(--ui-surface2)/50 hover:bg-(--ui-surface2) transition-colors text-center"
+    <Dialog
+      open={isSignatureModalOpen}
+      onOpenChange={(_, data) => setIsSignatureModalOpen(data.open)}
+    >
+      <DialogSurface style={{ maxWidth: 580 }}>
+        <DialogBody>
+          <DialogTitle
+            action={
+              <Button
+                appearance="subtle"
+                size="small"
+                aria-label="Close"
+                icon={<DismissRegular />}
+                onClick={() => setIsSignatureModalOpen(false)}
+              />
+            }
           >
-            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-              <Upload className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-(--ui-text)">
-                Click to upload photo of your handwritten signature
+            <span className="flex items-center gap-2">
+              <SignatureRegular style={{ color: tokens.colorBrandForeground1 }} />
+              <span>Clean handwritten signature</span>
+            </span>
+          </DialogTitle>
+
+          <DialogContent>
+            <div className="space-y-4 py-1">
+              <p className="text-xs" style={{ color: tokens.colorNeutralForeground2 }}>
+                Upload a signature photo to remove paper background shading and produce a transparent cutout.
               </p>
-              <p className="text-xs text-(--ui-text-dim) mt-1">
-                Supports camera snapshots, scans, PNG, JPG, WEBP
-              </p>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
-        ) : (
-          /* Interactive Tuning & Preview State */
-          <div className="space-y-4 py-1">
-            {/* Live Preview Area (Checkerboard for transparency) */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold uppercase text-(--ui-text-dim) tracking-wider">
-                  Transparent Vector Preview
-                </span>
+
+              {!sourceImg ? (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-xs text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  className="w-full rounded-lg p-8 flex flex-col items-center justify-center gap-2.5 cursor-pointer text-center transition-colors"
+                  style={{
+                    border: `1.5px dashed ${tokens.colorNeutralStroke1}`,
+                    backgroundColor: tokens.colorNeutralBackground2,
+                  }}
                 >
-                  <Upload className="w-3 h-3" />
-                  <span>Choose another photo</span>
-                </button>
-              </div>
-
-              <div
-                className="w-full h-36 rounded-lg border border-(--ui-border) flex items-center justify-center p-3 relative overflow-hidden"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
-                    linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
-                    linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
-                    linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)
-                  `,
-                  backgroundSize: '16px 16px',
-                  backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                {processed && (
-                  <img
-                    src={processed.pngDataUrl}
-                    alt="Processed Signature"
-                    className="max-h-full max-w-full object-contain filter drop-shadow-xs"
+                  <ArrowUploadRegular
+                    fontSize={28}
+                    style={{ color: tokens.colorBrandForeground1 }}
                   />
-                )}
-              </div>
-            </div>
+                  <div>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{ color: tokens.colorNeutralForeground1 }}
+                    >
+                      Select a photo of your signature
+                    </p>
+                    <p
+                      className="text-xs mt-0.5"
+                      style={{ color: tokens.colorNeutralForeground3 }}
+                    >
+                      PNG, JPG, or WEBP
+                    </p>
+                  </div>
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: tokens.colorNeutralForeground2 }}
+                    >
+                      Preview
+                    </span>
+                    <Button
+                      appearance="subtle"
+                      size="small"
+                      icon={<ArrowUploadRegular />}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose another image
+                    </Button>
+                  </div>
 
-            {/* Sliders & Controls */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-(--ui-surface2) p-3.5 rounded-lg border border-(--ui-border)">
-              {/* Paper & Shadow Removal */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-medium">
-                  <span>Background / Shadow Cutoff</span>
-                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{threshold}</span>
-                </div>
-                <input
-                  type="range"
-                  min="120"
-                  max="245"
-                  step="1"
-                  value={threshold}
-                  onChange={(e) => setThreshold(Number(e.target.value))}
-                  className="w-full accent-primary cursor-pointer"
-                />
-                <p className="text-[10px] text-(--ui-text-dim)">
-                  Slide right to wipe out paper texture & ambient shadows
-                </p>
-              </div>
-
-              {/* Ink Darkness & Boldness */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-medium">
-                  <span>Ink Boldness / Contrast</span>
-                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{contrast.toFixed(1)}x</span>
-                </div>
-                <input
-                  type="range"
-                  min="1.0"
-                  max="2.5"
-                  step="0.1"
-                  value={contrast}
-                  onChange={(e) => setContrast(Number(e.target.value))}
-                  className="w-full accent-primary cursor-pointer"
-                />
-                <p className="text-[10px] text-(--ui-text-dim)">
-                  Strengthens faint pen strokes into solid ink
-                </p>
-              </div>
-
-              {/* Stroke Smoothness */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-medium">
-                  <span>Vector Smoothness</span>
-                  <span className="font-mono text-[11px] text-(--ui-text-dim)">{smoothness}</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  step="1"
-                  value={smoothness}
-                  onChange={(e) => setSmoothness(Number(e.target.value))}
-                  className="w-full accent-primary cursor-pointer"
-                />
-                <p className="text-[10px] text-(--ui-text-dim)">
-                  Anti-aliases stroke edges for smooth curves
-                </p>
-              </div>
-
-              {/* Ink Color Picker */}
-              <div className="space-y-1">
-                <span className="text-xs font-medium block">Ink Color</span>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => setInkColor('black')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'black'
-                        ? 'border-primary bg-primary text-primary-foreground font-semibold'
-                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
-                      }`}
-                  >
-                    Black
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInkColor('blue')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'blue'
-                        ? 'border-blue-700 bg-blue-700 text-white font-semibold'
-                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
-                      }`}
-                  >
-                    Royal Blue
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setInkColor('theme')}
-                    className={`px-2 py-1 rounded text-xs font-medium border cursor-pointer transition-colors ${inkColor === 'theme'
-                        ? 'border-primary bg-primary/20 text-primary font-semibold'
-                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
-                      }`}
-                  >
-                    Theme Color
-                  </button>
-                  <input
-                    type="color"
-                    value={customColor}
-                    onChange={(e) => {
-                      setCustomColor(e.target.value);
-                      setInkColor('custom');
+                  <div
+                    className="w-full h-36 rounded-md flex items-center justify-center p-3 relative overflow-hidden"
+                    style={{
+                      border: `1px solid ${tokens.colorNeutralStroke1}`,
+                      backgroundImage: `
+                        linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+                        linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+                        linear-gradient(-45deg, transparent 75%, #e5e7eb 75%)
+                      `,
+                      backgroundSize: '16px 16px',
+                      backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                      backgroundColor: '#ffffff',
                     }}
-                    title="Custom ink color"
-                    className="w-6 h-6 p-0 border-0 rounded cursor-pointer bg-transparent"
-                  />
+                  >
+                    {processed && (
+                      <img
+                        src={processed.pngDataUrl}
+                        alt="Processed Signature"
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    )}
+                  </div>
+
+                  <div
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-3 rounded-md"
+                    style={{
+                      backgroundColor: tokens.colorNeutralBackground2,
+                      border: `1px solid ${tokens.colorNeutralStroke2}`,
+                    }}
+                  >
+                    <Field
+                      label={
+                        <span className="flex items-center justify-between w-full text-xs">
+                          <span>Background cutoff</span>
+                          <span className="font-mono">{threshold}</span>
+                        </span>
+                      }
+                      hint="Increase to clear paper shadow"
+                    >
+                      <Slider
+                        size="small"
+                        min={120}
+                        max={245}
+                        step={1}
+                        value={threshold}
+                        onChange={(_, data) => setThreshold(data.value)}
+                      />
+                    </Field>
+
+                    <Field
+                      label={
+                        <span className="flex items-center justify-between w-full text-xs">
+                          <span>Ink contrast</span>
+                          <span className="font-mono">{contrast.toFixed(1)}x</span>
+                        </span>
+                      }
+                      hint="Strengthens faint pen strokes"
+                    >
+                      <Slider
+                        size="small"
+                        min={1.0}
+                        max={2.5}
+                        step={0.1}
+                        value={contrast}
+                        onChange={(_, data) => setContrast(data.value)}
+                      />
+                    </Field>
+
+                    <Field
+                      label={
+                        <span className="flex items-center justify-between w-full text-xs">
+                          <span>Edge smoothing</span>
+                          <span className="font-mono">{smoothness}</span>
+                        </span>
+                      }
+                    >
+                      <Slider
+                        size="small"
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={smoothness}
+                        onChange={(_, data) => setSmoothness(data.value)}
+                      />
+                    </Field>
+
+                    <Field label="Ink color">
+                      <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                        <Button
+                          size="small"
+                          appearance={inkColor === 'black' ? 'primary' : 'outline'}
+                          onClick={() => setInkColor('black')}
+                        >
+                          Black
+                        </Button>
+                        <Button
+                          size="small"
+                          appearance={inkColor === 'blue' ? 'primary' : 'outline'}
+                          onClick={() => setInkColor('blue')}
+                        >
+                          Blue
+                        </Button>
+                        <Button
+                          size="small"
+                          appearance={inkColor === 'theme' ? 'primary' : 'outline'}
+                          onClick={() => setInkColor('theme')}
+                        >
+                          Theme
+                        </Button>
+                        <input
+                          type="color"
+                          value={customColor}
+                          onChange={(e) => {
+                            setCustomColor(e.target.value);
+                            setInkColor('custom');
+                          }}
+                          title="Custom ink color"
+                          className="w-6 h-6 p-0 border-0 rounded cursor-pointer bg-transparent"
+                        />
+                      </div>
+                    </Field>
+                  </div>
+
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <Checkbox
+                      label="Auto-crop whitespace around signature"
+                      checked={autoCrop}
+                      onChange={(_, data) => setAutoCrop(!!data.checked)}
+                    />
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        appearance="subtle"
+                        size="small"
+                        icon={<ArrowDownloadRegular />}
+                        onClick={handleDownloadSvg}
+                      >
+                        SVG
+                      </Button>
+                      <Button
+                        appearance="subtle"
+                        size="small"
+                        icon={<ArrowDownloadRegular />}
+                        onClick={handleDownloadPng}
+                      >
+                        PNG
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
             </div>
+          </DialogContent>
 
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs font-medium text-(--ui-text) cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={autoCrop}
-                  onChange={(e) => setAutoCrop(e.target.checked)}
-                  className="rounded border-(--ui-border) text-primary h-4 w-4 cursor-pointer"
-                />
-                <span>Auto-crop empty borders around signature</span>
-              </label>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleDownloadSvg}
-                  className="text-xs text-(--ui-text-dim) hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
-                  title="Download SVG vector file"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>SVG</span>
-                </button>
-                <span className="text-(--ui-border)">|</span>
-                <button
-                  type="button"
-                  onClick={handleDownloadPng}
-                  className="text-xs text-(--ui-text-dim) hover:text-foreground flex items-center gap-1 cursor-pointer hover:underline"
-                  title="Download transparent PNG"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>PNG</span>
-                </button>
-              </div>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
-        )}
-
-        <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsSignatureModalOpen(false)}
-          >
-            Cancel
-          </Button>
-
-          {sourceImg && (
-            <Button size="sm" onClick={handleApply} className="gap-1.5">
-              <Check className="w-3.5 h-3.5" />
-              <span>Apply to Resume</span>
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => setIsSignatureModalOpen(false)}>
+              Cancel
             </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
+            {sourceImg && (
+              <Button appearance="primary" icon={<CheckmarkRegular />} onClick={handleApply}>
+                Apply to resume
+              </Button>
+            )}
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
     </Dialog>
   );
 };

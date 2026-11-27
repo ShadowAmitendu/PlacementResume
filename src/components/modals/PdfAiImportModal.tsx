@@ -1,14 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useResume } from '../../context/ResumeContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
+  DialogSurface,
+  DialogBody,
   DialogTitle,
-  DialogFooter,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
-import { extractTextFromPdf } from '../../utils/pdfExtractor';
+  DialogContent,
+  DialogActions,
+  Button,
+  Input,
+  Field,
+  Dropdown,
+  Option,
+  RadioGroup,
+  Radio,
+  Badge,
+  Spinner,
+  tokens,
+} from '@fluentui/react-components';
+import {
+  DocumentPdfRegular,
+  ArrowUploadRegular,
+  CheckmarkCircleRegular,
+  WarningRegular,
+  BotRegular,
+  DesktopRegular,
+  DocumentTextRegular,
+  KeyRegular,
+  ArrowRightRegular,
+  EyeRegular,
+  EyeOffRegular,
+  ArrowSyncRegular,
+  DismissRegular,
+} from '@fluentui/react-icons';
+import { useResume } from '../../context/ResumeContext';
 import {
   parseResumeHeuristically,
   parseResumeWithGemini,
@@ -21,22 +45,6 @@ import {
   DEFAULT_GEMINI_MODELS,
   GeminiModelInfo,
 } from '../../utils/aiResumeParser';
-import {
-  Sparkles,
-  FileText,
-  Upload,
-  CheckCircle2,
-  AlertCircle,
-  Cpu,
-  Key,
-  Layers,
-  ArrowRight,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  X,
-  Bot,
-} from 'lucide-react';
 
 export const PdfAiImportModal: React.FC = () => {
   const {
@@ -55,7 +63,6 @@ export const PdfAiImportModal: React.FC = () => {
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [hasWindowAi, setHasWindowAi] = useState<boolean>(false);
 
-  // Gemini model fetching & selection
   const [geminiModels, setGeminiModels] = useState<GeminiModelInfo[]>(DEFAULT_GEMINI_MODELS);
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     return (
@@ -74,6 +81,7 @@ export const PdfAiImportModal: React.FC = () => {
   const [importMode, setImportMode] = useState<'replace' | 'merge'>('replace');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleFetchModels = async (keyToUse?: string) => {
     const key = (keyToUse !== undefined ? keyToUse : apiKey).trim();
@@ -82,12 +90,17 @@ export const PdfAiImportModal: React.FC = () => {
       return;
     }
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoadingModels(true);
     setModelsFetchStatus(null);
     try {
-      const models = await fetchGeminiModels(key);
+      const models = await fetchGeminiModels(key, controller.signal);
+      if (controller.signal.aborted) return;
       setGeminiModels(models);
-      setModelsFetchStatus(`Found ${models.length} models`);
+      setModelsFetchStatus(`${models.length} models loaded`);
 
       if (!models.some((m) => m.id === selectedModel)) {
         const best =
@@ -99,11 +112,15 @@ export const PdfAiImportModal: React.FC = () => {
           localStorage.setItem('placement_gemini_selected_model', best);
         } catch {}
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      if (controller.signal.aborted) return;
+      const message = err instanceof Error ? err.message : 'Using preset models.';
       console.warn('Failed to fetch Gemini models:', err);
-      setModelsFetchStatus(err.message || 'Could not fetch models. Using presets.');
+      setModelsFetchStatus(message);
     } finally {
-      setIsLoadingModels(false);
+      if (!controller.signal.aborted) {
+        setIsLoadingModels(false);
+      }
     }
   };
 
@@ -114,13 +131,14 @@ export const PdfAiImportModal: React.FC = () => {
     } catch {}
   };
 
-  // Check saved API key & available browser AI
   useEffect(() => {
+    let active = true;
     if (isPdfAiModalOpen) {
       const savedKey = localStorage.getItem('placement_gemini_api_key') || '';
       setApiKey(savedKey);
 
       checkAvailableAiEngines().then(({ hasWindowAi: winAi }) => {
+        if (!active) return;
         setHasWindowAi(winAi);
         if (winAi) {
           setEngine('window-ai');
@@ -139,7 +157,7 @@ export const PdfAiImportModal: React.FC = () => {
         setSelectedFile(pdfImportInitialFile);
       }
     } else {
-      // Reset state on close
+      abortControllerRef.current?.abort();
       setErrorMessage(null);
       setParsedResult(null);
       setIsProcessing(false);
@@ -148,15 +166,17 @@ export const PdfAiImportModal: React.FC = () => {
         setPdfImportInitialFile(null);
       }
     }
+    return () => {
+      active = false;
+      abortControllerRef.current?.abort();
+    };
   }, [isPdfAiModalOpen, pdfImportInitialFile, setPdfImportInitialFile]);
 
   const handleApiKeyChange = (val: string) => {
     setApiKey(val);
     try {
       localStorage.setItem('placement_gemini_api_key', val.trim());
-    } catch {
-      // Ignore storage errors
-    }
+    } catch {}
 
     if (val.trim().length > 25) {
       handleFetchModels(val);
@@ -167,7 +187,7 @@ export const PdfAiImportModal: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.name.toLowerCase().endsWith('.pdf')) {
-        setErrorMessage('Please select a valid .pdf resume file.');
+        setErrorMessage('Select a valid .pdf file.');
         return;
       }
       setSelectedFile(file);
@@ -182,7 +202,7 @@ export const PdfAiImportModal: React.FC = () => {
     const file = e.dataTransfer.files?.[0];
     if (file) {
       if (!file.name.toLowerCase().endsWith('.pdf')) {
-        setErrorMessage('Please drop a valid .pdf resume file.');
+        setErrorMessage('Drop a valid .pdf file.');
         return;
       }
       setSelectedFile(file);
@@ -193,7 +213,7 @@ export const PdfAiImportModal: React.FC = () => {
 
   const handleStartParsing = async () => {
     if (!selectedFile) {
-      setErrorMessage('Please select a PDF file first.');
+      setErrorMessage('Select a PDF file first.');
       return;
     }
 
@@ -201,23 +221,27 @@ export const PdfAiImportModal: React.FC = () => {
     setErrorMessage(null);
     setParsedResult(null);
 
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      // Step 1: In-browser PDF text extraction
       setStatusMessage('Extracting text with PDF.js...');
+      const { extractTextFromPdf } = await import('../../utils/pdfExtractor');
       const rawText = await extractTextFromPdf(selectedFile);
+      if (controller.signal.aborted) return;
 
       if (!rawText || rawText.trim().length < 30) {
         throw new Error(
-          'Could not extract text from this PDF. It may be a scanned image or empty. Please ensure it contains selectable text.'
+          'Could not extract selectable text from this PDF. Check that it is not a scanned image.'
         );
       }
 
-      // Step 2: AI Parsing
       const currentModel = geminiModels.find((m) => m.id === selectedModel);
       const modelDisplayName = currentModel?.displayName || selectedModel;
 
       setStatusMessage(
-        `Analyzing resume structure with ${
+        `Parsing resume with ${
           engine === 'gemini'
             ? modelDisplayName
             : engine === 'window-ai'
@@ -230,23 +254,29 @@ export const PdfAiImportModal: React.FC = () => {
 
       if (engine === 'gemini') {
         if (!apiKey.trim()) {
-          throw new Error('Please enter a Google Gemini API Key, or switch to the Local Parser.');
+          throw new Error('Enter a Google Gemini API key or switch to the Local Parser.');
         }
-        result = await parseResumeWithGemini(rawText, apiKey, selectedModel);
+        result = await parseResumeWithGemini(rawText, apiKey, selectedModel, controller.signal);
       } else if (engine === 'window-ai') {
         result = await parseResumeWithWindowAi(rawText);
       } else {
         result = parseResumeHeuristically(rawText);
       }
 
+      if (controller.signal.aborted) return;
       setParsedResult(result);
       setStatusMessage('');
-      showToast('Resume parsed successfully! Review the extracted details below.');
-    } catch (err: any) {
+      showToast('PDF resume extracted');
+    } catch (err: unknown) {
+      if (controller.signal.aborted) return;
       console.error('AI PDF parse error:', err);
-      setErrorMessage(err.message || 'Failed to parse resume PDF. You can try the Local Parser.');
+      const message =
+        err instanceof Error ? err.message : 'Failed to parse resume PDF.';
+      setErrorMessage(message);
     } finally {
-      setIsProcessing(false);
+      if (!controller.signal.aborted) {
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -258,423 +288,469 @@ export const PdfAiImportModal: React.FC = () => {
   };
 
   const currentModelInfo = geminiModels.find((m) => m.id === selectedModel);
+  const selectedModelLabel = currentModelInfo
+    ? `${currentModelInfo.displayName} (${currentModelInfo.id})`
+    : selectedModel;
 
   return (
-    <Dialog open={isPdfAiModalOpen} onOpenChange={setIsPdfAiModalOpen}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-bold">Import Old Resume PDF (AI)</DialogTitle>
-              <p className="text-xs text-(--ui-text-dim)">
-                Extract details from an existing resume PDF in your browser and automatically build your resume.
+    <Dialog
+      open={isPdfAiModalOpen}
+      onOpenChange={(_, data) => setIsPdfAiModalOpen(data.open)}
+    >
+      <DialogSurface style={{ maxWidth: 580, maxHeight: '90vh', overflowY: 'auto' }}>
+        <DialogBody>
+          <DialogTitle
+            action={
+              <Button
+                appearance="subtle"
+                size="small"
+                aria-label="Close"
+                icon={<DismissRegular />}
+                onClick={() => setIsPdfAiModalOpen(false)}
+              />
+            }
+          >
+            <span className="flex items-center gap-2">
+              <DocumentPdfRegular style={{ color: tokens.colorBrandForeground1 }} />
+              <span>Import resume from PDF</span>
+            </span>
+          </DialogTitle>
+
+          <DialogContent>
+            <div className="space-y-4 py-1">
+              <p className="text-xs" style={{ color: tokens.colorNeutralForeground2 }}>
+                Extract fields from an existing text PDF resume in your browser.
               </p>
-            </div>
-          </div>
-        </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          {/* File Upload Dropzone */}
-          <div>
-            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block mb-1.5">
-              1. Select Resume PDF
-            </label>
-            {!selectedFile ? (
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-(--ui-border) hover:border-primary/60 bg-(--ui-surface2) hover:bg-primary/5 rounded-xl p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2"
-              >
-                <div className="w-10 h-10 rounded-full bg-(--ui-surface) flex items-center justify-center shadow-xs text-primary">
-                  <Upload className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-(--ui-text)">
-                    Click to browse or drag &amp; drop PDF
-                  </p>
-                  <p className="text-xs text-(--ui-text-dim) mt-0.5">
-                    Supports any standard text-based PDF resume
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between p-3 rounded-xl border border-(--ui-border) bg-(--ui-surface2)">
-                <div className="flex items-center gap-2.5 overflow-hidden">
-                  <div className="p-2 rounded-lg bg-red-500/10 text-red-600 shrink-0">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-(--ui-text) truncate">
-                      {selectedFile.name}
-                    </p>
-                    <p className="text-[10px] text-(--ui-text-dim)">
-                      {(selectedFile.size / 1024).toFixed(1)} KB • PDF Document
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFile(null);
-                    setParsedResult(null);
-                    setErrorMessage(null);
-                  }}
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground shrink-0"
-                  title="Remove selected file"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-
-          {/* AI Engine Selection */}
-          <div className="space-y-2">
-            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
-              2. Choose AI Engine
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {/* Gemini API Option */}
-              <button
-                type="button"
-                onClick={() => setEngine('gemini')}
-                className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors ${
-                  engine === 'gemini'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text)'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-primary" />
-                  <span>{currentModelInfo?.displayName || 'Google Gemini'}</span>
-                </div>
-                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
-                  High-accuracy extraction using Google Gemini API.
-                </p>
-              </button>
-
-              {/* Local Parser Option */}
-              <button
-                type="button"
-                onClick={() => setEngine('local')}
-                className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors ${
-                  engine === 'local'
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text)'
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
-                  <Cpu className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Instant Local</span>
-                </div>
-                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
-                  Zero setup, 100% offline rule-based parser.
-                </p>
-              </button>
-
-              {/* Chrome Built-in AI Option */}
-              <button
-                type="button"
-                disabled={!hasWindowAi}
-                onClick={() => setEngine('window-ai')}
-                className={`p-2.5 rounded-lg border text-left transition-colors ${
-                  !hasWindowAi
-                    ? 'opacity-40 cursor-not-allowed border-(--ui-border) bg-(--ui-surface)'
-                    : engine === 'window-ai'
-                    ? 'border-primary bg-primary/10 text-primary cursor-pointer'
-                    : 'border-(--ui-border) bg-(--ui-surface) hover:bg-(--ui-surface2) text-(--ui-text) cursor-pointer'
-                }`}
-                title={!hasWindowAi ? 'Requires Chrome with Prompt API / Gemini Nano enabled' : undefined}
-              >
-                <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
-                  <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                  <span>Window.ai</span>
-                </div>
-                <p className="text-[10px] text-(--ui-text-dim) leading-tight">
-                  {hasWindowAi ? 'On-device Gemini Nano model.' : 'Not available in this browser.'}
-                </p>
-              </button>
-            </div>
-
-            {/* Gemini API Key & Model Selection */}
-            {engine === 'gemini' && (
-              <div className="p-3 rounded-lg border border-(--ui-border) bg-(--ui-surface2) space-y-3 mt-2">
-                {/* API Key */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-(--ui-text) flex items-center gap-1.5">
-                      <Key className="w-3.5 h-3.5 text-primary" />
-                      Google Gemini API Key
-                    </span>
-                    <a
-                      href="https://aistudio.google.com/app/apikey"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[11px] text-primary hover:underline font-medium"
-                    >
-                      Get Free API Key ↗
-                    </a>
-                  </div>
-                  <div className="relative flex items-center">
-                    <input
-                      type={showApiKey ? 'text' : 'password'}
-                      value={apiKey}
-                      onChange={(e) => handleApiKeyChange(e.target.value)}
-                      placeholder="AIzaSy..."
-                      className="w-full pr-8 pl-2.5 py-1.5 text-xs rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) focus:outline-none focus:border-primary font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Model Selection Dropdown */}
-                <div className="space-y-1.5 pt-2 border-t border-(--ui-border)/70">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-(--ui-text) flex items-center gap-1.5">
-                      <Bot className="w-3.5 h-3.5 text-primary" />
-                      Select Gemini Model
-                    </span>
-                    <button
-                      type="button"
-                      disabled={isLoadingModels || !apiKey.trim()}
-                      onClick={() => handleFetchModels()}
-                      className="text-[11px] text-primary hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Fetch live model list from Google Gemini API"
-                    >
-                      <RefreshCw className={`w-3 h-3 ${isLoadingModels ? 'animate-spin' : ''}`} />
-                      <span>{isLoadingModels ? 'Fetching...' : 'Fetch Models'}</span>
-                    </button>
-                  </div>
-
-                  <select
-                    value={selectedModel}
-                    onChange={(e) => handleModelChange(e.target.value)}
-                    disabled={isLoadingModels}
-                    className="w-full px-2.5 py-1.5 text-xs rounded-md border border-(--ui-border) bg-(--ui-surface) text-(--ui-text) focus:outline-none focus:border-primary cursor-pointer font-medium"
+              {/* Step 1: Select PDF */}
+              <Field label="1. Resume PDF file">
+                {!selectedFile ? (
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={handleDrop}
+                    className="w-full"
                   >
-                    {geminiModels.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.displayName} ({m.id})
-                      </option>
-                    ))}
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full rounded-lg p-6 text-center cursor-pointer transition-colors flex flex-col items-center justify-center gap-2"
+                      style={{
+                        border: `1.5px dashed ${tokens.colorNeutralStroke1}`,
+                        backgroundColor: tokens.colorNeutralBackground2,
+                      }}
+                    >
+                      <ArrowUploadRegular
+                        fontSize={24}
+                        style={{ color: tokens.colorBrandForeground1 }}
+                      />
+                      <div>
+                        <p
+                          className="text-sm font-medium"
+                          style={{ color: tokens.colorNeutralForeground1 }}
+                        >
+                          Choose or drop a PDF resume
+                        </p>
+                        <p
+                          className="text-xs mt-0.5"
+                          style={{ color: tokens.colorNeutralForeground3 }}
+                        >
+                          Text-based PDF documents only
+                        </p>
+                      </div>
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center justify-between p-2.5 rounded-md"
+                    style={{
+                      border: `1px solid ${tokens.colorNeutralStroke1}`,
+                      backgroundColor: tokens.colorNeutralBackground2,
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <DocumentPdfRegular
+                        fontSize={20}
+                        style={{ color: tokens.colorBrandForeground1, flexShrink: 0 }}
+                      />
+                      <div className="min-w-0">
+                        <p
+                          className="text-xs font-semibold truncate"
+                          style={{ color: tokens.colorNeutralForeground1 }}
+                        >
+                          {selectedFile.name}
+                        </p>
+                        <p
+                          className="text-[11px]"
+                          style={{ color: tokens.colorNeutralForeground3 }}
+                        >
+                          {(selectedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      appearance="subtle"
+                      size="small"
+                      aria-label="Remove file"
+                      icon={<DismissRegular />}
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setParsedResult(null);
+                        setErrorMessage(null);
+                      }}
+                    />
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </Field>
 
-                  <div className="flex items-center justify-between text-[10px] text-(--ui-text-dim) pt-0.5">
-                    <span className="truncate max-w-[70%]">
-                      {currentModelInfo?.description || 'Select a Gemini model for resume parsing.'}
-                    </span>
-                    {modelsFetchStatus && (
-                      <span className="shrink-0 text-primary font-medium">{modelsFetchStatus}</span>
+              {/* Step 2: Parser Engine */}
+              <div className="space-y-2">
+                <Field label="2. Extraction method">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEngine('gemini')}
+                      className="p-2.5 rounded-md text-left cursor-pointer transition-colors"
+                      style={{
+                        border: `1px solid ${
+                          engine === 'gemini'
+                            ? tokens.colorBrandStroke1
+                            : tokens.colorNeutralStroke1
+                        }`,
+                        backgroundColor:
+                          engine === 'gemini'
+                            ? tokens.colorBrandBackground2
+                            : tokens.colorNeutralBackground1,
+                        color: tokens.colorNeutralForeground1,
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
+                        <BotRegular fontSize={14} />
+                        <span>Google Gemini</span>
+                      </div>
+                      <p
+                        className="text-[11px] leading-snug"
+                        style={{ color: tokens.colorNeutralForeground3 }}
+                      >
+                        Uses your Gemini API key.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setEngine('local')}
+                      className="p-2.5 rounded-md text-left cursor-pointer transition-colors"
+                      style={{
+                        border: `1px solid ${
+                          engine === 'local'
+                            ? tokens.colorBrandStroke1
+                            : tokens.colorNeutralStroke1
+                        }`,
+                        backgroundColor:
+                          engine === 'local'
+                            ? tokens.colorBrandBackground2
+                            : tokens.colorNeutralBackground1,
+                        color: tokens.colorNeutralForeground1,
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
+                        <DocumentTextRegular fontSize={14} />
+                        <span>Local rules</span>
+                      </div>
+                      <p
+                        className="text-[11px] leading-snug"
+                        style={{ color: tokens.colorNeutralForeground3 }}
+                      >
+                        Offline parser, no key needed.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={!hasWindowAi}
+                      onClick={() => setEngine('window-ai')}
+                      className="p-2.5 rounded-md text-left transition-colors disabled:opacity-45"
+                      style={{
+                        border: `1px solid ${
+                          engine === 'window-ai'
+                            ? tokens.colorBrandStroke1
+                            : tokens.colorNeutralStroke1
+                        }`,
+                        backgroundColor:
+                          engine === 'window-ai'
+                            ? tokens.colorBrandBackground2
+                            : tokens.colorNeutralBackground1,
+                        color: tokens.colorNeutralForeground1,
+                        cursor: hasWindowAi ? 'pointer' : 'not-allowed',
+                      }}
+                      title={
+                        !hasWindowAi
+                          ? 'Requires Chrome with Prompt API enabled'
+                          : undefined
+                      }
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 font-semibold text-xs">
+                        <DesktopRegular fontSize={14} />
+                        <span>Browser AI</span>
+                      </div>
+                      <p
+                        className="text-[11px] leading-snug"
+                        style={{ color: tokens.colorNeutralForeground3 }}
+                      >
+                        {hasWindowAi ? 'On-device model' : 'Unavailable'}
+                      </p>
+                    </button>
+                  </div>
+                </Field>
+
+                {engine === 'gemini' && (
+                  <div
+                    className="p-3 rounded-md space-y-3"
+                    style={{
+                      border: `1px solid ${tokens.colorNeutralStroke2}`,
+                      backgroundColor: tokens.colorNeutralBackground2,
+                    }}
+                  >
+                    <Field
+                      label={
+                        <span className="flex items-center justify-between w-full text-xs">
+                          <span className="flex items-center gap-1.5">
+                            <KeyRegular fontSize={13} />
+                            <span>Gemini API key</span>
+                          </span>
+                          <a
+                            href="https://aistudio.google.com/app/apikey"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] hover:underline"
+                            style={{ color: tokens.colorBrandForeground1 }}
+                          >
+                            Get API key
+                          </a>
+                        </span>
+                      }
+                      hint="Stored in browser localStorage and sent only to Google Gemini API."
+                    >
+                      <Input
+                        type={showApiKey ? 'text' : 'password'}
+                        size="small"
+                        value={apiKey}
+                        onChange={(_, data) => handleApiKeyChange(data.value)}
+                        placeholder="AIzaSy..."
+                        contentAfter={
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            aria-label="Toggle API key visibility"
+                            icon={showApiKey ? <EyeOffRegular /> : <EyeRegular />}
+                            onClick={() => setShowApiKey(!showApiKey)}
+                          />
+                        }
+                      />
+                    </Field>
+
+                    <Field
+                      label={
+                        <span className="flex items-center justify-between w-full text-xs">
+                          <span>Gemini model</span>
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            disabled={isLoadingModels || !apiKey.trim()}
+                            icon={<ArrowSyncRegular />}
+                            onClick={() => handleFetchModels()}
+                            style={{ fontSize: 11, height: 22 }}
+                          >
+                            {isLoadingModels ? 'Loading' : 'Refresh list'}
+                          </Button>
+                        </span>
+                      }
+                      hint={modelsFetchStatus || currentModelInfo?.description}
+                    >
+                      <Dropdown
+                        size="small"
+                        value={selectedModelLabel}
+                        selectedOptions={[selectedModel]}
+                        disabled={isLoadingModels}
+                        onOptionSelect={(_, data) => {
+                          if (data.optionValue) handleModelChange(data.optionValue);
+                        }}
+                      >
+                        {geminiModels.map((m) => {
+                          const label = `${m.displayName} (${m.id})`;
+                          return (
+                            <Option key={m.id} value={m.id} text={label}>
+                              {label}
+                            </Option>
+                          );
+                        })}
+                      </Dropdown>
+                    </Field>
+                  </div>
+                )}
+              </div>
+
+              {!parsedResult && (
+                <Button
+                  appearance="primary"
+                  onClick={handleStartParsing}
+                  disabled={!selectedFile || isProcessing}
+                  icon={isProcessing ? <Spinner size="tiny" /> : <DocumentPdfRegular />}
+                  style={{ width: '100%' }}
+                >
+                  {isProcessing ? statusMessage || 'Parsing PDF...' : 'Extract resume data'}
+                </Button>
+              )}
+
+              {errorMessage && (
+                <div
+                  className="p-3 rounded-md text-xs flex items-start gap-2"
+                  style={{
+                    backgroundColor: tokens.colorPaletteRedBackground1,
+                    border: `1px solid ${tokens.colorPaletteRedBorder1}`,
+                    color: tokens.colorPaletteRedForeground1,
+                  }}
+                >
+                  <WarningRegular fontSize={16} className="shrink-0 mt-0.5" />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-semibold">Extraction failed</p>
+                    <p>{errorMessage}</p>
+                    {engine !== 'local' && (
+                      <Button
+                        appearance="subtle"
+                        size="small"
+                        onClick={() => {
+                          setEngine('local');
+                          setErrorMessage(null);
+                        }}
+                        style={{ paddingLeft: 0, textDecoration: 'underline' }}
+                      >
+                        Switch to Local rules parser
+                      </Button>
                     )}
                   </div>
                 </div>
+              )}
 
-                <p className="text-[10px] text-(--ui-text-dim)">
-                  Your key is stored securely in your browser's local storage and used directly via client-side fetch.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Action Button: Parse */}
-          {!parsedResult && (
-            <div className="pt-2">
-              <Button
-                onClick={handleStartParsing}
-                disabled={!selectedFile || isProcessing}
-                className="w-full text-xs h-10 gap-2 bg-primary text-primary-foreground font-semibold shadow-md cursor-pointer"
-              >
-                {isProcessing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>{statusMessage || 'Processing PDF...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Extract &amp; Populate Resume</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {errorMessage && (
-            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-semibold">Extraction Error</p>
-                <p className="text-[11px] mt-0.5">{errorMessage}</p>
-                {engine !== 'local' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEngine('local');
-                      setErrorMessage(null);
-                    }}
-                    className="mt-1.5 text-[11px] font-semibold underline cursor-pointer hover:opacity-80"
-                  >
-                    Try using the Instant Local Parser instead →
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Parsed Result Preview */}
-          {parsedResult && (
-            <div className="space-y-3 pt-2 border-t border-(--ui-border)">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Successfully Extracted Details
-                </span>
-                <button
-                  type="button"
-                  onClick={handleStartParsing}
-                  disabled={isProcessing}
-                  className="text-[11px] text-primary hover:underline flex items-center gap-1 cursor-pointer"
+              {parsedResult && (
+                <div
+                  className="space-y-3 pt-3"
+                  style={{ borderTop: `1px solid ${tokens.colorNeutralStroke2}` }}
                 >
-                  <RefreshCw className="w-3 h-3" />
-                  Re-parse
-                </button>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-xs font-semibold flex items-center gap-1.5"
+                      style={{ color: tokens.colorPaletteGreenForeground1 }}
+                    >
+                      <CheckmarkCircleRegular fontSize={15} />
+                      <span>Extracted data ready</span>
+                    </span>
+                    <Button
+                      appearance="subtle"
+                      size="small"
+                      icon={<ArrowSyncRegular />}
+                      disabled={isProcessing}
+                      onClick={handleStartParsing}
+                    >
+                      Re-parse
+                    </Button>
+                  </div>
 
-              {/* Summary Card */}
-              <div className="p-3 rounded-xl border border-(--ui-border) bg-(--ui-surface2) text-xs space-y-2">
-                <div>
-                  <h4 className="font-bold text-sm text-(--ui-text)">
-                    {parsedResult.header.fullName}
-                  </h4>
-                  <p className="text-[11px] text-(--ui-text-dim)">
-                    {parsedResult.header.degreeTitle} • {parsedResult.header.universityCompany}
-                  </p>
-                  <p className="text-[10px] text-(--ui-text-dim) mt-0.5">
-                    {parsedResult.header.location} | {parsedResult.header.email} | {parsedResult.header.phone}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {parsedResult.academics && (
-                    <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-medium">
-                      🎓 Academics ({parsedResult.academics.rows.length} rows)
-                    </span>
-                  )}
-                  {parsedResult.technicalSkills && (
-                    <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-medium">
-                      ⚡ Skills ({parsedResult.technicalSkills.length} items)
-                    </span>
-                  )}
-                  {parsedResult.projects && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-medium">
-                      🚀 Projects ({parsedResult.projects.rows.length} items)
-                    </span>
-                  )}
-                  {parsedResult.experience && (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-medium">
-                      💼 Experience ({parsedResult.experience.rows.length} items)
-                    </span>
-                  )}
-                  {parsedResult.personalProfile && (
-                    <span className="px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-600 dark:text-teal-400 text-[10px] font-medium">
-                      👤 Profile ({parsedResult.personalProfile.length} fields)
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Import Mode Selection */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
-                  3. Import Method
-                </label>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <label
-                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
-                      importMode === 'replace'
-                        ? 'border-primary bg-primary/10 text-primary font-semibold'
-                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
-                    }`}
+                  <div
+                    className="p-3 rounded-md text-xs space-y-2"
+                    style={{
+                      border: `1px solid ${tokens.colorNeutralStroke1}`,
+                      backgroundColor: tokens.colorNeutralBackground2,
+                    }}
                   >
-                    <input
-                      type="radio"
-                      name="importMode"
-                      value="replace"
-                      checked={importMode === 'replace'}
-                      onChange={() => setImportMode('replace')}
-                      className="accent-primary"
-                    />
                     <div>
-                      <span>Replace All</span>
-                      <p className="text-[10px] text-(--ui-text-dim) font-normal">
-                        Fresh import of all sections
+                      <h4
+                        className="font-semibold text-sm"
+                        style={{ color: tokens.colorNeutralForeground1 }}
+                      >
+                        {parsedResult.header.fullName}
+                      </h4>
+                      <p style={{ color: tokens.colorNeutralForeground2 }}>
+                        {parsedResult.header.degreeTitle} | {parsedResult.header.universityCompany}
+                      </p>
+                      <p
+                        className="text-[11px] mt-0.5"
+                        style={{ color: tokens.colorNeutralForeground3 }}
+                      >
+                        {parsedResult.header.location} | {parsedResult.header.email} |{' '}
+                        {parsedResult.header.phone}
                       </p>
                     </div>
-                  </label>
 
-                  <label
-                    className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-colors ${
-                      importMode === 'merge'
-                        ? 'border-primary bg-primary/10 text-primary font-semibold'
-                        : 'border-(--ui-border) bg-(--ui-surface) text-(--ui-text)'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="importMode"
-                      value="merge"
-                      checked={importMode === 'merge'}
-                      onChange={() => setImportMode('merge')}
-                      className="accent-primary"
-                    />
-                    <div>
-                      <span>Merge</span>
-                      <p className="text-[10px] text-(--ui-text-dim) font-normal">
-                        Keep current sections, add new
-                      </p>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {parsedResult.academics && (
+                        <Badge appearance="outline" size="small">
+                          Academics ({parsedResult.academics.rows.length})
+                        </Badge>
+                      )}
+                      {parsedResult.technicalSkills && (
+                        <Badge appearance="outline" size="small">
+                          Skills ({parsedResult.technicalSkills.length})
+                        </Badge>
+                      )}
+                      {parsedResult.projects && (
+                        <Badge appearance="outline" size="small">
+                          Projects ({parsedResult.projects.rows.length})
+                        </Badge>
+                      )}
+                      {parsedResult.experience && (
+                        <Badge appearance="outline" size="small">
+                          Experience ({parsedResult.experience.rows.length})
+                        </Badge>
+                      )}
+                      {parsedResult.personalProfile && (
+                        <Badge appearance="outline" size="small">
+                          Profile ({parsedResult.personalProfile.length})
+                        </Badge>
+                      )}
                     </div>
-                  </label>
+                  </div>
+
+                  <Field label="3. Import mode">
+                    <RadioGroup
+                      layout="horizontal"
+                      value={importMode}
+                      onChange={(_, data) =>
+                        setImportMode(data.value as 'replace' | 'merge')
+                      }
+                    >
+                      <Radio value="replace" label="Replace existing sections" />
+                      <Radio value="merge" label="Keep current and append new" />
+                    </RadioGroup>
+                  </Field>
                 </div>
-              </div>
+              )}
             </div>
-          )}
-        </div>
+          </DialogContent>
 
-        <DialogFooter className="gap-2 pt-2 border-t border-(--ui-border)">
-          <Button variant="outline" size="sm" onClick={() => setIsPdfAiModalOpen(false)}>
-            Cancel
-          </Button>
-          {parsedResult && (
-            <Button
-              size="sm"
-              onClick={handleApply}
-              className="gap-1.5 bg-primary text-primary-foreground font-semibold shadow-md"
-            >
-              <span>Apply to Resume</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => setIsPdfAiModalOpen(false)}>
+              Cancel
             </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
+            {parsedResult && (
+              <Button
+                appearance="primary"
+                icon={<ArrowRightRegular />}
+                iconPosition="after"
+                onClick={handleApply}
+              >
+                Apply to resume
+              </Button>
+            )}
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
     </Dialog>
   );
 };

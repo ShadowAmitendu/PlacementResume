@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { useEffect, useId } from 'react';
+import {
+  Toaster,
+  Toast as FluentToast,
+  ToastTitle,
+  useToastController,
+} from '@fluentui/react-components';
 import { useResume } from '../../context/ResumeContext';
 
 export const Toast: React.FC = () => {
   const { toast } = useResume();
+  const toasterId = useId();
+  const { dispatchToast } = useToastController(toasterId);
 
-  if (!toast.show) return null;
+  useEffect(() => {
+    if (toast.show && toast.message) {
+      dispatchToast(
+        <FluentToast>
+          <ToastTitle>{toast.message}</ToastTitle>
+        </FluentToast>,
+        { timeout: 2200, intent: 'info' }
+      );
+    }
+  }, [toast.id, toast.show, toast.message, dispatchToast]);
 
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white border border-neutral-700 px-4 py-2 rounded-lg text-sm shadow-xl transition-all animate-in fade-in slide-in-from-bottom-2"
-    >
-      {toast.message}
-    </div>
-  );
+  return <Toaster toasterId={toasterId} position="bottom" />;
 };

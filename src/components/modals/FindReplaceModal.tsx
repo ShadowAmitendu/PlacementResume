@@ -1,8 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Dialog,
+  DialogSurface,
+  DialogBody,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Input,
+  Field,
+  Checkbox,
+  Badge,
+  tokens,
+} from '@fluentui/react-components';
+import { SearchRegular, EditRegular, DismissRegular } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { Search, Replace } from 'lucide-react';
 import { TextSectionData, ListSectionData, TableSectionData } from '../../types/resume';
 
 export const FindReplaceModal: React.FC = () => {
@@ -18,7 +30,6 @@ export const FindReplaceModal: React.FC = () => {
   const [replaceQuery, setReplaceQuery] = useState('');
   const [matchCase, setMatchCase] = useState(false);
 
-  // Clear inputs when opened fresh
   useEffect(() => {
     if (!isFindReplaceModalOpen) {
       setSearchQuery('');
@@ -26,7 +37,6 @@ export const FindReplaceModal: React.FC = () => {
     }
   }, [isFindReplaceModalOpen]);
 
-  // Compute live matches count across the document
   const matchCount = useMemo(() => {
     if (!searchQuery.trim()) return 0;
     try {
@@ -41,7 +51,6 @@ export const FindReplaceModal: React.FC = () => {
         if (matches) total += matches.length;
       };
 
-      // Header
       countIn(resumeData.header.fullName);
       countIn(resumeData.header.degreeTitle);
       countIn(resumeData.header.universityCompany);
@@ -53,7 +62,6 @@ export const FindReplaceModal: React.FC = () => {
         countIn(l.url);
       });
 
-      // Sections
       resumeData.sections.forEach((sec) => {
         countIn(sec.title);
         if (sec.type === 'text') {
@@ -67,7 +75,6 @@ export const FindReplaceModal: React.FC = () => {
         }
       });
 
-      // Declaration
       countIn(resumeData.declaration.text);
       countIn(resumeData.declaration.date);
       countIn(resumeData.declaration.place);
@@ -85,90 +92,93 @@ export const FindReplaceModal: React.FC = () => {
       showToast(`Replaced ${replaced} occurrence${replaced === 1 ? '' : 's'}`);
       setIsFindReplaceModalOpen(false);
     } else {
-      showToast('No matching text found to replace');
+      showToast('No matching text found');
     }
   };
 
   return (
-    <Dialog open={isFindReplaceModalOpen} onOpenChange={setIsFindReplaceModalOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <Search className="w-5 h-5 text-primary shrink-0" />
-            <DialogTitle>Find & Replace</DialogTitle>
-          </div>
-        </DialogHeader>
-
-        <div className="space-y-4 py-1">
-          {/* Find Input */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
-                Find
-              </label>
-              {searchQuery.trim() && (
-                <span className="text-[11px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  {matchCount} match{matchCount === 1 ? '' : 'es'} found
-                </span>
-              )}
-            </div>
-            <input
-              type="text"
-              autoFocus
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Text to find..."
-              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Replace Input */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-(--ui-text-dim) uppercase tracking-wider block">
-              Replace With
-            </label>
-            <input
-              type="text"
-              value={replaceQuery}
-              onChange={(e) => setReplaceQuery(e.target.value)}
-              placeholder="Replacement text..."
-              className="w-full px-3 py-2 rounded-md border border-(--ui-border) bg-(--ui-surface2) text-(--ui-text) text-sm focus:outline-none transition-colors"
-            />
-          </div>
-
-          {/* Options */}
-          <div className="flex items-center gap-2 pt-1">
-            <label className="flex items-center gap-2 text-xs font-medium text-(--ui-text) cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={matchCase}
-                onChange={(e) => setMatchCase(e.target.checked)}
-                className="rounded border-(--ui-border) text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+    <Dialog
+      open={isFindReplaceModalOpen}
+      onOpenChange={(_, data) => setIsFindReplaceModalOpen(data.open)}
+    >
+      <DialogSurface style={{ maxWidth: 440 }}>
+        <DialogBody>
+          <DialogTitle
+            action={
+              <Button
+                appearance="subtle"
+                size="small"
+                aria-label="Close"
+                icon={<DismissRegular />}
+                onClick={() => setIsFindReplaceModalOpen(false)}
               />
-              <span>Match Case</span>
-            </label>
-          </div>
-        </div>
+            }
+          >
+            <span className="flex items-center gap-2">
+              <SearchRegular style={{ color: tokens.colorBrandForeground1 }} />
+              <span>Find and replace</span>
+            </span>
+          </DialogTitle>
 
-        <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsFindReplaceModalOpen(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleReplaceAll}
-            disabled={!searchQuery.trim() || matchCount === 0}
-            className="gap-1.5"
-          >
-            <Replace className="w-3.5 h-3.5" />
-            <span>Replace All ({matchCount})</span>
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+          <DialogContent>
+            <div className="space-y-3 py-1">
+              <Field
+                label={
+                  <span className="flex items-center justify-between w-full">
+                    <span>Find</span>
+                    {searchQuery.trim() && (
+                      <Badge appearance="tint" color="brand" size="small">
+                        {matchCount} match{matchCount === 1 ? '' : 'es'}
+                      </Badge>
+                    )}
+                  </span>
+                }
+              >
+                <Input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(_, data) => setSearchQuery(data.value)}
+                  placeholder="Text to find"
+                />
+              </Field>
+
+              <Field label="Replace with">
+                <Input
+                  value={replaceQuery}
+                  onChange={(_, data) => setReplaceQuery(data.value)}
+                  placeholder="Replacement text"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim() && matchCount > 0) {
+                      handleReplaceAll();
+                    }
+                  }}
+                />
+              </Field>
+
+              <Checkbox
+                label="Match case"
+                checked={matchCase}
+                onChange={(_, data) => setMatchCase(!!data.checked)}
+              />
+            </div>
+          </DialogContent>
+
+          <DialogActions>
+            <Button appearance="secondary" onClick={() => setIsFindReplaceModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              appearance="primary"
+              icon={<EditRegular />}
+              onClick={handleReplaceAll}
+              disabled={!searchQuery.trim() || matchCount === 0}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              Replace all ({matchCount})
+            </Button>
+          </DialogActions>
+        </DialogBody>
+      </DialogSurface>
     </Dialog>
   );
 };

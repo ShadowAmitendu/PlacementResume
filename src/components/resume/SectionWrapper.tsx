@@ -1,10 +1,14 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  ReOrderDotsVerticalRegular,
+  CopyRegular,
+  DeleteRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
 import { SectionData } from '../../types/resume';
 import { EditableContent } from './EditableContent';
-import { GripVertical, Copy, Trash2 } from 'lucide-react';
 
 interface SectionWrapperProps {
   section: SectionData;
@@ -42,26 +46,25 @@ export const SectionWrapper: React.FC<SectionWrapperProps> = ({ section, childre
           {...listeners}
           aria-label="Drag to reorder section"
           aria-roledescription="sortable"
-          className="drag-handle p-1 text-muted-foreground hover:text-foreground"
+          className="drag-handle"
           title="Drag to reorder"
         >
-          <GripVertical className="w-3.5 h-3.5" />
+          <ReOrderDotsVerticalRegular fontSize={14} />
         </span>
         <button
           type="button"
           onClick={() => duplicateSection(section.id)}
           title="Duplicate section"
-          className="p-1 hover:bg-neutral-200 rounded"
         >
-          <Copy className="w-3.5 h-3.5" />
+          <CopyRegular fontSize={14} />
         </button>
         <button
           type="button"
           onClick={() => removeSection(section.id)}
           title="Delete section"
-          className="btn-danger-small p-1 rounded"
+          className="btn-danger-small"
         >
-          <Trash2 className="w-3.5 h-3.5 text-white" />
+          <DeleteRegular fontSize={14} />
         </button>
       </div>
 

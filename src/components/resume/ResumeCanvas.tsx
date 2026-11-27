@@ -23,6 +23,7 @@ import { ListSection } from './sections/ListSection';
 import { DividerSection } from './sections/DividerSection';
 import { DeclarationSection } from './DeclarationSection';
 import { DocumentStatusBar } from './DocumentStatusBar';
+import { A4_HEIGHT_PX, measurePrintableResumeHeight } from '../../utils/documentMetrics';
 import {
   SectionData,
   TextSectionData,
@@ -37,13 +38,17 @@ export const ResumeCanvas: React.FC = () => {
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [wrapperHeight, setWrapperHeight] = useState<number>(0);
+  const [printableHeight, setPrintableHeight] = useState<number>(0);
   const [isAutoFit, setIsAutoFit] = useState<boolean>(false);
 
   useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
     const updateHeightAndFit = () => {
-      if (!wrapperRef.current) return;
-      const wrapper = wrapperRef.current;
       setWrapperHeight(wrapper.offsetHeight);
+      const measuredPrintable = measurePrintableResumeHeight(wrapper);
+      setPrintableHeight(measuredPrintable);
 
       const fitEnabled = resumeData.meta.fitSignatureToPage ?? true;
       if (!fitEnabled) {
@@ -51,37 +56,36 @@ export const ResumeCanvas: React.FC = () => {
         return;
       }
 
-      const headerEl = wrapper.querySelector('.header') as HTMLElement | null;
-      const sectionsEl = wrapper.querySelector('#sortable-sections') as HTMLElement | null;
-      const declEl = wrapper.querySelector('#declarationSection') as HTMLElement | null;
-
-      if (headerEl && sectionsEl) {
-        const style = window.getComputedStyle(wrapper);
-        const padTop = parseFloat(style.paddingTop) || 0;
-        const padBottom = parseFloat(style.paddingBottom) || 0;
-        const headerHeight = headerEl.offsetHeight;
-        const sectionsHeight = sectionsEl.offsetHeight;
-        const declHeight = declEl ? declEl.offsetHeight : 0;
-
-        const totalContentHeight = padTop + headerHeight + sectionsHeight + declHeight + padBottom;
-        const A4_HEIGHT_PX = 1122;
-
-        const overflow = totalContentHeight - A4_HEIGHT_PX;
-        setIsAutoFit((prev) => {
-          if (prev) {
-            return totalContentHeight <= A4_HEIGHT_PX && totalContentHeight > A4_HEIGHT_PX - 85;
-          } else {
-            return overflow > 0 && overflow <= 85;
-          }
-        });
-      }
+      const overflow = measuredPrintable - A4_HEIGHT_PX;
+      setIsAutoFit((prev) => {
+        if (prev) {
+          return measuredPrintable <= A4_HEIGHT_PX + 2 && measuredPrintable > A4_HEIGHT_PX - 95;
+        }
+        return overflow > 0 && overflow <= 85;
+      });
     };
 
     updateHeightAndFit();
     const timer = setTimeout(updateHeightAndFit, 80);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(updateHeightAndFit);
+      observer.observe(wrapper);
+    }
+
+    let cancelled = false;
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (!cancelled) updateHeightAndFit();
+      });
+    }
+
     window.addEventListener('resize', updateHeightAndFit);
     return () => {
+      cancelled = true;
       clearTimeout(timer);
+      observer?.disconnect();
       window.removeEventListener('resize', updateHeightAndFit);
     };
   }, [sections, resumeData]);
@@ -134,7 +138,7 @@ export const ResumeCanvas: React.FC = () => {
   return (
     <>
       <div
-        className="w-full flex justify-center items-start overflow-visible px-1 py-1 print:p-0 print:m-0 print:block"
+        className="resume-zoom-stage w-full flex justify-center items-start overflow-visible px-1 py-1 print:p-0 print:m-0 print:block"
         style={{
           minHeight: wrapperHeight && zoom ? `${Math.round(wrapperHeight * zoom)}px` : undefined,
         }}
@@ -184,7 +188,10 @@ export const ResumeCanvas: React.FC = () => {
         </div>
       </div>
 
-      <DocumentStatusBar wrapperHeight={wrapperHeight} isAutoFit={isAutoFit} />
+      <DocumentStatusBar
+        wrapperHeight={printableHeight || wrapperHeight}
+        isAutoFit={isAutoFit}
+      />
     </>
   );
 };

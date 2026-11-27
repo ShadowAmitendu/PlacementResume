@@ -1,4 +1,5 @@
 import { DEFAULT_RESUME_DATA } from '../constants/themes';
+import { createUniqueId, sanitizeLinkUrl, sanitizeRichTextHtml } from './sanitize';
 import {
   ResumeData,
   SectionData,
@@ -10,6 +11,44 @@ import {
   DividerSectionData,
 } from '../types/resume';
 
+function sanitizeHeaderData(header: ResumeData['header']): ResumeData['header'] {
+  return {
+    fullName: sanitizeRichTextHtml(header.fullName),
+    degreeTitle: sanitizeRichTextHtml(header.degreeTitle),
+    universityCompany: sanitizeRichTextHtml(header.universityCompany),
+    location: sanitizeRichTextHtml(header.location),
+    email: sanitizeRichTextHtml(header.email),
+    phone: sanitizeRichTextHtml(header.phone),
+    links: (header.links || []).map((link, idx) => ({
+      id: link.id || createUniqueId(`link-${idx}`),
+      text: sanitizeRichTextHtml(link.text || 'Link'),
+      url: sanitizeLinkUrl(link.url || '#'),
+      icon: (link.icon as LinkIconType) || 'globe',
+    })),
+  };
+}
+
+function sanitizeSections(sections: SectionData[]): SectionData[] {
+  return sections.map((sec) => {
+    const title = sanitizeRichTextHtml(sec.title);
+    if (sec.type === 'text') {
+      return { ...sec, title, content: sanitizeRichTextHtml(sec.content) };
+    }
+    if (sec.type === 'list') {
+      return { ...sec, title, items: sec.items.map((item) => sanitizeRichTextHtml(item)) };
+    }
+    if (sec.type === 'table') {
+      return {
+        ...sec,
+        title,
+        headers: sec.headers ? sec.headers.map((h) => sanitizeRichTextHtml(h)) : undefined,
+        rows: sec.rows.map((row) => row.map((cell) => sanitizeRichTextHtml(cell))),
+      };
+    }
+    return { ...sec, title };
+  });
+}
+
 export function parseLegacyResume(data: any): ResumeData {
   if (!data) return DEFAULT_RESUME_DATA;
 
@@ -19,9 +58,16 @@ export function parseLegacyResume(data: any): ResumeData {
       ...DEFAULT_RESUME_DATA,
       ...data,
       meta: { ...DEFAULT_RESUME_DATA.meta, ...data.meta },
-      header: { ...DEFAULT_RESUME_DATA.header, ...data.header },
-      declaration: { ...DEFAULT_RESUME_DATA.declaration, ...data.declaration },
-      sections: data.sections || DEFAULT_RESUME_DATA.sections,
+      header: sanitizeHeaderData({ ...DEFAULT_RESUME_DATA.header, ...data.header }),
+      declaration: {
+        ...DEFAULT_RESUME_DATA.declaration,
+        ...data.declaration,
+        text: sanitizeRichTextHtml(data.declaration?.text ?? DEFAULT_RESUME_DATA.declaration.text),
+        place: sanitizeRichTextHtml(data.declaration?.place ?? DEFAULT_RESUME_DATA.declaration.place),
+        date: sanitizeRichTextHtml(data.declaration?.date ?? DEFAULT_RESUME_DATA.declaration.date),
+        signature: sanitizeRichTextHtml(data.declaration?.signature ?? DEFAULT_RESUME_DATA.declaration.signature),
+      },
+      sections: sanitizeSections(data.sections || DEFAULT_RESUME_DATA.sections),
     };
     return merged;
   }
@@ -82,6 +128,13 @@ export function parseLegacyResume(data: any): ResumeData {
         const phoneEl = root.querySelector('.phone-number');
         if (phoneEl) result.header.phone = phoneEl.textContent?.trim() || result.header.phone;
 
+        const emailLink = Array.from(root.querySelectorAll('.link-item')).find((el) =>
+          (el.textContent || '').includes('@') && !el.querySelector('a')
+        );
+        if (emailLink?.textContent) {
+          result.header.email = emailLink.textContent.trim();
+        }
+
         // Links
         const linkItems = root.querySelectorAll('.link-item');
         const parsedLinks: HeaderLink[] = [];
@@ -90,9 +143,9 @@ export function parseLegacyResume(data: any): ResumeData {
           if (a) {
             const iconKey = (item.getAttribute('data-link-icon') as LinkIconType) || 'globe';
             parsedLinks.push({
-              id: `link-${lIdx}`,
-              text: a.textContent?.trim() || 'Link',
-              url: a.getAttribute('href') || '#',
+              id: createUniqueId(`link-${lIdx}`),
+              text: sanitizeRichTextHtml(a.textContent?.trim() || 'Link'),
+              url: sanitizeLinkUrl(a.getAttribute('href') || '#'),
               icon: iconKey,
             });
           }
@@ -100,15 +153,15 @@ export function parseLegacyResume(data: any): ResumeData {
         if (parsedLinks.length > 0) result.header.links = parsedLinks;
       } else if (sec.type === 'section') {
         const titleEl = root.querySelector('.section-title');
-        const title = titleEl?.textContent?.trim() || 'Section:';
-        const sectionId = `sec-${index}-${Date.now()}`;
+        const title = sanitizeRichTextHtml(titleEl?.textContent?.trim() || 'Section:');
+        const sectionId = createUniqueId(`sec-${index}`);
 
         // Table section
         const table = root.querySelector('table');
         if (table) {
           const headers: string[] = [];
           table.querySelectorAll('tr th').forEach((th) => {
-            headers.push(th.innerHTML.trim());
+            headers.push(sanitizeRichTextHtml(th.innerHTML.trim()));
           });
 
           const rows: string[][] = [];
@@ -117,7 +170,7 @@ export function parseLegacyResume(data: any): ResumeData {
             const tds = tr.querySelectorAll('td');
             if (tds.length > 0) {
               const rowCells: string[] = [];
-              tds.forEach((td) => rowCells.push(td.innerHTML.trim()));
+              tds.forEach((td) => rowCells.push(sanitizeRichTextHtml(td.innerHTML.trim())));
               rows.push(rowCells);
             }
           });
@@ -137,17 +190,18 @@ export function parseLegacyResume(data: any): ResumeData {
         }
 
         // List section
-        const ul = root.querySelector('ul');
+        const ul = root.querySelector('ul, ol');
         if (ul) {
           const items: string[] = [];
           ul.querySelectorAll('li').forEach((li) => {
-            items.push(li.innerHTML.trim());
+            items.push(sanitizeRichTextHtml(li.innerHTML.trim()));
           });
           const listSec: ListSectionData = {
             id: sectionId,
             type: 'list',
             title,
             items,
+            listType: ul.tagName.toLowerCase() === 'ol' ? 'numbered' : 'bullet',
           };
           parsedSections.push(listSec);
           return;
@@ -166,7 +220,7 @@ export function parseLegacyResume(data: any): ResumeData {
 
         // Text paragraph section
         const p = root.querySelector('p');
-        const content = p ? p.innerHTML.trim() : root.innerHTML.trim();
+        const content = sanitizeRichTextHtml(p ? p.innerHTML.trim() : root.innerHTML.trim());
         const textSec: TextSectionData = {
           id: sectionId,
           type: 'text',
@@ -176,7 +230,7 @@ export function parseLegacyResume(data: any): ResumeData {
         parsedSections.push(textSec);
       } else if (sec.type === 'final') {
         const decl = root.querySelector('.declaration');
-        if (decl) result.declaration.text = decl.textContent?.trim() || result.declaration.text;
+        if (decl) result.declaration.text = sanitizeRichTextHtml(decl.textContent?.trim() || result.declaration.text);
       }
     });
 

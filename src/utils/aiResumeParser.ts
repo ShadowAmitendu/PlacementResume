@@ -1,4 +1,5 @@
 import { ResumeData, SectionData, TableSectionData, ListSectionData, TextSectionData, LinkIconType } from '../types/resume';
+import { createUniqueId, escapeHtml, sanitizeLinkUrl, sanitizeRichTextHtml } from './sanitize';
 
 export interface ParsedResumeResult {
   header: {
@@ -89,13 +90,21 @@ export const DEFAULT_GEMINI_MODELS: GeminiModelInfo[] = [
   },
 ];
 
-export async function fetchGeminiModels(apiKey: string): Promise<GeminiModelInfo[]> {
+export async function fetchGeminiModels(
+  apiKey: string,
+  signal?: AbortSignal
+): Promise<GeminiModelInfo[]> {
   if (!apiKey || apiKey.trim().length < 10) {
     return DEFAULT_GEMINI_MODELS;
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey.trim()}`;
-  const response = await fetch(url);
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models';
+  const response = await fetch(url, {
+    signal,
+    headers: {
+      'x-goog-api-key': apiKey.trim(),
+    },
+  });
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error?.message || `Failed to fetch Gemini models (${response.status})`);
@@ -150,7 +159,9 @@ export async function checkAvailableAiEngines(): Promise<{
   hasWindowAi: boolean;
   hasGeminiKey: boolean;
 }> {
-  const hasWindowAi = typeof window !== 'undefined' && Boolean((window as any).ai?.languageModel);
+  const hasWindowAi =
+    typeof window !== 'undefined' &&
+    Boolean((window as any).ai?.languageModel || (window as any).LanguageModel);
   const geminiKey = typeof window !== 'undefined' ? localStorage.getItem('placement_gemini_api_key') : null;
   return {
     hasWindowAi,
@@ -322,9 +333,9 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
     for (const line of sectionsFound.techSkills) {
       if (line.includes(':')) {
         const [cat, items] = line.split(/:\s*(.+)/);
-        technicalSkills.push(`● <strong>${cat.trim()}:</strong> ${items.trim()}`);
+        technicalSkills.push(`● <strong>${escapeHtml(cat.trim())}:</strong> ${escapeHtml(items.trim())}`);
       } else {
-        technicalSkills.push(line.replace(/^[•●-]\s*/, ''));
+        technicalSkills.push(escapeHtml(line.replace(/^[•●-]\s*/, '')));
       }
     }
   }
@@ -412,7 +423,8 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
 export async function parseResumeWithGemini(
   rawText: string,
   apiKey: string,
-  modelName: string = 'gemini-2.5-flash'
+  modelName: string = 'gemini-2.5-flash',
+  signal?: AbortSignal
 ): Promise<ParsedResumeResult> {
   const systemInstruction = `
 You are an expert resume parsing AI. Extract and structure the candidate's resume text into a strict, valid JSON object matching this schema:
@@ -475,11 +487,15 @@ Return ONLY valid JSON.
 `;
 
   const cleanModel = modelName.replace(/^models\//, '');
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent?key=${apiKey.trim()}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModel}:generateContent`;
 
   const response = await fetch(url, {
+    signal,
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey.trim(),
+    },
     body: JSON.stringify({
       contents: [
         {
@@ -515,7 +531,7 @@ Return ONLY valid JSON.
  * 3. Chrome Built-in AI (Prompt API / Gemini Nano)
  */
 export async function parseResumeWithWindowAi(rawText: string): Promise<ParsedResumeResult> {
-  const windowAi = (window as any).ai?.languageModel;
+  const windowAi = (window as any).ai?.languageModel || (window as any).LanguageModel;
   if (!windowAi) {
     throw new Error('Chrome Built-in AI is not available in this browser.');
   }
@@ -544,25 +560,26 @@ export function convertParsedToResumeData(
   mode: 'replace' | 'merge' = 'replace'
 ): ResumeData {
   const newSections: SectionData[] = [];
+  const nextId = (base: string) => (mode === 'merge' ? createUniqueId(base) : base);
 
   // Career Objective
   if (parsed.careerObjective) {
     newSections.push({
-      id: 'sec-objective',
+      id: nextId('sec-objective'),
       type: 'text',
       title: 'Career Objective:',
-      content: parsed.careerObjective,
+      content: sanitizeRichTextHtml(parsed.careerObjective),
     } as TextSectionData);
   }
 
   // Academics Table
   if (parsed.academics && parsed.academics.rows.length > 0) {
     newSections.push({
-      id: 'sec-academics',
+      id: nextId('sec-academics'),
       type: 'table',
       title: 'Academic Background:',
-      headers: parsed.academics.headers || ['Year', 'Qualification', 'Institution / Board', 'Marks / CGPA'],
-      rows: parsed.academics.rows,
+      headers: (parsed.academics.headers || ['Year', 'Qualification', 'Institution / Board', 'Marks / CGPA']).map(sanitizeRichTextHtml),
+      rows: parsed.academics.rows.map((r) => r.map(sanitizeRichTextHtml)),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -572,18 +589,18 @@ export function convertParsedToResumeData(
     const isFormattedTable = parsed.technicalSkills.some((s) => s.includes('<strong>') || s.includes(':'));
     if (isFormattedTable) {
       newSections.push({
-        id: 'sec-techskills',
+        id: nextId('sec-techskills'),
         type: 'table',
         title: 'Technical Skills:',
-        rows: parsed.technicalSkills.map((s) => [s]),
+        rows: parsed.technicalSkills.map((s) => [sanitizeRichTextHtml(s)]),
         showColBorders: false,
       } as TableSectionData);
     } else {
       newSections.push({
-        id: 'sec-techskills',
+        id: nextId('sec-techskills'),
         type: 'list',
         title: 'Technical Skills:',
-        items: parsed.technicalSkills,
+        items: parsed.technicalSkills.map(sanitizeRichTextHtml),
         listType: 'bullet',
       } as ListSectionData);
     }
@@ -592,10 +609,10 @@ export function convertParsedToResumeData(
   // Professional Skills
   if (parsed.professionalSkills && parsed.professionalSkills.length > 0) {
     newSections.push({
-      id: 'sec-profskills',
+      id: nextId('sec-profskills'),
       type: 'list',
       title: 'Professional Skills:',
-      items: parsed.professionalSkills,
+      items: parsed.professionalSkills.map(sanitizeRichTextHtml),
       listType: 'bullet',
     } as ListSectionData);
   }
@@ -603,11 +620,11 @@ export function convertParsedToResumeData(
   // Work Experience / Internships
   if (parsed.experience && parsed.experience.rows.length > 0) {
     newSections.push({
-      id: 'sec-experience',
+      id: nextId('sec-experience'),
       type: 'table',
       title: 'Work Experience / Internships:',
-      headers: parsed.experience.headers || ['Role / Company', 'Description', 'Duration'],
-      rows: parsed.experience.rows,
+      headers: (parsed.experience.headers || ['Role / Company', 'Description', 'Duration']).map(sanitizeRichTextHtml),
+      rows: parsed.experience.rows.map((r) => r.map(sanitizeRichTextHtml)),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -615,11 +632,11 @@ export function convertParsedToResumeData(
   // Projects
   if (parsed.projects && parsed.projects.rows.length > 0) {
     newSections.push({
-      id: 'sec-projects',
+      id: nextId('sec-projects'),
       type: 'table',
       title: 'Projects:',
-      headers: parsed.projects.headers || ['Project Name', 'Role / Description / Technologies', 'Duration'],
-      rows: parsed.projects.rows,
+      headers: (parsed.projects.headers || ['Project Name', 'Role / Description / Technologies', 'Duration']).map(sanitizeRichTextHtml),
+      rows: parsed.projects.rows.map((r) => r.map(sanitizeRichTextHtml)),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -627,10 +644,10 @@ export function convertParsedToResumeData(
   // Personal Profile
   if (parsed.personalProfile && parsed.personalProfile.length > 0) {
     newSections.push({
-      id: 'sec-profile',
+      id: nextId('sec-profile'),
       type: 'table',
       title: 'Personal Profile:',
-      rows: parsed.personalProfile,
+      rows: parsed.personalProfile.map((r) => r.map(sanitizeRichTextHtml)),
       variant: 'profile',
       showColBorders: false,
     } as TableSectionData);
@@ -638,27 +655,27 @@ export function convertParsedToResumeData(
 
   // Map Header Links
   const headerLinks = (parsed.header.links || []).map((l, idx) => ({
-    id: `link-ai-${idx + 1}`,
-    text: l.text || 'Link',
-    url: l.url || '#',
+    id: createUniqueId(`link-ai-${idx + 1}`),
+    text: sanitizeRichTextHtml(l.text || 'Link'),
+    url: sanitizeLinkUrl(l.url || '#'),
     icon: (l.icon as LinkIconType) || 'globe',
   }));
 
   const finalHeader = {
-    fullName: parsed.header.fullName || current.header.fullName,
-    degreeTitle: parsed.header.degreeTitle || current.header.degreeTitle,
-    universityCompany: parsed.header.universityCompany || current.header.universityCompany,
-    location: parsed.header.location || current.header.location,
-    email: parsed.header.email || current.header.email,
-    phone: parsed.header.phone || current.header.phone,
+    fullName: sanitizeRichTextHtml(parsed.header.fullName || current.header.fullName),
+    degreeTitle: sanitizeRichTextHtml(parsed.header.degreeTitle || current.header.degreeTitle),
+    universityCompany: sanitizeRichTextHtml(parsed.header.universityCompany || current.header.universityCompany),
+    location: sanitizeRichTextHtml(parsed.header.location || current.header.location),
+    email: sanitizeRichTextHtml(parsed.header.email || current.header.email),
+    phone: sanitizeRichTextHtml(parsed.header.phone || current.header.phone),
     links: headerLinks.length > 0 ? headerLinks : current.header.links,
   };
 
   const finalDeclaration = {
-    text: parsed.declaration?.text || current.declaration.text,
-    place: parsed.declaration?.place || current.declaration.place,
-    date: parsed.declaration?.date || current.declaration.date,
-    signature: parsed.declaration?.signature || current.declaration.signature,
+    text: sanitizeRichTextHtml(parsed.declaration?.text || current.declaration.text),
+    place: sanitizeRichTextHtml(parsed.declaration?.place || current.declaration.place),
+    date: sanitizeRichTextHtml(parsed.declaration?.date || current.declaration.date),
+    signature: sanitizeRichTextHtml(parsed.declaration?.signature || current.declaration.signature),
     signatureImage: current.declaration.signatureImage,
   };
 

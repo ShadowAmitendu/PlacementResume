@@ -1,8 +1,13 @@
 import React from 'react';
+import {
+  AddRegular,
+  DismissRegular,
+  TextBulletListLtrRegular,
+  TextNumberListLtrRegular,
+} from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { ListSectionData } from '../../../types/resume';
 import { EditableContent } from '../EditableContent';
-import { Plus, X } from 'lucide-react';
 
 interface ListSectionProps {
   section: ListSectionData;
@@ -35,7 +40,10 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddItem(index);
-    } else if (e.key === 'Backspace' && (!section.items[index] || section.items[index].trim() === '')) {
+    } else if (
+      e.key === 'Backspace' &&
+      (!section.items[index] || section.items[index].trim() === '')
+    ) {
       if (section.items.length > 1) {
         e.preventDefault();
         handleRemoveItem(index);
@@ -50,64 +58,66 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
     <div className="relative">
       <ListTag className={listClass}>
         {section.items.map((item, index) => (
-          <li key={index} className="group/item relative mb-0.5">
+          <li key={index} className="list-row-item relative mb-0.5">
             <EditableContent
               tagName="span"
               html={item}
               onChange={(val) => handleItemChange(index, val)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              placeholder="[Skill / List item]"
+              placeholder="[List item]"
               className="inline-block"
             />
             {section.items.length > 1 && (
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-destructive p-0.5 rounded no-print transition-opacity ml-2 inline-flex items-center align-middle cursor-pointer"
+                className="list-remove-btn text-neutral-500 hover:text-red-700 p-0.5 rounded no-print ml-1.5 inline-flex items-center align-middle cursor-pointer"
                 title="Remove item"
               >
-                <X className="w-3 h-3" />
+                <DismissRegular fontSize={12} />
               </button>
             )}
           </li>
         ))}
       </ListTag>
 
-      <div className="flex items-center justify-between pl-5 -mt-1 mb-2 no-print pr-2 text-xs">
+      <div className="flex items-center justify-between pl-5 -mt-1 mb-2 no-print pr-2 text-xs font-sans">
         <button
           type="button"
           onClick={() => handleAddItem()}
-          className="text-primary hover:underline flex items-center gap-1 font-medium cursor-pointer"
+          className="text-neutral-600 hover:text-neutral-950 flex items-center gap-1 font-medium cursor-pointer"
+          style={{ fontSize: 11 }}
         >
-          <Plus className="w-3 h-3" />
-          <span>Add list item</span>
+          <AddRegular fontSize={12} />
+          <span>Add item</span>
         </button>
 
-        <div className="flex items-center gap-1 text-[11px] text-muted-foreground bg-(--ui-surface2) px-2 py-0.5 rounded border border-(--ui-border)">
-          <span className="font-medium mr-1 text-[10px] uppercase">Format:</span>
+        <div className="flex items-center gap-0.5 p-0.5 rounded bg-neutral-100 border border-neutral-200">
           <button
             type="button"
             onClick={() => updateSection(section.id, { listType: 'bullet' })}
-            className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors text-[11px] ${
+            className={`px-1.5 py-0.5 rounded cursor-pointer flex items-center gap-1 text-[11px] transition-colors ${
               !isNumbered
-                ? 'bg-primary text-primary-foreground font-semibold'
-                : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                ? 'bg-white text-neutral-900 font-semibold shadow-2xs'
+                : 'text-neutral-600 hover:text-neutral-900'
             }`}
             title="Bulleted list"
           >
-            • Bullet
+            <TextBulletListLtrRegular fontSize={12} />
+            <span>Bullets</span>
           </button>
           <button
             type="button"
             onClick={() => updateSection(section.id, { listType: 'numbered' })}
-            className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors text-[11px] ${
+            className={`px-1.5 py-0.5 rounded cursor-pointer flex items-center gap-1 text-[11px] transition-colors ${
               isNumbered
-                ? 'bg-primary text-primary-foreground font-semibold'
-                : 'hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                ? 'bg-white text-neutral-900 font-semibold shadow-2xs'
+                : 'text-neutral-600 hover:text-neutral-900'
             }`}
             title="Numbered list"
           >
-            1. Numbered
+            <TextNumberListLtrRegular fontSize={12} />
+            <span>Numbered</span>
           </button>
         </div>
       </div>
