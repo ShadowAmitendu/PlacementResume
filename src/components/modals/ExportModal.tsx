@@ -60,7 +60,7 @@ export const ExportModal: React.FC = () => {
             <div className="py-1 space-y-2">
               <Field
                 label="File name"
-                hint="Saves a .resumeBuilder backup file that you can import later."
+                hint="Saves a .rsbld backup file that you can import later."
               >
                 <Input
                   value={fileName}
@@ -74,7 +74,7 @@ export const ExportModal: React.FC = () => {
                       className="text-xs font-mono"
                       style={{ color: tokens.colorNeutralForeground3 }}
                     >
-                      .resumeBuilder
+                      .rsbld
                     </span>
                   }
                   autoFocus

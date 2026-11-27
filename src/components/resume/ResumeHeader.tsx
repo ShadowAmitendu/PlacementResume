@@ -97,6 +97,7 @@ export const ResumeHeader: React.FC = () => {
       <div className="header-details">
         <EditableContent
           tagName="h1"
+          singleLine
           html={fullName}
           onChange={(val) => updateHeader({ fullName: val })}
           placeholder="Your Full Name"
@@ -104,6 +105,7 @@ export const ResumeHeader: React.FC = () => {
 
         <div className="subtitle-line">
           <EditableContent
+            singleLine
             html={degreeTitle}
             onChange={(val) => updateHeader({ degreeTitle: val })}
             placeholder="Degree / Job Title"
@@ -111,6 +113,7 @@ export const ResumeHeader: React.FC = () => {
           />
           <span className="subtitle-sep">|</span>
           <EditableContent
+            singleLine
             html={universityCompany}
             onChange={(val) => updateHeader({ universityCompany: val })}
             placeholder="University / Company"

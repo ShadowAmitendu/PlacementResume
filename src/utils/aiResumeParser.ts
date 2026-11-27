@@ -173,10 +173,8 @@ export async function checkAvailableAiEngines(): Promise<{
  * 1. Heuristic Rule-Based / NLP Instant Local Parser
  */
 export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
-  const lines = rawText
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+  const rawLines = rawText.split(/\r?\n/).map((l) => l.trim());
+  const lines = rawLines.filter((l) => l.length > 0);
 
   // Extract Email
   const emailMatch = rawText.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/);
@@ -266,7 +264,19 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
   const sectionsFound: Record<string, string[]> = {};
   let currentSecKey = 'header';
 
-  for (const line of lines) {
+  for (const line of rawLines) {
+    if (!line) {
+      if (
+        currentSecKey === 'projects' &&
+        sectionsFound.projects &&
+        sectionsFound.projects.length > 0 &&
+        sectionsFound.projects[sectionsFound.projects.length - 1] !== ''
+      ) {
+        sectionsFound.projects.push('');
+      }
+      continue;
+    }
+
     const lower = line.toLowerCase();
     let matchedSec = '';
 
@@ -292,6 +302,16 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
     careerObjective = sectionsFound.objective.join(' ').replace(/^objective:?\s*/i, '').trim();
   }
 
+  const normalizeAcademicRow = (cells: string[]): string[] => {
+    if (cells.length === 4) return cells;
+    if (cells.length < 4) {
+      const padded = [...cells];
+      while (padded.length < 4) padded.push('-');
+      return padded;
+    }
+    return [cells[0], cells[1], cells.slice(2, -1).join(', '), cells[cells.length - 1]];
+  };
+
   // Parse Academics Table
   const academicRows: string[][] = [];
   if (sectionsFound.academics) {
@@ -301,15 +321,18 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
       const cgpaMatch = line.match(/\b(?:\d{1,2}(?:\.\d{1,2})?\s*(?:%|cgpa|gpa)|\d\.\d{1,2})\b/i);
       if (yearMatch || cgpaMatch || /b\.?tech|m\.?tech|b\.?sc|higher secondary|secondary|class xii|class x|diploma/i.test(line)) {
         if (currentRow.length >= 2) {
-          while (currentRow.length < 4) currentRow.push('-');
-          academicRows.push(currentRow);
+          academicRows.push(normalizeAcademicRow(currentRow));
           currentRow = [];
         }
       }
       if (line.includes('|') || line.includes('\t')) {
         const parts = line.split(/[|\t]+/).map((p) => p.trim()).filter(Boolean);
         if (parts.length >= 2) {
-          academicRows.push(parts);
+          if (currentRow.length >= 2) {
+            academicRows.push(normalizeAcademicRow(currentRow));
+          }
+          currentRow = [];
+          academicRows.push(normalizeAcademicRow(parts));
           continue;
         }
       }
@@ -322,8 +345,7 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
       }
     }
     if (currentRow.length >= 2) {
-      while (currentRow.length < 4) currentRow.push('-');
-      academicRows.push(currentRow);
+      academicRows.push(normalizeAcademicRow(currentRow));
     }
   }
 
@@ -331,11 +353,20 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
   const technicalSkills: string[] = [];
   if (sectionsFound.techSkills) {
     for (const line of sectionsFound.techSkills) {
-      if (line.includes(':')) {
-        const [cat, items] = line.split(/:\s*(.+)/);
-        technicalSkills.push(`● <strong>${escapeHtml(cat.trim())}:</strong> ${escapeHtml(items.trim())}`);
+      const cleanedLine = line.replace(/^[•●-]\s*/, '');
+      const colonIdx = cleanedLine.indexOf(':');
+      if (colonIdx !== -1) {
+        const cat = cleanedLine.slice(0, colonIdx).trim();
+        const items = cleanedLine.slice(colonIdx + 1).trim();
+        if (cat && items) {
+          technicalSkills.push(`● <strong>${escapeHtml(cat)}:</strong> ${escapeHtml(items)}`);
+        } else if (cat) {
+          technicalSkills.push(`● <strong>${escapeHtml(cat)}:</strong>`);
+        } else if (items) {
+          technicalSkills.push(escapeHtml(items));
+        }
       } else {
-        technicalSkills.push(escapeHtml(line.replace(/^[•●-]\s*/, '')));
+        technicalSkills.push(escapeHtml(cleanedLine));
       }
     }
   }
@@ -343,34 +374,116 @@ export function parseResumeHeuristically(rawText: string): ParsedResumeResult {
   // Parse Projects
   const projectRows: string[][] = [];
   if (sectionsFound.projects) {
-    let currentProj: { name: string; desc: string; duration: string } = { name: '', desc: '', duration: '' };
+    const projectDateRe =
+      /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*20\d\d(?:\s*[-–]\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*20\d\d|present)?\b/i;
+    const bulletPrefixRe = /^(?:[•●]\s*|[-*]\s+)/;
+
+    let currentProj: {
+      name: string;
+      desc: string;
+      duration: string;
+      startedWithBullet: boolean;
+      descUsesBullets: boolean;
+    } = {
+      name: '',
+      desc: '',
+      duration: '',
+      startedWithBullet: false,
+      descUsesBullets: false,
+    };
+
+    const flushProject = () => {
+      if (!currentProj.name) return;
+      projectRows.push([
+        currentProj.name,
+        currentProj.desc || 'Project Description',
+        currentProj.duration || 'Duration',
+      ]);
+      currentProj = {
+        name: '',
+        desc: '',
+        duration: '',
+        startedWithBullet: false,
+        descUsesBullets: false,
+      };
+    };
+
     for (const line of sectionsFound.projects) {
-      const dateMatch = line.match(/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*20\d\d(?:\s*[-–]\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\s*20\d\d|present)?\b/i);
+      if (line === '') {
+        flushProject();
+        continue;
+      }
+
+      if (line.includes('|') || line.includes('\t')) {
+        const parts = line.split(/[|\t]+/).map((p) => p.trim()).filter(Boolean);
+        if (parts.length >= 3) {
+          flushProject();
+          projectRows.push([
+            parts[0].replace(bulletPrefixRe, ''),
+            parts.slice(1, -1).join(' | '),
+            parts[parts.length - 1],
+          ]);
+          continue;
+        }
+        if (parts.length === 2) {
+          const secondIsDate = projectDateRe.test(parts[1]) && parts[1].length <= 30;
+          if (!secondIsDate) {
+            flushProject();
+            projectRows.push([parts[0].replace(bulletPrefixRe, ''), parts[1], 'Duration']);
+            continue;
+          }
+          flushProject();
+          currentProj.name = parts[0].replace(bulletPrefixRe, '');
+          currentProj.duration = parts[1];
+          currentProj.startedWithBullet = bulletPrefixRe.test(parts[0]);
+          continue;
+        }
+      }
+
+      const isBullet = bulletPrefixRe.test(line);
+      const dateMatch = line.match(projectDateRe);
+
+      if (currentProj.name && currentProj.desc) {
+        const hasNewDateCue =
+          Boolean(dateMatch) && (Boolean(currentProj.duration) || (!isBullet && line.length < 80));
+        const hasNewBulletCue =
+          isBullet &&
+          ((currentProj.startedWithBullet && !currentProj.descUsesBullets) ||
+            (!currentProj.startedWithBullet && !currentProj.descUsesBullets && currentProj.desc.length > 40));
+
+        if (hasNewDateCue || hasNewBulletCue) {
+          flushProject();
+        }
+      }
+
       if (dateMatch && !currentProj.duration) {
-        currentProj.duration = dateMatch[0];
+        currentProj.duration = dateMatch[0].trim();
       }
+
+      const cleanLine = line.replace(bulletPrefixRe, '');
       if (!currentProj.name) {
-        currentProj.name = line.replace(/^[•●-]\s*/, '');
+        currentProj.name = cleanLine;
+        currentProj.startedWithBullet = isBullet;
       } else {
-        currentProj.desc = currentProj.desc ? `${currentProj.desc} ${line}` : line;
-      }
-      if (currentProj.name && currentProj.desc.length > 40) {
-        projectRows.push([currentProj.name, currentProj.desc, currentProj.duration || 'Duration']);
-        currentProj = { name: '', desc: '', duration: '' };
+        if (!currentProj.desc && isBullet) {
+          currentProj.descUsesBullets = true;
+        }
+        currentProj.desc = currentProj.desc ? `${currentProj.desc} ${cleanLine}` : cleanLine;
       }
     }
-    if (currentProj.name) {
-      projectRows.push([currentProj.name, currentProj.desc || 'Project Description', currentProj.duration || 'Duration']);
-    }
+
+    flushProject();
   }
 
   // Parse Personal Profile
   const personalProfile: string[][] = [];
   if (sectionsFound.profile) {
     for (const line of sectionsFound.profile) {
-      if (line.includes(':')) {
-        const [k, v] = line.split(/:\s*(.+)/);
-        if (k && v) personalProfile.push([k.trim(), v.trim()]);
+      const colonIdx = line.indexOf(':');
+      if (colonIdx !== -1) {
+        const k = line.slice(0, colonIdx).trim();
+        const v = line.slice(colonIdx + 1).trim();
+        if (k && v) personalProfile.push([k, v]);
       }
     }
   }
@@ -551,6 +664,46 @@ export async function parseResumeWithWindowAi(rawText: string): Promise<ParsedRe
   return JSON.parse(jsonMatch[0]) as ParsedResumeResult;
 }
 
+const SAFE_FORMATTING_AND_ENTITY_RE =
+  /(<\/?(?:strong|b|i|em|u)\s*>|<br\s*\/?>|&(?:lt|gt|amp|quot|#39|#x27);)/gi;
+
+function escapePreservingSafeTags(raw: string): string {
+  return raw
+    .split(SAFE_FORMATTING_AND_ENTITY_RE)
+    .map((part, idx) => (idx % 2 === 1 ? part : escapeHtml(part)))
+    .join('');
+}
+
+/**
+ * Normalizes imported plain text (or safely formatted skill HTML) into sanitized resume HTML.
+ */
+export function formatImportedRichText(
+  raw: string,
+  multiline = false,
+  preserveSafeTags = false
+): string {
+  if (!raw) return '';
+  const normalized = raw.replace(/\r\n?/g, '\n').replace(/^\n+|\n+$/g, '');
+  if (!normalized) return '';
+
+  const escapeSegment = preserveSafeTags ? escapePreservingSafeTags : escapeHtml;
+
+  let html: string;
+  if (multiline && /\n{2,}/.test(normalized)) {
+    const paragraphs = normalized
+      .split(/\n{2,}/)
+      .map((para) => para.replace(/^\n+|\n+$/g, ''))
+      .filter((para) => para.length > 0);
+    html = paragraphs
+      .map((para) => `<div>${escapeSegment(para).replace(/\n/g, '<br>')}</div>`)
+      .join('');
+  } else {
+    html = escapeSegment(normalized).replace(/\n/g, '<br>');
+  }
+
+  return sanitizeRichTextHtml(html);
+}
+
 /**
  * 4. Convert Parsed Result into PlacementResume Document Data Structure
  */
@@ -568,7 +721,7 @@ export function convertParsedToResumeData(
       id: nextId('sec-objective'),
       type: 'text',
       title: 'Career Objective:',
-      content: sanitizeRichTextHtml(parsed.careerObjective),
+      content: formatImportedRichText(parsed.careerObjective, true),
     } as TextSectionData);
   }
 
@@ -578,8 +731,10 @@ export function convertParsedToResumeData(
       id: nextId('sec-academics'),
       type: 'table',
       title: 'Academic Background:',
-      headers: (parsed.academics.headers || ['Year', 'Qualification', 'Institution / Board', 'Marks / CGPA']).map(sanitizeRichTextHtml),
-      rows: parsed.academics.rows.map((r) => r.map(sanitizeRichTextHtml)),
+      headers: (parsed.academics.headers || ['Year', 'Qualification', 'Institution / Board', 'Marks / CGPA']).map(
+        (h) => formatImportedRichText(h)
+      ),
+      rows: parsed.academics.rows.map((r) => r.map((cell) => formatImportedRichText(cell, true))),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -592,7 +747,7 @@ export function convertParsedToResumeData(
         id: nextId('sec-techskills'),
         type: 'table',
         title: 'Technical Skills:',
-        rows: parsed.technicalSkills.map((s) => [sanitizeRichTextHtml(s)]),
+        rows: parsed.technicalSkills.map((s) => [formatImportedRichText(s, false, true)]),
         showColBorders: false,
       } as TableSectionData);
     } else {
@@ -600,7 +755,7 @@ export function convertParsedToResumeData(
         id: nextId('sec-techskills'),
         type: 'list',
         title: 'Technical Skills:',
-        items: parsed.technicalSkills.map(sanitizeRichTextHtml),
+        items: parsed.technicalSkills.map((s) => formatImportedRichText(s, false, true)),
         listType: 'bullet',
       } as ListSectionData);
     }
@@ -612,7 +767,7 @@ export function convertParsedToResumeData(
       id: nextId('sec-profskills'),
       type: 'list',
       title: 'Professional Skills:',
-      items: parsed.professionalSkills.map(sanitizeRichTextHtml),
+      items: parsed.professionalSkills.map((s) => formatImportedRichText(s)),
       listType: 'bullet',
     } as ListSectionData);
   }
@@ -623,8 +778,10 @@ export function convertParsedToResumeData(
       id: nextId('sec-experience'),
       type: 'table',
       title: 'Work Experience / Internships:',
-      headers: (parsed.experience.headers || ['Role / Company', 'Description', 'Duration']).map(sanitizeRichTextHtml),
-      rows: parsed.experience.rows.map((r) => r.map(sanitizeRichTextHtml)),
+      headers: (parsed.experience.headers || ['Role / Company', 'Description', 'Duration']).map((h) =>
+        formatImportedRichText(h)
+      ),
+      rows: parsed.experience.rows.map((r) => r.map((cell) => formatImportedRichText(cell, true))),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -635,8 +792,10 @@ export function convertParsedToResumeData(
       id: nextId('sec-projects'),
       type: 'table',
       title: 'Projects:',
-      headers: (parsed.projects.headers || ['Project Name', 'Role / Description / Technologies', 'Duration']).map(sanitizeRichTextHtml),
-      rows: parsed.projects.rows.map((r) => r.map(sanitizeRichTextHtml)),
+      headers: (parsed.projects.headers || ['Project Name', 'Role / Description / Technologies', 'Duration']).map(
+        (h) => formatImportedRichText(h)
+      ),
+      rows: parsed.projects.rows.map((r) => r.map((cell) => formatImportedRichText(cell, true))),
       showColBorders: false,
     } as TableSectionData);
   }
@@ -647,7 +806,7 @@ export function convertParsedToResumeData(
       id: nextId('sec-profile'),
       type: 'table',
       title: 'Personal Profile:',
-      rows: parsed.personalProfile.map((r) => r.map(sanitizeRichTextHtml)),
+      rows: parsed.personalProfile.map((r) => r.map((cell) => formatImportedRichText(cell))),
       variant: 'profile',
       showColBorders: false,
     } as TableSectionData);
@@ -656,26 +815,46 @@ export function convertParsedToResumeData(
   // Map Header Links
   const headerLinks = (parsed.header.links || []).map((l, idx) => ({
     id: createUniqueId(`link-ai-${idx + 1}`),
-    text: sanitizeRichTextHtml(l.text || 'Link'),
+    text: formatImportedRichText(l.text || 'Link'),
     url: sanitizeLinkUrl(l.url || '#'),
     icon: (l.icon as LinkIconType) || 'globe',
   }));
 
   const finalHeader = {
-    fullName: sanitizeRichTextHtml(parsed.header.fullName || current.header.fullName),
-    degreeTitle: sanitizeRichTextHtml(parsed.header.degreeTitle || current.header.degreeTitle),
-    universityCompany: sanitizeRichTextHtml(parsed.header.universityCompany || current.header.universityCompany),
-    location: sanitizeRichTextHtml(parsed.header.location || current.header.location),
-    email: sanitizeRichTextHtml(parsed.header.email || current.header.email),
-    phone: sanitizeRichTextHtml(parsed.header.phone || current.header.phone),
+    fullName: parsed.header.fullName
+      ? formatImportedRichText(parsed.header.fullName)
+      : sanitizeRichTextHtml(current.header.fullName),
+    degreeTitle: parsed.header.degreeTitle
+      ? formatImportedRichText(parsed.header.degreeTitle)
+      : sanitizeRichTextHtml(current.header.degreeTitle),
+    universityCompany: parsed.header.universityCompany
+      ? formatImportedRichText(parsed.header.universityCompany)
+      : sanitizeRichTextHtml(current.header.universityCompany),
+    location: parsed.header.location
+      ? formatImportedRichText(parsed.header.location)
+      : sanitizeRichTextHtml(current.header.location),
+    email: parsed.header.email
+      ? formatImportedRichText(parsed.header.email)
+      : sanitizeRichTextHtml(current.header.email),
+    phone: parsed.header.phone
+      ? formatImportedRichText(parsed.header.phone)
+      : sanitizeRichTextHtml(current.header.phone),
     links: headerLinks.length > 0 ? headerLinks : current.header.links,
   };
 
   const finalDeclaration = {
-    text: sanitizeRichTextHtml(parsed.declaration?.text || current.declaration.text),
-    place: sanitizeRichTextHtml(parsed.declaration?.place || current.declaration.place),
-    date: sanitizeRichTextHtml(parsed.declaration?.date || current.declaration.date),
-    signature: sanitizeRichTextHtml(parsed.declaration?.signature || current.declaration.signature),
+    text: parsed.declaration?.text
+      ? formatImportedRichText(parsed.declaration.text, true)
+      : sanitizeRichTextHtml(current.declaration.text),
+    place: parsed.declaration?.place
+      ? formatImportedRichText(parsed.declaration.place)
+      : sanitizeRichTextHtml(current.declaration.place),
+    date: parsed.declaration?.date
+      ? formatImportedRichText(parsed.declaration.date)
+      : sanitizeRichTextHtml(current.declaration.date),
+    signature: parsed.declaration?.signature
+      ? formatImportedRichText(parsed.declaration.signature)
+      : sanitizeRichTextHtml(current.declaration.signature),
     signatureImage: current.declaration.signatureImage,
   };
 

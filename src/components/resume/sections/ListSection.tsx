@@ -7,6 +7,7 @@ import {
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { ListSectionData } from '../../../types/resume';
+import { htmlToPlainText } from '../../../utils/documentMetrics';
 import { EditableContent } from '../EditableContent';
 
 interface ListSectionProps {
@@ -14,14 +15,8 @@ interface ListSectionProps {
 }
 
 export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
-  const { updateSection } = useResume();
+  const { updateSection, updateListItem } = useResume();
   const isNumbered = section.listType === 'numbered';
-
-  const handleItemChange = (index: number, val: string) => {
-    const updated = [...section.items];
-    updated[index] = val;
-    updateSection(section.id, { items: updated });
-  };
 
   const handleAddItem = (afterIndex?: number) => {
     const updated = [...section.items];
@@ -42,7 +37,7 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
       handleAddItem(index);
     } else if (
       e.key === 'Backspace' &&
-      (!section.items[index] || section.items[index].trim() === '')
+      htmlToPlainText(section.items[index]).trim() === ''
     ) {
       if (section.items.length > 1) {
         e.preventDefault();
@@ -60,18 +55,18 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
         {section.items.map((item, index) => (
           <li key={index} className="list-row-item relative mb-0.5">
             <EditableContent
-              tagName="span"
+              tagName="div"
               html={item}
-              onChange={(val) => handleItemChange(index, val)}
+              onChange={(val) => updateListItem(section.id, index, val)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               placeholder="[List item]"
-              className="inline-block"
+              className="block w-full pr-6"
             />
             {section.items.length > 1 && (
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="list-remove-btn text-neutral-500 hover:text-red-700 p-0.5 rounded no-print ml-1.5 inline-flex items-center align-middle cursor-pointer"
+                className="list-remove-btn absolute right-0 top-0.5 text-neutral-500 hover:text-red-700 p-0.5 rounded no-print inline-flex items-center cursor-pointer"
                 title="Remove item"
               >
                 <DismissRegular fontSize={12} />

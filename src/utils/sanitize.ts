@@ -12,12 +12,21 @@ const ALLOWED_TAGS = new Set([
   'BR',
   'DIV',
   'P',
+  'H1',
+  'H2',
+  'H3',
   'A',
   'UL',
   'OL',
   'LI',
   'FONT',
 ]);
+
+const ALIGNABLE_TAGS = new Set(['DIV', 'P', 'H1', 'H2', 'H3', 'LI']);
+const VALID_ALIGN_VALUES = new Set(['left', 'center', 'right', 'justify']);
+
+const FOCUS_HIGHLIGHT_LEAK_RE =
+  /^rgba\(\s*(?:15\s*,\s*108\s*,\s*189\s*,\s*0?\.08|255\s*,\s*255\s*,\s*255\s*,\s*0?\.20?|255\s*,\s*255\s*,\s*255\s*,\s*0?\.14|0\s*,\s*0\s*,\s*0\s*,\s*0?\.045)\s*\)$/i;
 
 const ALLOWED_CLASSES = new Set(['code-inline']);
 
@@ -84,6 +93,7 @@ function sanitizeStyleAttribute(rawStyle: string): string {
     const val = part.slice(colonIdx + 1).trim();
     if (!SAFE_STYLE_PROPS.has(prop) || !val) continue;
     if (/url\s*\(|expression\s*\(|@import|-moz-binding/i.test(val)) continue;
+    if (prop === 'background-color' && FOCUS_HIGHLIGHT_LEAK_RE.test(val)) continue;
     safeDeclarations.push(`${prop}: ${val}`);
   }
   return safeDeclarations.join('; ');
@@ -104,7 +114,8 @@ function sanitizeNode(node: Node, doc: Document): Node | null {
     return null;
   }
 
-  if (!ALLOWED_TAGS.has(tag)) {
+  const isCenter = tag === 'CENTER';
+  if (!isCenter && !ALLOWED_TAGS.has(tag)) {
     const frag = doc.createDocumentFragment();
     el.childNodes.forEach((child) => {
       const sanitizedChild = sanitizeNode(child, doc);
@@ -113,12 +124,24 @@ function sanitizeNode(node: Node, doc: Document): Node | null {
     return frag;
   }
 
-  const cleanEl = doc.createElement(el.tagName.toLowerCase());
+  const cleanEl = doc.createElement(isCenter ? 'div' : el.tagName.toLowerCase());
 
   const styleAttr = el.getAttribute('style');
-  if (styleAttr) {
-    const cleanStyle = sanitizeStyleAttribute(styleAttr);
-    if (cleanStyle) cleanEl.setAttribute('style', cleanStyle);
+  let cleanStyle = styleAttr ? sanitizeStyleAttribute(styleAttr) : '';
+
+  if (isCenter) {
+    if (!/(?:^|;)\s*text-align\s*:/i.test(cleanStyle)) {
+      cleanStyle = cleanStyle ? `${cleanStyle}; text-align: center` : 'text-align: center';
+    }
+  } else if (ALIGNABLE_TAGS.has(tag)) {
+    const alignAttr = el.getAttribute('align')?.trim().toLowerCase();
+    if (alignAttr && VALID_ALIGN_VALUES.has(alignAttr) && !/(?:^|;)\s*text-align\s*:/i.test(cleanStyle)) {
+      cleanStyle = cleanStyle ? `${cleanStyle}; text-align: ${alignAttr}` : `text-align: ${alignAttr}`;
+    }
+  }
+
+  if (cleanStyle) {
+    cleanEl.setAttribute('style', cleanStyle);
   }
 
   const classAttr = el.getAttribute('class');

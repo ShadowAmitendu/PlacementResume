@@ -1,5 +1,5 @@
 import { DEFAULT_RESUME_DATA } from '../constants/themes';
-import { createUniqueId, sanitizeLinkUrl, sanitizeRichTextHtml } from './sanitize';
+import { createUniqueId, escapeHtml, sanitizeLinkUrl, sanitizeRichTextHtml } from './sanitize';
 import {
   ResumeData,
   SectionData,
@@ -119,20 +119,29 @@ export function parseLegacyResume(data: any): ResumeData {
 
       if (sec.type === 'header') {
         const h1 = root.querySelector('h1');
-        if (h1) result.header.fullName = h1.textContent?.trim() || result.header.fullName;
+        const h1Text = h1?.textContent?.trim();
+        if (h1Text) result.header.fullName = sanitizeRichTextHtml(escapeHtml(h1Text));
 
         const subSpans = root.querySelectorAll('.subtitle-line span');
-        if (subSpans.length >= 1) result.header.degreeTitle = subSpans[0].textContent?.trim() || '';
-        if (subSpans.length >= 3) result.header.universityCompany = subSpans[2].textContent?.trim() || '';
+        if (subSpans.length >= 1) {
+          const deg = subSpans[0].textContent?.trim() || '';
+          result.header.degreeTitle = deg ? sanitizeRichTextHtml(escapeHtml(deg)) : '';
+        }
+        if (subSpans.length >= 3) {
+          const uni = subSpans[2].textContent?.trim() || '';
+          result.header.universityCompany = uni ? sanitizeRichTextHtml(escapeHtml(uni)) : '';
+        }
 
         const phoneEl = root.querySelector('.phone-number');
-        if (phoneEl) result.header.phone = phoneEl.textContent?.trim() || result.header.phone;
+        const phoneText = phoneEl?.textContent?.trim();
+        if (phoneText) result.header.phone = sanitizeRichTextHtml(escapeHtml(phoneText));
 
         const emailLink = Array.from(root.querySelectorAll('.link-item')).find((el) =>
           (el.textContent || '').includes('@') && !el.querySelector('a')
         );
         if (emailLink?.textContent) {
-          result.header.email = emailLink.textContent.trim();
+          const emailText = emailLink.textContent.trim();
+          result.header.email = emailText ? sanitizeRichTextHtml(escapeHtml(emailText)) : result.header.email;
         }
 
         // Links
@@ -144,7 +153,7 @@ export function parseLegacyResume(data: any): ResumeData {
             const iconKey = (item.getAttribute('data-link-icon') as LinkIconType) || 'globe';
             parsedLinks.push({
               id: createUniqueId(`link-${lIdx}`),
-              text: sanitizeRichTextHtml(a.textContent?.trim() || 'Link'),
+              text: sanitizeRichTextHtml(escapeHtml(a.textContent?.trim() || 'Link')),
               url: sanitizeLinkUrl(a.getAttribute('href') || '#'),
               icon: iconKey,
             });
@@ -153,7 +162,7 @@ export function parseLegacyResume(data: any): ResumeData {
         if (parsedLinks.length > 0) result.header.links = parsedLinks;
       } else if (sec.type === 'section') {
         const titleEl = root.querySelector('.section-title');
-        const title = sanitizeRichTextHtml(titleEl?.textContent?.trim() || 'Section:');
+        const title = sanitizeRichTextHtml(escapeHtml(titleEl?.textContent?.trim() || 'Section:'));
         const sectionId = createUniqueId(`sec-${index}`);
 
         // Table section
@@ -220,7 +229,15 @@ export function parseLegacyResume(data: any): ResumeData {
 
         // Text paragraph section
         const p = root.querySelector('p');
-        const content = sanitizeRichTextHtml(p ? p.innerHTML.trim() : root.innerHTML.trim());
+        let rawContent = '';
+        if (p) {
+          rawContent = p.innerHTML.trim();
+        } else {
+          const contentClone = root.cloneNode(true) as HTMLElement;
+          contentClone.querySelectorAll('.section-title').forEach((el) => el.remove());
+          rawContent = contentClone.innerHTML.trim();
+        }
+        const content = sanitizeRichTextHtml(rawContent);
         const textSec: TextSectionData = {
           id: sectionId,
           type: 'text',
@@ -230,7 +247,8 @@ export function parseLegacyResume(data: any): ResumeData {
         parsedSections.push(textSec);
       } else if (sec.type === 'final') {
         const decl = root.querySelector('.declaration');
-        if (decl) result.declaration.text = sanitizeRichTextHtml(decl.textContent?.trim() || result.declaration.text);
+        const declText = decl?.textContent?.trim();
+        if (declText) result.declaration.text = sanitizeRichTextHtml(escapeHtml(declText));
       }
     });
 

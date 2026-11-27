@@ -66,6 +66,228 @@ const FONT_SIZES = [
   { label: '16pt', value: '16pt' },
 ];
 
+type AlignmentCommand = 'justifyLeft' | 'justifyCenter' | 'justifyRight' | 'justifyFull';
+
+const ALIGN_CSS_VALUE: Record<AlignmentCommand, 'left' | 'center' | 'right' | 'justify'> = {
+  justifyLeft: 'left',
+  justifyCenter: 'center',
+  justifyRight: 'right',
+  justifyFull: 'justify',
+};
+
+function isFocusTintBackground(rawBg: string): boolean {
+  const bg = rawBg.replace(/\s+/g, '').toLowerCase();
+  return (
+    /^rgba\(15,108,189,0\.0(?:8|78\d*)\)$/.test(bg) ||
+    /^rgba\(255,255,255,0\.2(?:0*)?\)$/.test(bg)
+  );
+}
+
+function findEditableAncestor(node: Node | null | undefined): HTMLElement | null {
+  if (!node) return null;
+  const el = node instanceof HTMLElement ? node : node.parentElement;
+  return (el?.closest('.editable-text') as HTMLElement | null) ?? null;
+}
+
+function rangeIntersectsNode(range: Range, node: Node): boolean {
+  if (node.contains(range.startContainer) || node.contains(range.endContainer)) {
+    return true;
+  }
+  if (typeof range.intersectsNode === 'function') {
+    try {
+      return range.intersectsNode(node);
+    } catch {
+      // Fallback below when DOM implementation throws
+    }
+  }
+  const nodeRange = document.createRange();
+  nodeRange.selectNodeContents(node);
+  return (
+    range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0 &&
+    range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0
+  );
+}
+
+function cleanupAlignmentArtifacts(
+  editable: HTMLElement,
+  preExistingSpans: Set<HTMLSpanElement>
+): void {
+  // Normalize legacy align="..." attributes into inline style.textAlign
+  editable.querySelectorAll('[align]').forEach((node) => {
+    const el = node as HTMLElement;
+    const alignVal = el.getAttribute('align')?.trim().toLowerCase();
+    el.removeAttribute('align');
+    if (alignVal && !el.style.textAlign) {
+      el.style.textAlign = alignVal;
+    }
+  });
+
+  const sel = window.getSelection();
+  const activeRange =
+    sel && sel.rangeCount > 0 && editable.contains(sel.getRangeAt(0).commonAncestorContainer)
+      ? sel.getRangeAt(0)
+      : null;
+
+  let sc: Node | null = activeRange ? activeRange.startContainer : null;
+  let so = activeRange ? activeRange.startOffset : 0;
+  let ec: Node | null = activeRange ? activeRange.endContainer : null;
+  let eo = activeRange ? activeRange.endOffset : 0;
+  let unwrappedAny = false;
+
+  editable.querySelectorAll('span').forEach((span) => {
+    const isSyntheticSpan = !preExistingSpans.has(span);
+    if (span.style.fontFamily) {
+      span.style.removeProperty('font-family');
+    }
+    if (isSyntheticSpan && span.style.fontSize) {
+      span.style.removeProperty('font-size');
+    }
+    if (isFocusTintBackground(span.style.backgroundColor)) {
+      span.style.removeProperty('background-color');
+    }
+    if (!span.getAttribute('style')?.trim()) {
+      span.removeAttribute('style');
+    }
+
+    if (span.attributes.length === 0 && span.parentNode) {
+      const parent = span.parentNode;
+      const spanIndex = Array.prototype.indexOf.call(parent.childNodes, span);
+      if (sc === span) {
+        sc = parent;
+        so = spanIndex + so;
+      }
+      if (ec === span) {
+        ec = parent;
+        eo = spanIndex + eo;
+      }
+      while (span.firstChild) {
+        parent.insertBefore(span.firstChild, span);
+      }
+      parent.removeChild(span);
+      unwrappedAny = true;
+    }
+  });
+
+  if (unwrappedAny && sc && ec && sel) {
+    try {
+      const restored = document.createRange();
+      restored.setStart(sc, so);
+      restored.setEnd(ec, eo);
+      sel.removeAllRanges();
+      sel.addRange(restored);
+    } catch {
+      // Ignore if endpoints cannot be restored
+    }
+  }
+}
+
+function ensureBlockAlignment(
+  editable: HTMLElement,
+  alignValue: 'left' | 'center' | 'right' | 'justify'
+): void {
+  const sel = window.getSelection();
+  const range =
+    sel && sel.rangeCount > 0 && editable.contains(sel.getRangeAt(0).commonAncestorContainer)
+      ? sel.getRangeAt(0)
+      : null;
+
+  const blockChildren = Array.from(editable.children).filter(
+    (child): child is HTMLElement =>
+      child instanceof HTMLElement && (child.tagName === 'DIV' || child.tagName === 'P')
+  );
+
+  if (blockChildren.length > 0) {
+    const targeted = range
+      ? blockChildren.filter((block) => rangeIntersectsNode(range, block))
+      : blockChildren;
+    if (targeted.length > 0) {
+      targeted.forEach((block) => {
+        block.style.textAlign = alignValue;
+      });
+      return;
+    }
+    // If selection sits in direct inline nodes alongside block siblings, only fall through when no blocks
+    if (!range) {
+      blockChildren.forEach((block) => {
+        block.style.textAlign = alignValue;
+      });
+      return;
+    }
+  }
+
+  if (!editable.firstChild) return;
+  const saved = range
+    ? {
+        sc: range.startContainer,
+        so: range.startOffset,
+        ec: range.endContainer,
+        eo: range.endOffset,
+      }
+    : null;
+
+  const wrapper = document.createElement('div');
+  wrapper.style.textAlign = alignValue;
+
+  if (blockChildren.length > 0 && range) {
+    // Wrap only the contiguous non-block run containing the range start
+    let anchor: Node = range.startContainer;
+    while (anchor.parentNode && anchor.parentNode !== editable) {
+      anchor = anchor.parentNode;
+    }
+    let startNode: Node | null = anchor;
+    while (
+      startNode.previousSibling &&
+      !(
+        startNode.previousSibling instanceof HTMLElement &&
+        (startNode.previousSibling.tagName === 'DIV' ||
+          startNode.previousSibling.tagName === 'P')
+      )
+    ) {
+      startNode = startNode.previousSibling;
+    }
+    const nodesToWrap: Node[] = [];
+    let cur: Node | null = startNode;
+    while (
+      cur &&
+      !(
+        cur instanceof HTMLElement &&
+        (cur.tagName === 'DIV' || cur.tagName === 'P')
+      )
+    ) {
+      nodesToWrap.push(cur);
+      cur = cur.nextSibling;
+    }
+    if (nodesToWrap.length === 0) return;
+    editable.insertBefore(wrapper, nodesToWrap[0]);
+    nodesToWrap.forEach((n) => wrapper.appendChild(n));
+  } else {
+    while (editable.firstChild) {
+      wrapper.appendChild(editable.firstChild);
+    }
+    editable.appendChild(wrapper);
+  }
+
+  if (saved && sel) {
+    try {
+      const restored = document.createRange();
+      if (saved.sc === editable) {
+        restored.setStart(wrapper, Math.min(saved.so, wrapper.childNodes.length));
+      } else {
+        restored.setStart(saved.sc, saved.so);
+      }
+      if (saved.ec === editable) {
+        restored.setEnd(wrapper, Math.min(saved.eo, wrapper.childNodes.length));
+      } else {
+        restored.setEnd(saved.ec, saved.eo);
+      }
+      sel.removeAllRanges();
+      sel.addRange(restored);
+    } catch {
+      // Ignore if range endpoints were invalidated
+    }
+  }
+}
+
 export const HomeTab: React.FC = () => {
   const {
     resumeData,
@@ -87,37 +309,35 @@ export const HomeTab: React.FC = () => {
 
   const captureSelection = () => {
     const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-      savedRangeRef.current = sel.getRangeAt(0).cloneRange();
-    }
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (!findEditableAncestor(range.commonAncestorContainer)) return;
+    savedRangeRef.current = range.cloneRange();
   };
 
-  const restoreSelection = () => {
+  const restoreSelection = (clearAfter = true) => {
     const sel = window.getSelection();
     if (sel && savedRangeRef.current) {
       sel.removeAllRanges();
       sel.addRange(savedRangeRef.current);
-      savedRangeRef.current = null;
+      if (clearAfter) {
+        savedRangeRef.current = null;
+      }
     }
   };
 
   const notifyEditableInput = (node: Node | null | undefined) => {
-    const el = node instanceof HTMLElement ? node : node?.parentElement;
-    const editable = el?.closest('.editable-text');
+    const editable = findEditableAncestor(node);
     if (editable) {
       editable.dispatchEvent(new Event('input', { bubbles: true }));
     }
   };
 
-  const getActiveEditableElement = (): Element | null => {
-    const active = document.activeElement;
-    if (active?.classList.contains('editable-text')) return active;
+  const getActiveEditableElement = (): HTMLElement | null => {
+    const activeEditable = findEditableAncestor(document.activeElement);
+    if (activeEditable) return activeEditable;
     const sel = window.getSelection();
-    const anchorEl =
-      sel?.anchorNode instanceof HTMLElement
-        ? sel.anchorNode
-        : sel?.anchorNode?.parentElement;
-    return anchorEl?.closest('.editable-text') ?? null;
+    return findEditableAncestor(sel?.anchorNode);
   };
 
   const preventBlur = (e: React.MouseEvent) => {
@@ -125,35 +345,60 @@ export const HomeTab: React.FC = () => {
   };
 
   const formatText = (cmd: string) => {
-    document.execCommand(cmd, false, undefined);
-    notifyEditableInput(getActiveEditableElement());
+    const editable = getActiveEditableElement();
+    if (!editable) return;
+    if (typeof document.execCommand === 'function') {
+      document.execCommand(cmd, false, undefined);
+    }
+    notifyEditableInput(editable);
   };
 
   const clearFormatting = () => {
-    document.execCommand('removeFormat', false, undefined);
-    document.execCommand('unlink', false, undefined);
-    notifyEditableInput(getActiveEditableElement());
+    const editable = getActiveEditableElement();
+    if (!editable) return;
+    if (typeof document.execCommand === 'function') {
+      document.execCommand('removeFormat', false, undefined);
+      document.execCommand('unlink', false, undefined);
+    }
+    notifyEditableInput(editable);
   };
 
-  const applyTextColor = (color: string) => {
+  const applyTextColor = (color: string, closePopover = true) => {
     setActiveTextColor(color);
-    restoreSelection();
-    document.execCommand('styleWithCSS', false, 'true');
-    document.execCommand('foreColor', false, color);
-    notifyEditableInput(getActiveEditableElement());
-    setTextPopoverOpen(false);
+    restoreSelection(closePopover);
+    const editable = getActiveEditableElement();
+    if (editable && typeof document.execCommand === 'function') {
+      document.execCommand('styleWithCSS', false, 'true');
+      document.execCommand('foreColor', false, color);
+      if (!closePopover) {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const nextRange = sel.getRangeAt(0);
+          if (findEditableAncestor(nextRange.commonAncestorContainer)) {
+            savedRangeRef.current = nextRange.cloneRange();
+          }
+        }
+      }
+      notifyEditableInput(editable);
+    }
+    if (closePopover) {
+      setTextPopoverOpen(false);
+    }
   };
 
   const applyHighlightColor = (color: string) => {
     setActiveHighlightColor(color);
-    restoreSelection();
-    document.execCommand('styleWithCSS', false, 'true');
-    try {
-      document.execCommand('hiliteColor', false, color);
-    } catch {
-      document.execCommand('backColor', false, color);
+    restoreSelection(true);
+    const editable = getActiveEditableElement();
+    if (editable && typeof document.execCommand === 'function') {
+      document.execCommand('styleWithCSS', false, 'true');
+      try {
+        document.execCommand('hiliteColor', false, color);
+      } catch {
+        document.execCommand('backColor', false, color);
+      }
+      notifyEditableInput(editable);
     }
-    notifyEditableInput(getActiveEditableElement());
     setHighlightPopoverOpen(false);
   };
 
@@ -161,6 +406,7 @@ export const HomeTab: React.FC = () => {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
     const range = sel.getRangeAt(0);
+    if (!findEditableAncestor(range.commonAncestorContainer)) return false;
     const span = document.createElement('span');
     configureSpan(span);
     try {
@@ -179,25 +425,35 @@ export const HomeTab: React.FC = () => {
   };
 
   const applyFontSize = (fontSize: string) => {
-    restoreSelection();
+    restoreSelection(true);
+    const editable = getActiveEditableElement();
+    if (!editable) return;
     if (fontSize === 'inherit') {
-      document.execCommand('removeFormat', false, undefined);
-      notifyEditableInput(getActiveEditableElement());
+      if (typeof document.execCommand === 'function') {
+        document.execCommand('removeFormat', false, undefined);
+      }
+      notifyEditableInput(editable);
       return;
     }
     if (!wrapSelectionInSpan((span) => { span.style.fontSize = fontSize; })) {
-      document.execCommand('styleWithCSS', false, 'true');
-      document.execCommand('fontSize', false, '3');
-      notifyEditableInput(getActiveEditableElement());
+      if (typeof document.execCommand === 'function') {
+        document.execCommand('styleWithCSS', false, 'true');
+        document.execCommand('fontSize', false, '3');
+      }
+      notifyEditableInput(editable);
     }
   };
 
   const adjustFontSize = (direction: 'up' | 'down') => {
     const size = direction === 'up' ? '1.18em' : '0.85em';
     if (!wrapSelectionInSpan((span) => { span.style.fontSize = size; })) {
-      document.execCommand('styleWithCSS', false, 'true');
-      document.execCommand('fontSize', false, direction === 'up' ? '4' : '2');
-      notifyEditableInput(getActiveEditableElement());
+      const editable = getActiveEditableElement();
+      if (!editable) return;
+      if (typeof document.execCommand === 'function') {
+        document.execCommand('styleWithCSS', false, 'true');
+        document.execCommand('fontSize', false, direction === 'up' ? '4' : '2');
+      }
+      notifyEditableInput(editable);
     }
   };
 
@@ -208,16 +464,56 @@ export const HomeTab: React.FC = () => {
         if (className) span.className = className;
       })
     ) {
-      document.execCommand(style ? 'formatBlock' : 'fontName', false, undefined);
-      notifyEditableInput(getActiveEditableElement());
+      const editable = getActiveEditableElement();
+      if (!editable) return;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (!findEditableAncestor(range.commonAncestorContainer)) return;
+
+      if (typeof document.execCommand === 'function') {
+        document.execCommand('styleWithCSS', false, 'true');
+      }
+
+      const span = document.createElement('span');
+      if (style) span.setAttribute('style', style);
+      if (className) span.className = className;
+      const zwsp = document.createTextNode('\u200B');
+      span.appendChild(zwsp);
+      range.insertNode(span);
+      const nextRange = document.createRange();
+      nextRange.setStart(zwsp, 1);
+      nextRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(nextRange);
+      notifyEditableInput(editable);
     }
   };
 
-  const formatAlignment = (
-    alignment: 'justifyLeft' | 'justifyCenter' | 'justifyRight' | 'justifyFull'
-  ) => {
-    document.execCommand(alignment, false, undefined);
-    notifyEditableInput(getActiveEditableElement());
+  const formatAlignment = (alignment: AlignmentCommand) => {
+    const editable = getActiveEditableElement();
+    if (!editable) return;
+
+    const tag = editable.tagName;
+    const isBlockHost =
+      tag === 'DIV' || tag === 'P' || tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'LI';
+    if (!isBlockHost || tag !== 'DIV') return;
+
+    const alignValue = ALIGN_CSS_VALUE[alignment];
+    const preExistingSpans = new Set(Array.from(editable.querySelectorAll('span')));
+    let executed = false;
+    if (typeof document.execCommand === 'function') {
+      document.execCommand('styleWithCSS', false, 'true');
+      executed = document.execCommand(alignment, false, undefined);
+    }
+
+    cleanupAlignmentArtifacts(editable, preExistingSpans);
+
+    if (!executed || (alignment === 'justifyLeft' && editable.closest('td, th'))) {
+      ensureBlockAlignment(editable, alignValue);
+    }
+
+    notifyEditableInput(editable);
   };
 
   const selectedFontLabel =
@@ -385,7 +681,10 @@ export const HomeTab: React.FC = () => {
             {/* Text Color Popover */}
             <Popover
               open={textPopoverOpen}
-              onOpenChange={(_, data) => setTextPopoverOpen(data.open)}
+              onOpenChange={(_, data) => {
+                setTextPopoverOpen(data.open);
+                if (!data.open) savedRangeRef.current = null;
+              }}
               trapFocus={false}
             >
               <PopoverTrigger disableButtonEnhancement>
@@ -440,7 +739,7 @@ export const HomeTab: React.FC = () => {
                     <input
                       type="color"
                       value={activeTextColor}
-                      onChange={(e) => applyTextColor(e.target.value)}
+                      onChange={(e) => applyTextColor(e.target.value, false)}
                       className="w-5 h-5 p-0 border-0 rounded cursor-pointer bg-transparent"
                     />
                   </div>
@@ -451,7 +750,10 @@ export const HomeTab: React.FC = () => {
             {/* Highlight Color Popover */}
             <Popover
               open={highlightPopoverOpen}
-              onOpenChange={(_, data) => setHighlightPopoverOpen(data.open)}
+              onOpenChange={(_, data) => {
+                setHighlightPopoverOpen(data.open);
+                if (!data.open) savedRangeRef.current = null;
+              }}
               trapFocus={false}
             >
               <PopoverTrigger disableButtonEnhancement>

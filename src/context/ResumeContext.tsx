@@ -13,7 +13,7 @@ import {
 } from '../types/resume';
 import { DEFAULT_RESUME_DATA, THEMES } from '../constants/themes';
 import { buildEqualColWidths, normalizeColWidths } from '../utils/tableWidths';
-import { createUniqueId, sanitizeLinkUrl } from '../utils/sanitize';
+import { createUniqueId, sanitizeLinkUrl, sanitizeRichTextHtml } from '../utils/sanitize';
 import { MAX_ZOOM, MIN_ZOOM } from '../utils/documentMetrics';
 import { useHistory } from '../hooks/useHistory';
 import { parseLegacyResume } from '../utils/legacyMigration';
@@ -66,6 +66,7 @@ interface ResumeContextType {
   // Section actions
   addSection: (type: SectionType) => void;
   updateSection: (id: string, updated: Partial<SectionData>) => void;
+  updateListItem: (sectionId: string, itemIndex: number, value: string) => void;
   removeSection: (id: string) => void;
   duplicateSection: (id: string) => void;
   reorderSections: (newSections: SectionData[]) => void;
@@ -482,6 +483,31 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, []);
 
+  // Embed resume data in document.title before printing so the PDF can be
+  // reimported losslessly without AI parsing.
+  useEffect(() => {
+    const originalTitle = document.title;
+    const handleBeforePrint = () => {
+      try {
+        const json = JSON.stringify(storedResumeData);
+        const b64 = btoa(unescape(encodeURIComponent(json)));
+        document.title = `RSBLD::${b64}`;
+      } catch {
+        // If data is too large or encoding fails, leave title unchanged.
+      }
+    };
+    const handleAfterPrint = () => {
+      document.title = originalTitle;
+    };
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+      document.title = originalTitle;
+    };
+  }, [storedResumeData]);
+
   // --- Meta Actions ---
   const updateMeta = useCallback(
     (meta: Partial<ResumeMeta>) => {
@@ -648,6 +674,23 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setResumeDataDebounced((prev) => ({
         ...prev,
         sections: prev.sections.map((s) => (s.id === id ? ({ ...s, ...updated } as SectionData) : s)),
+      }));
+    },
+    [setResumeDataDebounced]
+  );
+
+  const updateListItem = useCallback(
+    (sectionId: string, itemIndex: number, value: string) => {
+      setResumeDataDebounced((prev) => ({
+        ...prev,
+        sections: prev.sections.map((sec) => {
+          if (sec.id !== sectionId || sec.type !== 'list') return sec;
+          const listSec = sec as ListSectionData;
+          if (itemIndex < 0 || itemIndex >= listSec.items.length) return sec;
+          const newItems = [...listSec.items];
+          newItems[itemIndex] = value;
+          return { ...listSec, items: newItems };
+        }),
       }));
     },
     [setResumeDataDebounced]
@@ -923,13 +966,13 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${sanitizedName}.resumeBuilder`;
+      a.download = `${sanitizedName}.rsbld`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       setIsExportModalOpen(false);
-      showToast(`Exported as ${sanitizedName}.resumeBuilder`);
+      showToast(`Exported as ${sanitizedName}.rsbld`);
     },
     [resumeData, showToast]
   );
@@ -966,7 +1009,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             resolve();
           } catch (err) {
             console.error('Import failure', err);
-            showAlert('Could not read file. Ensure it is a valid .resumeBuilder or .pdf file.', 'Invalid File');
+            showAlert('Could not read file. Ensure it is a valid .rsbld or .pdf file.', 'Invalid File');
             reject(err);
           }
         };
@@ -985,16 +1028,50 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (!searchStr) return 0;
       let count = 0;
 
-      const replaceInString = (str: string): string => {
-        if (!str) return str;
-        const flags = matchCase ? 'g' : 'gi';
-        const escaped = searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(escaped, flags);
-        const matches = str.match(regex);
-        if (matches) {
+      const flags = matchCase ? 'g' : 'gi';
+      const escaped = searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, flags);
+
+      const replaceInPlainUrl = (url: string): string => {
+        if (!url) return url;
+        const matches = url.match(regex);
+        if (!matches) return url;
+        count += matches.length;
+        return sanitizeLinkUrl(url.replace(regex, () => replaceStr));
+      };
+
+      const replaceInString = (html: string): string => {
+        if (!html) return html;
+        if (typeof DOMParser === 'undefined') {
+          const matches = html.match(regex);
+          if (!matches) return html;
           count += matches.length;
+          return html.replace(regex, () => replaceStr);
         }
-        return str.replace(regex, replaceStr);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+        const root = doc.body.firstElementChild;
+        if (!root) return html;
+
+        let localReplaced = 0;
+        const walkTextNodes = (node: Node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent || '';
+            const matches = text.match(regex);
+            if (matches) {
+              localReplaced += matches.length;
+              node.textContent = text.replace(regex, () => replaceStr);
+            }
+            return;
+          }
+          node.childNodes.forEach(walkTextNodes);
+        };
+
+        walkTextNodes(root);
+        if (localReplaced === 0) return html;
+        count += localReplaced;
+        return sanitizeRichTextHtml(root.innerHTML);
       };
 
       setResumeData((prev) => {
@@ -1010,7 +1087,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           links: prev.header.links.map((link) => ({
             ...link,
             text: replaceInString(link.text),
-            url: replaceInString(link.url),
+            url: replaceInPlainUrl(link.url),
           })),
         };
 
@@ -1085,6 +1162,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       removeLink,
       addSection,
       updateSection,
+      updateListItem,
       removeSection,
       duplicateSection,
       reorderSections,
@@ -1151,6 +1229,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       removeLink,
       addSection,
       updateSection,
+      updateListItem,
       removeSection,
       duplicateSection,
       reorderSections,

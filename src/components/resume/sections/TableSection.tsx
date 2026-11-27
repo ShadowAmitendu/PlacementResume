@@ -266,7 +266,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                   />
 
                   <EditableContent
-                    tagName="span"
+                    tagName="div"
                     html={headerText}
                     onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
                     placeholder="[Header]"
@@ -314,7 +314,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                   )}
 
                   <EditableContent
-                    tagName="span"
+                    tagName="div"
                     html={cellText}
                     onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
                     placeholder="[Data]"

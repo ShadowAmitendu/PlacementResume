@@ -54,18 +54,18 @@ export const FileTab: React.FC = () => {
           icon={<ArrowExportRegular />}
           label="Export"
           onClick={() => setIsExportModalOpen(true)}
-          title="Download project backup (.resumeBuilder)"
+          title="Download project backup (.rsbld)"
         />
         <RibbonActionButton
           icon={<ArrowImportRegular />}
           label="Import"
           onClick={() => fileInputRef.current?.click()}
-          title="Import .resumeBuilder, .json, or .pdf file"
+          title="Import .rsbld, .json, or .pdf file"
         />
         <input
           ref={fileInputRef}
           type="file"
-          accept=".resbuild,.resumeBuilder,.html,.json,.pdf"
+          accept=".rsbld,.resumeBuilder,.html,.json,.pdf"
           onChange={handleFileChange}
           className="hidden"
         />

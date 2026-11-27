@@ -56,6 +56,8 @@
 .resume-wrapper th,
 .resume-wrapper td,
 .resume-wrapper .editable-text,
+.resume-wrapper .editable-text div:not(.no-print):not(.no-print *),
+.resume-wrapper .editable-text p:not(.no-print):not(.no-print *),
 .resume-wrapper .section-title,
 .resume-wrapper .section-text,
 .resume-wrapper .subtitle-line,
@@ -217,6 +219,9 @@ ol.skills-list-numbered {
   padding-left: 20px;
   font-size: 11pt;
   margin-bottom: 8px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
 }
 ol.skills-list-numbered li {
   margin-bottom: 2px;
@@ -290,9 +295,7 @@ ol.skills-list-numbered li {
   margin-top: -1px;
 }
 
-.link-item .editable-text,
-.link-item a,
-.link-item span {
+.link-item a {
   display: inline-flex;
   align-items: center;
   line-height: 1.2;
@@ -301,6 +304,10 @@ ol.skills-list-numbered li {
 }
 
 .link-item .editable-text {
+  display: inline-block;
+  line-height: 1.2;
+  vertical-align: middle;
+  white-space: nowrap;
   padding: 0 1.5px;
 }
 
@@ -415,8 +422,11 @@ ol.skills-list-numbered li {
 .editable-text {
   padding: 1px 3px;
   border-bottom: 1px dashed transparent;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   outline: none;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
 }
 
 .editable-text:empty:before,
@@ -435,7 +445,7 @@ ol.skills-list-numbered li {
 
 .editable-text:focus {
   outline: none;
-  background-color: rgba(15, 108, 189, 0.08);
+  box-shadow: inset 0 0 0 9999px rgba(15, 108, 189, 0.08);
   border-bottom: 1px dashed var(--theme-color);
 }
 
@@ -463,7 +473,7 @@ ol.skills-list-numbered li {
 [data-table-style="striped-alt"] th .editable-text:focus,
 [data-table-style="striped-alt"] .profile-table td:first-child .editable-text:focus,
 [data-table-style="clean-modern"] th .editable-text:focus {
-  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.2);
   border-bottom: 1px dashed rgba(255, 255, 255, 0.85);
 }
 
@@ -594,6 +604,11 @@ ol.skills-list-numbered li {
   width: 100%;
 }
 
+.subtitle-line > span,
+.subtitle-line .editable-text {
+  min-width: 0;
+}
+
 .subtitle-sep {
   color: #999;
   user-select: none;
@@ -632,6 +647,9 @@ ol.skills-list-numbered li {
 .section-text {
   font-size: 11pt;
   margin-bottom: 8px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
 }
 
 /* ── TABLE SYSTEM ────────────────────────────────────────── */
@@ -1142,16 +1160,22 @@ td:focus-within > .row-actions-pill,
 
 /* List */
 ul.skills-list {
-  list-style: none;
+  list-style: disc;
   padding-left: 20px;
   font-size: 11pt;
   margin-bottom: 8px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
 }
 
-ul.skills-list li::before {
-  content: "• ";
+ul.skills-list li::marker {
   font-weight: bold;
   color: var(--theme-color);
+}
+
+.list-row-item .editable-text {
+  padding-right: 22px;
 }
 
 /* Declaration */
@@ -1159,6 +1183,9 @@ ul.skills-list li::before {
   margin-top: 8px;
   font-size: 10.5pt;
   line-height: 1.35;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  min-width: 0;
 }
 
 .signature-area {
@@ -1328,6 +1355,10 @@ ul.skills-list li::before {
     background-color: transparent !important;
     outline: none !important;
     box-shadow: none !important;
+  }
+
+  .list-row-item .editable-text {
+    padding-right: 0 !important;
   }
 
   #photo-label {

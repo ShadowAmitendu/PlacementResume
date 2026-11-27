@@ -26,6 +26,7 @@ export const DeclarationSection: React.FC = () => {
           <p>
             Place:&nbsp;
             <EditableContent
+              singleLine
               html={place}
               onChange={(val) => updateDeclaration({ place: val })}
               placeholder="___________"
@@ -34,6 +35,7 @@ export const DeclarationSection: React.FC = () => {
           <p className="mt-1">
             Date:&nbsp;
             <EditableContent
+              singleLine
               html={date}
               onChange={(val) => updateDeclaration({ date: val })}
               placeholder="___________"
@@ -90,6 +92,7 @@ export const DeclarationSection: React.FC = () => {
 
           <div className="signature-line">
             <EditableContent
+              singleLine
               html={signature}
               onChange={(val) => updateDeclaration({ signature: val })}
               placeholder="Full Name / Signature"

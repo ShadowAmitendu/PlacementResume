@@ -8,8 +8,16 @@ interface EditableContentProps {
   style?: React.CSSProperties;
   tagName?: 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'li';
   placeholder?: string;
+  singleLine?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
   transformOnBlur?: (value: string) => string;
+}
+
+function isElementEmpty(el: HTMLElement): boolean {
+  return (
+    !el.querySelector('img, svg') &&
+    (el.textContent || '').replace(/[\u200B\u00A0\s]/g, '') === ''
+  );
 }
 
 export const EditableContent: React.FC<EditableContentProps> = ({
@@ -19,48 +27,46 @@ export const EditableContent: React.FC<EditableContentProps> = ({
   style,
   tagName: Tag = 'span',
   placeholder,
+  singleLine = false,
   onKeyDown,
   transformOnBlur,
 }) => {
   const ref = useRef<HTMLElement>(null);
+  const initializedRef = useRef(false);
   const lastHtmlRef = useRef(html);
 
-  // Initialize innerHTML synchronously before paint
+  // Initialize innerHTML once on mount and update DOM only when changed externally (e.g. Undo, Redo, Import)
   useLayoutEffect(() => {
-    if (ref.current) {
+    if (!ref.current) return;
+    if (!initializedRef.current || html !== lastHtmlRef.current) {
       const cleanHtml = sanitizeRichTextHtml(html);
       ref.current.innerHTML = cleanHtml;
       lastHtmlRef.current = cleanHtml;
-    }
-  }, []);
-
-  // Update DOM ONLY when the value was changed externally (e.g. Undo, Redo, File Import)
-  useLayoutEffect(() => {
-    if (ref.current && html !== lastHtmlRef.current) {
-      const cleanHtml = sanitizeRichTextHtml(html);
-      ref.current.innerHTML = cleanHtml;
-      lastHtmlRef.current = cleanHtml;
+      initializedRef.current = true;
     }
   }, [html]);
 
+  const readNormalizedHtml = (): string => {
+    if (!ref.current) return '';
+    if (isElementEmpty(ref.current)) {
+      ref.current.innerHTML = '';
+      return '';
+    }
+    const currentHtml = ref.current.innerHTML;
+    return currentHtml === '' ? '' : sanitizeRichTextHtml(currentHtml);
+  };
+
   const handleInput = () => {
     if (!ref.current) return;
-    let currentHtml = ref.current.innerHTML;
-
-    // Clean up empty browser artifacts so :empty:before placeholder activates
-    if (currentHtml === '<br>' || currentHtml === '<div><br></div>' || currentHtml.trim() === '') {
-      currentHtml = '';
-      ref.current.innerHTML = '';
-    }
-
-    lastHtmlRef.current = currentHtml;
-    onChange(currentHtml);
+    const cleanHtml = readNormalizedHtml();
+    lastHtmlRef.current = cleanHtml;
+    onChange(cleanHtml);
   };
 
   const handleBlur = () => {
     if (!ref.current) return;
     let currentHtml = ref.current.innerHTML;
-    if (currentHtml === '<br>' || currentHtml === '<div><br></div>' || currentHtml.trim() === '') {
+    if (isElementEmpty(ref.current)) {
       currentHtml = '';
       ref.current.innerHTML = '';
     }
@@ -71,27 +77,86 @@ export const EditableContent: React.FC<EditableContentProps> = ({
         ref.current.innerHTML = transformed;
       }
     }
-    lastHtmlRef.current = currentHtml;
-    onChange(currentHtml);
+    const cleanHtml = currentHtml === '' ? '' : sanitizeRichTextHtml(currentHtml);
+    if (cleanHtml !== lastHtmlRef.current) {
+      lastHtmlRef.current = cleanHtml;
+      onChange(cleanHtml);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (singleLine && e.key === 'Enter') {
+      e.preventDefault();
+    }
+    onKeyDown?.(e);
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLElement>) => {
     e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    if (!text) return;
+    if (!ref.current) return;
+
+    const rawText = e.clipboardData?.getData('text/plain');
+    if (!rawText) return;
+
+    const normalized = rawText.replace(/\r\n?/g, '\n');
+    const preparedText = singleLine ? normalized.replace(/\n+/g, ' ') : normalized;
 
     const sel = window.getSelection();
-    if (!sel || !sel.rangeCount) return;
+    const activeEl = document.activeElement;
+    const isFocusedInside =
+      activeEl === ref.current || (activeEl instanceof Node && ref.current.contains(activeEl));
+    const hasRangeInside =
+      !!sel && sel.rangeCount > 0 && ref.current.contains(sel.getRangeAt(0).commonAncestorContainer);
 
+    let insertedByExecCommand = false;
+    if ((isFocusedInside || hasRangeInside) && typeof document.execCommand === 'function') {
+      try {
+        insertedByExecCommand = document.execCommand('insertText', false, preparedText);
+      } catch {
+        insertedByExecCommand = false;
+      }
+    }
+
+    if (insertedByExecCommand) {
+      const cleanHtml = readNormalizedHtml();
+      if (cleanHtml !== lastHtmlRef.current) {
+        lastHtmlRef.current = cleanHtml;
+        onChange(cleanHtml);
+      }
+      return;
+    }
+
+    if (!sel || !sel.rangeCount) return;
     const range = sel.getRangeAt(0);
+    if (!ref.current.contains(range.commonAncestorContainer)) return;
     range.deleteContents();
 
-    const lines = text.split(/\r?\n/);
     const frag = document.createDocumentFragment();
-    lines.forEach((line, i) => {
-      if (i > 0) frag.appendChild(document.createElement('br'));
-      frag.appendChild(document.createTextNode(line));
-    });
+    if (singleLine) {
+      frag.appendChild(document.createTextNode(preparedText));
+    } else {
+      const lines = preparedText.split('\n');
+      if (Tag === 'div' && lines.length > 1) {
+        lines.forEach((line, i) => {
+          if (i === 0) {
+            if (line) frag.appendChild(document.createTextNode(line));
+          } else {
+            const div = document.createElement('div');
+            if (line) {
+              div.appendChild(document.createTextNode(line));
+            } else {
+              div.appendChild(document.createElement('br'));
+            }
+            frag.appendChild(div);
+          }
+        });
+      } else {
+        lines.forEach((line, i) => {
+          if (i > 0) frag.appendChild(document.createElement('br'));
+          if (line || i === 0) frag.appendChild(document.createTextNode(line));
+        });
+      }
+    }
 
     const lastNode = frag.lastChild;
     range.insertNode(frag);
@@ -103,10 +168,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
       sel.addRange(afterRange);
     }
 
-    if (ref.current) {
-      lastHtmlRef.current = ref.current.innerHTML;
-      onChange(ref.current.innerHTML);
-    }
+    handleInput();
   };
 
   return (
@@ -116,7 +178,7 @@ export const EditableContent: React.FC<EditableContentProps> = ({
       suppressContentEditableWarning
       onInput={handleInput}
       onBlur={handleBlur}
-      onKeyDown={onKeyDown}
+      onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       className={`editable-text ${className}`}
       style={style}

@@ -45,6 +45,7 @@ import {
   DEFAULT_GEMINI_MODELS,
   GeminiModelInfo,
 } from '../../utils/aiResumeParser';
+import { parseLegacyResume } from '../../utils/legacyMigration';
 
 export const PdfAiImportModal: React.FC = () => {
   const {
@@ -226,8 +227,25 @@ export const PdfAiImportModal: React.FC = () => {
     abortControllerRef.current = controller;
 
     try {
+      // 1. Check for an own-site PDF first (lossless restore, works on any device).
+      setStatusMessage('Checking for embedded data...');
+      const { tryExtractEmbeddedResumeData, extractTextFromPdf } = await import('../../utils/pdfExtractor');
+      const embedded = await tryExtractEmbeddedResumeData(selectedFile);
+      if (controller.signal.aborted) return;
+
+      if (embedded !== null) {
+        // Own-site PDF: restore directly without any AI.
+        const restored = parseLegacyResume(embedded);
+        applyAiParsedResume(restored);
+        setIsProcessing(false);
+        setStatusMessage('');
+        showToast('Resume restored from embedded data');
+        setIsPdfAiModalOpen(false);
+        return;
+      }
+
+      // 2. Extract plain text for AI or heuristic parsing.
       setStatusMessage('Extracting text with PDF.js...');
-      const { extractTextFromPdf } = await import('../../utils/pdfExtractor');
       const rawText = await extractTextFromPdf(selectedFile);
       if (controller.signal.aborted) return;
 
@@ -256,9 +274,23 @@ export const PdfAiImportModal: React.FC = () => {
         if (!apiKey.trim()) {
           throw new Error('Enter a Google Gemini API key or switch to the Local Parser.');
         }
-        result = await parseResumeWithGemini(rawText, apiKey, selectedModel, controller.signal);
+        try {
+          result = await parseResumeWithGemini(rawText, apiKey, selectedModel, controller.signal);
+        } catch (aiErr) {
+          if (controller.signal.aborted) return;
+          console.warn('Gemini failed, falling back to local parser:', aiErr);
+          setStatusMessage('Gemini failed. Falling back to local rules parser...');
+          result = parseResumeHeuristically(rawText);
+        }
       } else if (engine === 'window-ai') {
-        result = await parseResumeWithWindowAi(rawText);
+        try {
+          result = await parseResumeWithWindowAi(rawText);
+        } catch (aiErr) {
+          if (controller.signal.aborted) return;
+          console.warn('Browser AI failed, falling back to local parser:', aiErr);
+          setStatusMessage('Browser AI failed. Falling back to local rules parser...');
+          result = parseResumeHeuristically(rawText);
+        }
       } else {
         result = parseResumeHeuristically(rawText);
       }
@@ -318,6 +350,26 @@ export const PdfAiImportModal: React.FC = () => {
 
           <DialogContent>
             <div className="space-y-4 py-1">
+              {/* Warning banner */}
+              <div
+                className="p-3 rounded-md text-xs flex items-start gap-2"
+                style={{
+                  backgroundColor: tokens.colorPaletteYellowBackground1,
+                  border: `1px solid ${tokens.colorPaletteYellowBorder1}`,
+                  color: tokens.colorPaletteYellowForeground1,
+                }}
+              >
+                <WarningRegular fontSize={15} className="shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold mb-0.5">AI parsing may miss or misplace fields.</p>
+                  <p>
+                    For a perfect import, use a <strong>.rsbld</strong> backup file instead. If you only have
+                    a PDF, copy the text and paste it manually for best results. PDFs exported from this site
+                    restore without any AI.
+                  </p>
+                </div>
+              </div>
+
               <p className="text-xs" style={{ color: tokens.colorNeutralForeground2 }}>
                 Extract fields from an existing text PDF resume in your browser.
               </p>

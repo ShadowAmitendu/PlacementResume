@@ -11,12 +11,12 @@ export const TextSection: React.FC<TextSectionProps> = ({ section }) => {
   const { updateSection } = useResume();
 
   return (
-    <p className="section-text">
-      <EditableContent
-        html={section.content}
-        onChange={(val) => updateSection(section.id, { content: val })}
-        placeholder="Enter your paragraph text here..."
-      />
-    </p>
+    <EditableContent
+      tagName="div"
+      html={section.content}
+      onChange={(val) => updateSection(section.id, { content: val })}
+      placeholder="Enter your paragraph text here..."
+      className="section-text block w-full"
+    />
   );
 };

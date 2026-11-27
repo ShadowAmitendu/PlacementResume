@@ -90,7 +90,7 @@ export const Ribbon: React.FC = () => {
     >
       {/* Top Word Title Bar & Quick Access Toolbar */}
       <div
-        className="h-10 px-3 sm:px-4 flex items-center justify-between gap-2"
+        className="h-10 px-3 sm:px-4 flex items-center justify-between gap-2 relative"
         style={{
           borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
         }}
@@ -187,7 +187,7 @@ export const Ribbon: React.FC = () => {
         </div>
 
         {/* Center: Search Bar */}
-        <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
           <Button
             appearance="outline"
             size="small"
