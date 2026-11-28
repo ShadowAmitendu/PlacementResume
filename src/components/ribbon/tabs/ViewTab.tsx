@@ -42,8 +42,9 @@ export const ViewTab: React.FC<ViewTabProps> = ({
   };
 
   const handleAutoFit = () => {
-    const sidePadding = window.innerWidth < 640 ? 20 : 52;
-    const availableWidth = Math.max(240, window.innerWidth - sidePadding);
+    const w = window.innerWidth;
+    const sidePadding = w < 640 ? 20 : w < 1024 ? 48 : 72;
+    const availableWidth = Math.max(240, w - sidePadding);
     const resumeWidth = 794;
     const fitScale = Math.max(
       MIN_ZOOM,
@@ -141,7 +142,7 @@ export const ViewTab: React.FC<ViewTabProps> = ({
             title="Hide editing buttons and preview exact PDF appearance (Esc to exit)"
           />
           <div
-            className="h-[54px] px-3 flex flex-col justify-center rounded"
+            className="h-13.5 px-3 flex flex-col justify-center rounded"
             style={{
               backgroundColor: tokens.colorNeutralBackground2,
               border: `1px solid ${tokens.colorNeutralStroke2}`,

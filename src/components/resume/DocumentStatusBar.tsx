@@ -84,13 +84,13 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
         </span>
 
         <span
-          className="hidden sm:inline"
+          className="hidden lg:inline"
           style={{ color: tokens.colorNeutralStroke1 }}
         >
           |
         </span>
 
-        <span className="hidden sm:inline shrink-0 tabular-nums">
+        <span className="hidden lg:inline shrink-0 tabular-nums">
           <strong style={{ color: tokens.colorNeutralForeground1, fontWeight: 600 }}>
             {charCount}
           </strong>{' '}
@@ -99,10 +99,10 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
 
         {hiddenCount > 0 && (
           <>
-            <span className="hidden sm:inline" style={{ color: tokens.colorNeutralStroke1 }}>
+            <span className="hidden md:inline" style={{ color: tokens.colorNeutralStroke1 }}>
               |
             </span>
-            <span className="hidden sm:inline shrink-0" style={{ color: tokens.colorNeutralForeground3 }}>
+            <span className="hidden md:inline shrink-0" style={{ color: tokens.colorNeutralForeground3 }}>
               {hiddenCount} hidden
             </span>
           </>

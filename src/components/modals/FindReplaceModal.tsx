@@ -15,7 +15,13 @@ import {
 } from '@fluentui/react-components';
 import { SearchRegular, EditRegular, DismissRegular } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
-import { TextSectionData, ListSectionData, TableSectionData } from '../../types/resume';
+import {
+  TextSectionData,
+  ListSectionData,
+  TableSectionData,
+  EntriesSectionData,
+  KeyValueSectionData,
+} from '../../types/resume';
 
 export const FindReplaceModal: React.FC = () => {
   const {
@@ -72,6 +78,19 @@ export const FindReplaceModal: React.FC = () => {
           const t = sec as TableSectionData;
           t.headers?.forEach((h) => countIn(h));
           t.rows.forEach((row) => row.forEach((cell) => countIn(cell)));
+        } else if (sec.type === 'entries') {
+          (sec as EntriesSectionData).entries.forEach((e) => {
+            countIn(e.heading);
+            countIn(e.subheading);
+            countIn(e.dateRange);
+            countIn(e.location);
+            e.bullets.forEach((b) => countIn(b));
+          });
+        } else if (sec.type === 'keyvalue') {
+          (sec as KeyValueSectionData).pairs.forEach((p) => {
+            countIn(p.label);
+            countIn(p.value);
+          });
         }
       });
 

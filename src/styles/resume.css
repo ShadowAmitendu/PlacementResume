@@ -612,7 +612,9 @@ ol.skills-list-numbered li {
   .block-controls button,
   .block-controls .drag-handle,
   .column-actions-pill button,
+  .column-actions-pill .col-drag-handle,
   .row-actions-pill button,
+  .entry-controls button,
   .photo-actions-pill button,
   .sig-actions-pill button {
     min-width: 30px;
@@ -625,11 +627,26 @@ ol.skills-list-numbered li {
 }
 
 @media (hover: none), (pointer: coarse) {
-  .photo-actions-pill,
-  .sig-actions-pill,
-  .list-remove-btn {
+  .app-shell:not(.is-print-preview) .block-controls {
+    display: flex;
+    opacity: 0.45;
+    transition: opacity 0.14s ease;
+  }
+  .app-shell:not(.is-print-preview) .section-block:focus-within .block-controls,
+  .app-shell:not(.is-print-preview) .block-controls:hover {
+    opacity: 1;
+  }
+  .app-shell:not(.is-print-preview) .photo-actions-pill,
+  .app-shell:not(.is-print-preview) .sig-actions-pill,
+  .app-shell:not(.is-print-preview) .list-remove-btn {
     opacity: 1;
     pointer-events: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .row-actions-pill {
+    right: -4px !important;
   }
 }
 
@@ -1405,7 +1422,16 @@ ul.skills-list li::marker {
 }
 
 .list-row-item .editable-text {
-  padding-right: 22px;
+  padding-right: 44px;
+}
+
+.keyvalue-value-col .editable-text {
+  padding-right: 60px;
+}
+
+.is-print-preview .list-row-item .editable-text,
+.is-print-preview .keyvalue-value-col .editable-text {
+  padding-right: 3px !important;
 }
 
 /* Declaration */
@@ -1609,7 +1635,8 @@ ul.skills-list li::marker {
     box-shadow: none !important;
   }
 
-  .list-row-item .editable-text {
+  .list-row-item .editable-text,
+  .keyvalue-value-col .editable-text {
     padding-right: 0 !important;
   }
 

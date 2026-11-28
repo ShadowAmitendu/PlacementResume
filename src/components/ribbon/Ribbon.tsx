@@ -111,13 +111,13 @@ export const Ribbon: React.FC = () => {
     >
       {/* Top Word Title Bar & Quick Access Toolbar */}
       <div
-        className="h-10 px-2 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-2 relative"
+        className="h-10 px-2 sm:px-4 flex items-center justify-between md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-1.5 sm:gap-2 relative"
         style={{
           borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
         }}
       >
         <div
-          className="flex items-center gap-1 sm:gap-2.5 min-w-0 flex-1 overflow-x-auto scrollbar-none touch-pan-x"
+          className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1 md:flex-initial overflow-x-auto scrollbar-none touch-pan-x"
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -131,12 +131,12 @@ export const Ribbon: React.FC = () => {
               <DocumentTextFilled fontSize={14} />
             </div>
             <span
-              className="hidden min-[440px]:inline font-semibold text-xs sm:text-sm tracking-tight"
+              className="hidden min-[440px]:inline md:hidden lg:inline font-semibold text-xs sm:text-sm tracking-tight"
               style={{ color: tokens.colorNeutralForeground1 }}
             >
               PlacementResume
             </span>
-            <div className="hidden sm:inline-flex">
+            <div className="hidden xl:inline-flex">
               <Button
                 size="small"
                 appearance="subtle"
@@ -145,18 +145,18 @@ export const Ribbon: React.FC = () => {
                 title="Switch or manage resume versions"
                 style={{
                   height: 22,
-                  padding: '0 8px',
+                  padding: '0 6px',
                   fontSize: 11,
                   fontWeight: 500,
                   backgroundColor: tokens.colorNeutralBackground3,
                   borderRadius: 999,
                 }}
               >
-                <span className="max-w-28 truncate">{activeProfileName}</span>
+                <span className="max-w-16 xl:max-w-28 truncate">{activeProfileName}</span>
               </Button>
             </div>
             <span
-              className="hidden sm:inline-flex items-center gap-1 text-[11px] pl-1"
+              className="hidden xl:inline-flex items-center gap-1 text-[11px] pl-1"
               style={{
                 color:
                   saveStatus === 'error'
@@ -188,7 +188,7 @@ export const Ribbon: React.FC = () => {
             </span>
           </div>
 
-          <Toolbar size="small" aria-label="Quick Access Toolbar">
+          <Toolbar size="small" aria-label="Quick Access Toolbar" style={{ padding: 0, gap: 0 }}>
             <Tooltip content="Save to browser (Ctrl+S)" relationship="label">
               <ToolbarButton
                 aria-label="Save"
@@ -229,16 +229,16 @@ export const Ribbon: React.FC = () => {
           </Toolbar>
         </div>
 
-        {/* Center: Search Bar */}
-        <div className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
+        {/* Center: Search Bar (Window-Centered on Tablet & Desktop) */}
+        <div className="hidden md:flex items-center justify-center shrink-0">
           <Button
             appearance="outline"
             size="small"
             icon={<SearchRegular />}
             onClick={() => setIsFindReplaceModalOpen(true)}
             title="Find and replace (Ctrl+F)"
+            className="w-36 lg:w-52 xl:w-65"
             style={{
-              width: 260,
               justifyContent: 'space-between',
               backgroundColor: tokens.colorNeutralBackground1,
               color: tokens.colorNeutralForeground3,
@@ -246,9 +246,9 @@ export const Ribbon: React.FC = () => {
               fontSize: 12,
             }}
           >
-            <span className="flex-1 text-left">Find and replace</span>
+            <span className="flex-1 text-left truncate">Find and replace</span>
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded ml-2"
+              className="hidden lg:inline text-[10px] px-1.5 py-0.5 rounded ml-2 shrink-0"
               style={{
                 backgroundColor: tokens.colorNeutralBackground3,
                 color: tokens.colorNeutralForeground3,
@@ -260,7 +260,7 @@ export const Ribbon: React.FC = () => {
         </div>
 
         {/* Right: Appearance & Collapse Controls */}
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center justify-end gap-0.5 shrink-0">
           <div className="md:hidden">
             <Tooltip content="Find and replace (Ctrl+F)" relationship="label">
               <ToolbarButton
@@ -353,7 +353,7 @@ export const Ribbon: React.FC = () => {
       >
         <div
           key={activeTab}
-          className={`h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none touch-pan-x flex items-center ribbon-tab-panel ${
+          className={`h-22 px-2 sm:px-3 overflow-x-auto scrollbar-none touch-pan-x flex items-center ribbon-tab-panel ${
             slideDir === 'from-right'
               ? 'ribbon-slide-from-right'
               : slideDir === 'from-left'

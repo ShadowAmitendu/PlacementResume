@@ -358,7 +358,7 @@ export const ImageCropModal: React.FC = () => {
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
-                  className={`rounded select-none touch-none max-w-full h-auto aspect-[460/360] ${
+                  className={`rounded select-none touch-none max-w-full h-auto aspect-460/360 ${
                     isDragging ? 'cursor-grabbing' : 'cursor-grab'
                   }`}
                   title="Drag to pan, scroll to zoom"

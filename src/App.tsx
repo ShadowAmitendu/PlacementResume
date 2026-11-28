@@ -58,7 +58,7 @@ const ResumeAppContent: React.FC = () => {
       const screenW = window.innerWidth;
       lastWidthRef.current = screenW;
       if (screenW <= 1024) {
-        const sidePadding = screenW < 640 ? 20 : 52;
+        const sidePadding = screenW < 640 ? 20 : screenW < 1024 ? 48 : 72;
         const availableW = Math.max(240, screenW - sidePadding);
         const RESUME_WIDTH_PX = 794;
         const fitScale = Math.max(
