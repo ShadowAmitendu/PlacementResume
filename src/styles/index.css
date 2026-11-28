@@ -46,6 +46,10 @@ html.dark body {
   will-change: transform;
 }
 
+.fluent-canvas-zoom.is-pinching {
+  transition: none !important;
+}
+
 .app-root-hidden {
   visibility: hidden;
   opacity: 0;

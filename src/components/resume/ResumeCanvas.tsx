@@ -28,9 +28,12 @@ import { DocumentStatusBar } from './DocumentStatusBar';
 import {
   A4_HEIGHT_PX,
   PAGE_GAP_PX,
+  MIN_ZOOM,
+  MAX_ZOOM,
   measureNonPrintHeight,
   measurePrintableResumeHeight,
 } from '../../utils/documentMetrics';
+import { computePinchScale, computePinchScrollTarget } from '../../utils/pinchZoom';
 import {
   SectionData,
   TextSectionData,
@@ -200,11 +203,13 @@ function paginateResumeLayout(wrapper: HTMLElement, keepSinglePageFit: boolean):
 }
 
 export const ResumeCanvas: React.FC = () => {
-  const { resumeData, reorderSections, isPrintPreview, setCanvasPageCount } = useResume();
+  const { resumeData, reorderSections, isPrintPreview, setCanvasPageCount, setZoom } = useResume();
   const { zoom, tableStyle, showLinkIcons } = resumeData.meta;
   const sections = resumeData.sections;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [wrapperWidth, setWrapperWidth] = useState<number>(794);
   const [wrapperHeight, setWrapperHeight] = useState<number>(0);
   const [printableHeight, setPrintableHeight] = useState<number>(0);
@@ -213,6 +218,7 @@ export const ResumeCanvas: React.FC = () => {
   isAutoFitRef.current = isAutoFit;
   const [sheetHeights, setSheetHeights] = useState<number[]>([A4_HEIGHT_PX]);
   const [activePage, setActivePage] = useState<number>(1);
+  const [pinchZoomHud, setPinchZoomHud] = useState<number | null>(null);
   const pageCount = sheetHeights.length;
 
   useLayoutEffect(() => {
@@ -403,6 +409,120 @@ export const ResumeCanvas: React.FC = () => {
     ? sheetHeights.reduce((sum, h) => sum + h, 0) + (pageCount - 1) * PAGE_GAP_PX
     : wrapperHeight;
 
+  const pinchRefs = useRef({ zoom, wrapperWidth, pagedTotalHeight, setZoom });
+  pinchRefs.current = { zoom, wrapperWidth, pagedTotalHeight, setZoom };
+
+  // Two-finger pinch-to-zoom on touchscreens & mobile/tablet viewports
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const stage = stageRef.current;
+    const container = containerRef.current;
+    const mainEl = wrapper?.closest('main') as HTMLElement | null;
+    if (!wrapper || !stage || !container || !mainEl) return;
+
+    let pinchState: {
+      startDist: number;
+      startZoom: number;
+      lastZoom: number;
+    } | null = null;
+
+    const getDistance = (t1: Touch, t2: Touch) =>
+      Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+    const beginPinch = (t1: Touch, t2: Touch) => {
+      const dist = getDistance(t1, t2);
+      if (dist <= 0) return;
+      const curZoom = pinchRefs.current.zoom || 1;
+      pinchState = { startDist: dist, startZoom: curZoom, lastZoom: curZoom };
+      container.classList.add('is-pinching');
+      setPinchZoomHud(Math.round(curZoom * 100));
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        beginPinch(e.touches[0], e.touches[1]);
+      } else if (e.touches.length > 2 && pinchState) {
+        container.classList.remove('is-pinching');
+        pinchState = null;
+        setPinchZoomHud(null);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 2) return;
+      if (e.cancelable) e.preventDefault();
+      if (!pinchState) {
+        beginPinch(e.touches[0], e.touches[1]);
+        return;
+      }
+
+      const curDist = getDistance(e.touches[0], e.touches[1]);
+      const nextZoom = computePinchScale(
+        pinchState.startZoom,
+        pinchState.startDist,
+        curDist,
+        MIN_ZOOM,
+        MAX_ZOOM
+      );
+
+      if (Math.abs(nextZoom - pinchState.lastZoom) < 0.005) return;
+
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      const mainRect = mainEl.getBoundingClientRect();
+      const stageBefore = stage.getBoundingClientRect();
+
+      const vpX = midX - mainRect.left;
+      const vpY = midY - mainRect.top;
+      const docX = (midX - stageBefore.left) / (pinchState.lastZoom || 1);
+      const docY = (midY - stageBefore.top) / (pinchState.lastZoom || 1);
+
+      const baseW = pinchRefs.current.wrapperWidth || 794;
+      const baseH = pinchRefs.current.pagedTotalHeight || wrapper.offsetHeight;
+
+      container.style.transform = `scale(${nextZoom})`;
+      stage.style.width = `${Math.round(baseW * nextZoom)}px`;
+      if (baseH) {
+        stage.style.height = `${Math.round(baseH * nextZoom)}px`;
+      }
+
+      const stageAfter = stage.getBoundingClientRect();
+      const stageContentLeft = stageAfter.left - mainRect.left + mainEl.scrollLeft;
+      const stageContentTop = stageAfter.top - mainRect.top + mainEl.scrollTop;
+
+      mainEl.scrollLeft = computePinchScrollTarget(stageContentLeft, docX, vpX, nextZoom);
+      mainEl.scrollTop = computePinchScrollTarget(stageContentTop, docY, vpY, nextZoom);
+
+      pinchState.lastZoom = nextZoom;
+      setPinchZoomHud(Math.round(nextZoom * 100));
+    };
+
+    const endPinch = (e: TouchEvent) => {
+      if (!pinchState || e.touches.length >= 2) return;
+      const finalZoom = pinchState.lastZoom;
+      const initialZoom = pinchState.startZoom;
+      pinchState = null;
+      container.classList.remove('is-pinching');
+      setPinchZoomHud(null);
+      if (Math.abs(finalZoom - initialZoom) >= 0.01) {
+        pinchRefs.current.setZoom(finalZoom);
+      }
+    };
+
+    mainEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    mainEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    mainEl.addEventListener('touchend', endPinch, { passive: true });
+    mainEl.addEventListener('touchcancel', endPinch, { passive: true });
+
+    return () => {
+      container.classList.remove('is-pinching');
+      mainEl.removeEventListener('touchstart', handleTouchStart);
+      mainEl.removeEventListener('touchmove', handleTouchMove);
+      mainEl.removeEventListener('touchend', endPinch);
+      mainEl.removeEventListener('touchcancel', endPinch);
+    };
+  }, []);
+
   const wrapperClasses = [
     'resume-wrapper',
     !showLinkIcons ? 'links-no-icons' : '',
@@ -417,7 +537,20 @@ export const ResumeCanvas: React.FC = () => {
 
   return (
     <>
+      {pinchZoomHud !== null && (
+        <div
+          className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-3 py-1 rounded-full text-xs font-mono font-semibold shadow-md pointer-events-none no-print select-none"
+          style={{
+            backgroundColor: 'rgba(24, 24, 24, 0.85)',
+            color: '#ffffff',
+          }}
+        >
+          {pinchZoomHud}%
+        </div>
+      )}
+
       <div
+        ref={stageRef}
         className="resume-zoom-stage mx-auto mb-5 overflow-visible print:p-0 print:m-0 print:block print:w-full print:h-auto"
         style={{
           width: scaledWidth ? `${scaledWidth}px` : 'fit-content',
@@ -425,6 +558,7 @@ export const ResumeCanvas: React.FC = () => {
         }}
       >
         <div
+          ref={containerRef}
           id="resumeContainer"
           className="fluent-canvas-zoom"
           style={{
