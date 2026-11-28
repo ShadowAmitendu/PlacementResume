@@ -9,6 +9,8 @@ import {
   ListSectionData,
   TextSectionData,
   DividerSectionData,
+  EntriesSectionData,
+  KeyValueSectionData,
 } from '../types/resume';
 
 function sanitizeHeaderData(header: ResumeData['header']): ResumeData['header'] {
@@ -31,21 +33,58 @@ function sanitizeHeaderData(header: ResumeData['header']): ResumeData['header'] 
 function sanitizeSections(sections: SectionData[]): SectionData[] {
   return sections.map((sec) => {
     const title = sanitizeRichTextHtml(sec.title);
+    const hidden = sec.hidden ? true : undefined;
+    const pageBreakBefore = sec.pageBreakBefore ? true : undefined;
+    const baseFlags = {
+      ...(hidden ? { hidden } : {}),
+      ...(pageBreakBefore ? { pageBreakBefore } : {}),
+    };
+
     if (sec.type === 'text') {
-      return { ...sec, title, content: sanitizeRichTextHtml(sec.content) };
+      return { ...sec, ...baseFlags, title, content: sanitizeRichTextHtml(sec.content) };
     }
     if (sec.type === 'list') {
-      return { ...sec, title, items: sec.items.map((item) => sanitizeRichTextHtml(item)) };
+      return { ...sec, ...baseFlags, title, items: sec.items.map((item) => sanitizeRichTextHtml(item)) };
     }
     if (sec.type === 'table') {
       return {
         ...sec,
+        ...baseFlags,
         title,
         headers: sec.headers ? sec.headers.map((h) => sanitizeRichTextHtml(h)) : undefined,
         rows: sec.rows.map((row) => row.map((cell) => sanitizeRichTextHtml(cell))),
       };
     }
-    return { ...sec, title };
+    if (sec.type === 'entries') {
+      const entriesSec = sec as EntriesSectionData;
+      return {
+        ...entriesSec,
+        ...baseFlags,
+        title,
+        entries: (entriesSec.entries || []).map((entry, idx) => ({
+          id: entry.id || createUniqueId(`entry-${idx}`),
+          heading: sanitizeRichTextHtml(entry.heading || ''),
+          subheading: sanitizeRichTextHtml(entry.subheading || ''),
+          dateRange: sanitizeRichTextHtml(entry.dateRange || ''),
+          location: entry.location ? sanitizeRichTextHtml(entry.location) : undefined,
+          bullets: (entry.bullets || []).map((b) => sanitizeRichTextHtml(b)),
+        })),
+      };
+    }
+    if (sec.type === 'keyvalue') {
+      const kvSec = sec as KeyValueSectionData;
+      return {
+        ...kvSec,
+        ...baseFlags,
+        title,
+        pairs: (kvSec.pairs || []).map((pair, idx) => ({
+          id: pair.id || createUniqueId(`kv-${idx}`),
+          label: sanitizeRichTextHtml(pair.label || ''),
+          value: sanitizeRichTextHtml(pair.value || ''),
+        })),
+      };
+    }
+    return { ...sec, ...baseFlags, title };
   });
 }
 

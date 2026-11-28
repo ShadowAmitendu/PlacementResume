@@ -2,11 +2,13 @@ import React from 'react';
 import {
   AddRegular,
   DismissRegular,
+  SparkleRegular,
   TextBulletListLtrRegular,
   TextNumberListLtrRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { ListSectionData } from '../../../types/resume';
+import { sanitizeRichTextHtml } from '../../../utils/sanitize';
 import { htmlToPlainText } from '../../../utils/documentMetrics';
 import { EditableContent } from '../EditableContent';
 
@@ -15,7 +17,7 @@ interface ListSectionProps {
 }
 
 export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
-  const { updateSection, updateListItem } = useResume();
+  const { updateSection, updateListItem, openRewriteModal } = useResume();
   const isNumbered = section.listType === 'numbered';
 
   const handleAddItem = (afterIndex?: number) => {
@@ -60,18 +62,35 @@ export const ListSection: React.FC<ListSectionProps> = ({ section }) => {
               onChange={(val) => updateListItem(section.id, index, val)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               placeholder="[List item]"
-              className="block w-full pr-6"
+              className="block w-full pr-12"
             />
-            {section.items.length > 1 && (
+            <div className="list-remove-btn absolute right-0 top-0.5 flex items-center gap-0.5 no-print">
               <button
                 type="button"
-                onClick={() => handleRemoveItem(index)}
-                className="list-remove-btn absolute right-0 top-0.5 text-neutral-500 hover:text-red-700 p-0.5 rounded no-print inline-flex items-center cursor-pointer"
-                title="Remove item"
+                onClick={() =>
+                  openRewriteModal({
+                    title: 'Rewrite list item',
+                    initialText: htmlToPlainText(item),
+                    onApply: (rewritten) =>
+                      updateListItem(section.id, index, sanitizeRichTextHtml(rewritten)),
+                  })
+                }
+                className="text-neutral-500 hover:text-blue-700 p-0.5 rounded inline-flex items-center cursor-pointer"
+                title="Rewrite or tighten bullet"
               >
-                <DismissRegular fontSize={12} />
+                <SparkleRegular fontSize={12} />
               </button>
-            )}
+              {section.items.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem(index)}
+                  className="text-neutral-500 hover:text-red-700 p-0.5 rounded inline-flex items-center cursor-pointer"
+                  title="Remove item"
+                >
+                  <DismissRegular fontSize={12} />
+                </button>
+              )}
+            </div>
           </li>
         ))}
       </ListTag>

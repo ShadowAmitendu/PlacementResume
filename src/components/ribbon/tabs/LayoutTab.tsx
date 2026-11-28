@@ -1,9 +1,10 @@
 import React from 'react';
-import { Dropdown, Option, Switch, Label, tokens } from '@fluentui/react-components';
+import { Button, Dropdown, Option, Switch, Label, tokens } from '@fluentui/react-components';
 import {
   RulerRegular,
   TextLineSpacingRegular,
   TableRegular,
+  ContractDownLeftRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import {
@@ -14,7 +15,7 @@ import {
 import { RibbonGroup } from '../RibbonGroup';
 
 export const LayoutTab: React.FC = () => {
-  const { resumeData, updateMeta, setTableStyle } = useResume();
+  const { resumeData, updateMeta, setTableStyle, tightenToOnePage } = useResume();
   const { margin, lineHeight, tableStyle } = resumeData.meta;
   const fitSignatureToPage = resumeData.meta.fitSignatureToPage ?? true;
 
@@ -49,7 +50,9 @@ export const LayoutTab: React.FC = () => {
               selectedOptions={[activeMargin]}
               onOptionSelect={(_, data) => {
                 if (data.optionValue) {
-                  updateMeta({ margin: data.optionValue as 'compact' | 'normal' | 'moderate' | 'wide' });
+                  updateMeta({
+                    margin: data.optionValue as 'compact' | 'normal' | 'moderate' | 'wide',
+                  });
                 }
               }}
               style={{ minWidth: 136 }}
@@ -78,7 +81,9 @@ export const LayoutTab: React.FC = () => {
               selectedOptions={[activeLineHeight]}
               onOptionSelect={(_, data) => {
                 if (data.optionValue) {
-                  updateMeta({ lineHeight: data.optionValue as 'tight' | 'normal' | 'relaxed' });
+                  updateMeta({
+                    lineHeight: data.optionValue as 'tight' | 'normal' | 'relaxed',
+                  });
                 }
               }}
               style={{ minWidth: 154 }}
@@ -125,26 +130,38 @@ export const LayoutTab: React.FC = () => {
 
       {/* Auto-Fit Group */}
       <RibbonGroup label="Spacing fit" showDivider={false}>
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
-            <span
-              className="text-xs font-medium"
-              style={{ color: tokens.colorNeutralForeground1 }}
-            >
-              Fit signature to 1 page
-            </span>
-            <span
-              className="text-[11px]"
-              style={{ color: tokens.colorNeutralForeground3 }}
-            >
-              Tightens vertical spacing when content nears page end
-            </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col">
+              <span
+                className="text-xs font-medium"
+                style={{ color: tokens.colorNeutralForeground1 }}
+              >
+                Fit signature to 1 page
+              </span>
+              <span
+                className="text-[11px]"
+                style={{ color: tokens.colorNeutralForeground3 }}
+              >
+                Tightens spacing when content nears page end
+              </span>
+            </div>
+            <Switch
+              aria-label="Fit signature to 1 page"
+              checked={fitSignatureToPage}
+              onChange={(_, data) => updateMeta({ fitSignatureToPage: data.checked })}
+            />
           </div>
-          <Switch
-            aria-label="Fit signature to 1 page"
-            checked={fitSignatureToPage}
-            onChange={(_, data) => updateMeta({ fitSignatureToPage: data.checked })}
-          />
+
+          <Button
+            appearance="outline"
+            size="small"
+            icon={<ContractDownLeftRegular />}
+            onClick={tightenToOnePage}
+            title="Apply compact margins & tight spacing in one click"
+          >
+            Tighten to 1 page
+          </Button>
         </div>
       </RibbonGroup>
     </div>

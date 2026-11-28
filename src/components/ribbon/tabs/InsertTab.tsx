@@ -5,6 +5,8 @@ import {
   TableRegular,
   TextBulletListLtrRegular,
   LineHorizontal1Regular,
+  BriefcaseRegular,
+  GridRegular,
   CropRegular,
   SignatureRegular,
   LinkRegular,
@@ -32,31 +34,53 @@ export const InsertTab: React.FC = () => {
     setIsLinkModalOpen(true);
   };
 
+  const keepCanvasFocus = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="flex items-stretch h-full gap-1 overflow-x-auto scrollbar-none flex-nowrap">
       {/* Sections Group */}
       <RibbonGroup label="Sections">
         <RibbonActionButton
+          icon={<BriefcaseRegular />}
+          label="Experience"
+          onMouseDown={keepCanvasFocus}
+          onClick={() => addSection('entries')}
+          title="Add a structured Experience / Project block with right-aligned dates"
+        />
+        <RibbonActionButton
+          icon={<GridRegular />}
+          label="Skills grid"
+          onMouseDown={keepCanvasFocus}
+          onClick={() => addSection('keyvalue')}
+          title="Add a 2-column Key-Value Skills or Coursework grid"
+        />
+        <RibbonActionButton
           icon={<DocumentTextRegular />}
           label="Text"
+          onMouseDown={keepCanvasFocus}
           onClick={() => addSection('text')}
           title="Add a paragraph section"
         />
         <RibbonActionButton
           icon={<TableRegular />}
           label="Table"
+          onMouseDown={keepCanvasFocus}
           onClick={() => addSection('table')}
           title="Add a data table section"
         />
         <RibbonActionButton
           icon={<TextBulletListLtrRegular />}
           label="List"
+          onMouseDown={keepCanvasFocus}
           onClick={() => addSection('list')}
           title="Add a bullet or numbered list"
         />
         <RibbonActionButton
           icon={<LineHorizontal1Regular />}
           label="Divider"
+          onMouseDown={keepCanvasFocus}
           onClick={() => addSection('hr')}
           title="Add a horizontal divider line"
         />

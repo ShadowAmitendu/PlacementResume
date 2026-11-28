@@ -41,12 +41,14 @@ export interface HeaderData {
   links: HeaderLink[];
 }
 
-export type SectionType = 'text' | 'table' | 'list' | 'hr';
+export type SectionType = 'text' | 'table' | 'list' | 'hr' | 'entries' | 'keyvalue';
 
 export interface BaseSection {
   id: string;
   type: SectionType;
   title: string;
+  hidden?: boolean;
+  pageBreakBefore?: boolean;
 }
 
 export interface TextSectionData extends BaseSection {
@@ -73,11 +75,46 @@ export interface DividerSectionData extends BaseSection {
   type: 'hr';
 }
 
+export interface EntryItem {
+  id: string;
+  heading: string;
+  subheading: string;
+  dateRange: string;
+  location?: string;
+  bullets: string[];
+}
+
+export interface EntriesSectionData extends BaseSection {
+  type: 'entries';
+  entries: EntryItem[];
+}
+
+export interface KeyValueItem {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export interface KeyValueSectionData extends BaseSection {
+  type: 'keyvalue';
+  pairs: KeyValueItem[];
+  labelWidthPct?: number;
+}
+
 export type SectionData =
   | TextSectionData
   | TableSectionData
   | ListSectionData
-  | DividerSectionData;
+  | DividerSectionData
+  | EntriesSectionData
+  | KeyValueSectionData;
+
+export interface SavedResumeProfile {
+  id: string;
+  name: string;
+  updatedAt: number;
+  data: ResumeData;
+}
 
 export interface DeclarationData {
   text: string;

@@ -9,6 +9,8 @@ import {
   PanelTopContractRegular,
   PanelTopExpandRegular,
   DocumentRegular,
+  EyeRegular,
+  EyeOffRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { MIN_ZOOM, MAX_ZOOM } from '../../../utils/documentMetrics';
@@ -23,7 +25,14 @@ export const ViewTab: React.FC<ViewTabProps> = ({
   isRibbonCollapsed,
   setIsRibbonCollapsed,
 }) => {
-  const { resumeData, setZoom, isDarkMode, toggleDarkMode } = useResume();
+  const {
+    resumeData,
+    setZoom,
+    isDarkMode,
+    toggleDarkMode,
+    isPrintPreview,
+    setIsPrintPreview,
+  } = useResume();
   const currentZoom = resumeData.meta.zoom || 1;
 
   const handleAdjust = (delta: number) => {
@@ -121,28 +130,37 @@ export const ViewTab: React.FC<ViewTabProps> = ({
         </div>
       </RibbonGroup>
 
-      {/* Page Spec Info */}
+      {/* Page Spec Info & Clean Print Preview */}
       <RibbonGroup label="Page view">
-        <div
-          className="h-[54px] px-3 flex flex-col justify-center rounded"
-          style={{
-            backgroundColor: tokens.colorNeutralBackground2,
-            border: `1px solid ${tokens.colorNeutralStroke2}`,
-          }}
-        >
+        <div className="flex items-center gap-2">
+          <RibbonActionButton
+            icon={isPrintPreview ? <EyeOffRegular /> : <EyeRegular />}
+            label={isPrintPreview ? 'Exit preview' : 'Print preview'}
+            appearance={isPrintPreview ? 'primary' : 'subtle'}
+            onClick={() => setIsPrintPreview((prev) => !prev)}
+            title="Hide editing buttons and preview exact PDF appearance (Esc to exit)"
+          />
           <div
-            className="flex items-center gap-1.5 text-xs font-medium"
-            style={{ color: tokens.colorNeutralForeground1 }}
+            className="h-[54px] px-3 flex flex-col justify-center rounded"
+            style={{
+              backgroundColor: tokens.colorNeutralBackground2,
+              border: `1px solid ${tokens.colorNeutralStroke2}`,
+            }}
           >
-            <DocumentRegular fontSize={14} />
-            <span>A4 Print Layout</span>
+            <div
+              className="flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: tokens.colorNeutralForeground1 }}
+            >
+              <DocumentRegular fontSize={14} />
+              <span>A4 Print Layout</span>
+            </div>
+            <span
+              className="text-[11px] mt-0.5"
+              style={{ color: tokens.colorNeutralForeground3 }}
+            >
+              210 mm &times; 297 mm
+            </span>
           </div>
-          <span
-            className="text-[11px] mt-0.5"
-            style={{ color: tokens.colorNeutralForeground3 }}
-          >
-            210 mm &times; 297 mm
-          </span>
         </div>
       </RibbonGroup>
 

@@ -9,16 +9,26 @@ import {
   TableSectionData,
   TextSectionData,
   ListSectionData,
+  EntriesSectionData,
+  KeyValueSectionData,
   SectionType,
+  SavedResumeProfile,
 } from '../types/resume';
 import { DEFAULT_RESUME_DATA, THEMES } from '../constants/themes';
-import { buildEqualColWidths, normalizeColWidths } from '../utils/tableWidths';
+import { buildEqualColWidths, normalizeColWidths, reorderTableColumns } from '../utils/tableWidths';
 import { createUniqueId, sanitizeLinkUrl, sanitizeRichTextHtml } from '../utils/sanitize';
+import { runResumePreflight } from '../utils/resumePreflight';
 import { MAX_ZOOM, MIN_ZOOM } from '../utils/documentMetrics';
 import { useHistory } from '../hooks/useHistory';
 import { parseLegacyResume } from '../utils/legacyMigration';
 
 export type SaveStatus = 'saved' | 'saving' | 'error';
+
+export interface RewriteTargetState {
+  title: string;
+  initialText: string;
+  onApply: (rewrittenText: string) => void;
+}
 
 interface ConfirmDialogState {
   isOpen: boolean;
@@ -69,6 +79,8 @@ interface ResumeContextType {
   updateListItem: (sectionId: string, itemIndex: number, value: string) => void;
   removeSection: (id: string) => void;
   duplicateSection: (id: string) => void;
+  toggleSectionHidden: (id: string) => void;
+  toggleSectionPageBreak: (id: string) => void;
   reorderSections: (newSections: SectionData[]) => void;
 
   // Table actions
@@ -76,6 +88,7 @@ interface ResumeContextType {
   deleteTableRow: (sectionId: string, rowIndex?: number) => void;
   addTableColumn: (sectionId: string, atIndex?: number) => void;
   deleteTableColumn: (sectionId: string, colIndex?: number) => void;
+  reorderTableColumn: (sectionId: string, oldIndex: number, newIndex: number) => void;
   toggleTableBorders: (sectionId: string) => void;
   updateTableCell: (
     sectionId: string,
@@ -87,6 +100,24 @@ interface ResumeContextType {
 
   // Declaration
   updateDeclaration: (decl: Partial<DeclarationData>) => void;
+
+  // Profiles & Templates
+  profiles: SavedResumeProfile[];
+  activeProfileId: string;
+  switchProfile: (id: string) => void;
+  createProfile: (name?: string, baseData?: ResumeData) => void;
+  duplicateProfile: (id: string) => void;
+  renameProfile: (id: string, name: string) => void;
+  deleteProfile: (id: string) => Promise<void>;
+  applyTemplate: (templateData: ResumeData, preserveHeader: boolean) => void;
+
+  // Layout & Print Preview
+  tightenToOnePage: () => void;
+  isPrintPreview: boolean;
+  setIsPrintPreview: (val: boolean | ((prev: boolean) => boolean)) => void;
+  canvasPageCount: number;
+  setCanvasPageCount: (count: number) => void;
+  triggerPrintWithPreflight: () => void;
 
   // Storage
   saveToBrowser: () => void;
@@ -127,6 +158,21 @@ interface ResumeContextType {
   setCropImageSrc: (src: string | null) => void;
   openCropModal: (imageSrc?: string | null) => void;
 
+  isResumesModalOpen: boolean;
+  setIsResumesModalOpen: (open: boolean) => void;
+
+  isTemplatesModalOpen: boolean;
+  setIsTemplatesModalOpen: (open: boolean) => void;
+
+  isPreflightModalOpen: boolean;
+  setIsPreflightModalOpen: (open: boolean) => void;
+
+  isJdMatcherModalOpen: boolean;
+  setIsJdMatcherModalOpen: (open: boolean) => void;
+
+  rewriteTarget: RewriteTargetState | null;
+  openRewriteModal: (target: RewriteTargetState | null) => void;
+
   confirmDialog: ConfirmDialogState;
   showConfirm: (message: string, title?: string, confirmLabel?: string) => Promise<boolean>;
   closeConfirm: () => void;
@@ -142,23 +188,61 @@ interface ResumeContextType {
 const ResumeContext = createContext<ResumeContextType | null>(null);
 
 const STORAGE_KEY = 'mySavedResume';
+const PROFILES_KEY = 'placement_resume_profiles_v1';
+const ACTIVE_PROFILE_KEY = 'placement_active_profile_id_v1';
 const DARK_MODE_KEY = 'resumeAppDarkMode';
 const ZOOM_KEY = 'resumeAppZoom';
 
-export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load saved state or default
-  const getInitialState = (): ResumeData => {
-    let initial = DEFAULT_RESUME_DATA;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        initial = parseLegacyResume(JSON.parse(saved));
+function loadInitialProfiles(): { profiles: SavedResumeProfile[]; activeId: string } {
+  try {
+    const rawProfiles = localStorage.getItem(PROFILES_KEY);
+    const savedActive = localStorage.getItem(ACTIVE_PROFILE_KEY);
+    if (rawProfiles) {
+      const parsed = JSON.parse(rawProfiles);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const sanitizedProfiles: SavedResumeProfile[] = parsed.map((p: any, idx: number) => ({
+          id: typeof p?.id === 'string' && p.id ? p.id : `prof-${idx + 1}`,
+          name: typeof p?.name === 'string' && p.name.trim() ? p.name.trim() : `Resume ${idx + 1}`,
+          updatedAt: typeof p?.updatedAt === 'number' ? p.updatedAt : Date.now(),
+          data: parseLegacyResume(p?.data),
+        }));
+        const active = sanitizedProfiles.find((p) => p.id === savedActive) || sanitizedProfiles[0];
+        return { profiles: sanitizedProfiles, activeId: active.id };
       }
-    } catch (e) {
-      console.warn('Failed to load initial resume data from localStorage', e);
     }
-    return initial;
+  } catch (e) {
+    console.warn('Failed to parse saved resume profiles', e);
+  }
+
+  let initialData = DEFAULT_RESUME_DATA;
+  try {
+    const legacySaved = localStorage.getItem(STORAGE_KEY);
+    if (legacySaved) {
+      initialData = parseLegacyResume(JSON.parse(legacySaved));
+    }
+  } catch (e) {
+    console.warn('Failed to load initial resume data from localStorage', e);
+  }
+  const defaultProfile: SavedResumeProfile = {
+    id: 'default-resume',
+    name: 'Main Resume',
+    updatedAt: Date.now(),
+    data: initialData,
   };
+  return { profiles: [defaultProfile], activeId: defaultProfile.id };
+}
+
+export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const initialStoreRef = useRef<{ profiles: SavedResumeProfile[]; activeId: string } | null>(null);
+  if (!initialStoreRef.current) {
+    initialStoreRef.current = loadInitialProfiles();
+  }
+  const [profiles, setProfiles] = useState<SavedResumeProfile[]>(initialStoreRef.current.profiles);
+  const [activeProfileId, setActiveProfileId] = useState<string>(initialStoreRef.current.activeId);
+
+  const initialActiveData =
+    initialStoreRef.current.profiles.find((p) => p.id === initialStoreRef.current!.activeId)
+      ?.data || DEFAULT_RESUME_DATA;
 
   const {
     state: storedResumeData,
@@ -169,7 +253,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     canUndo,
     canRedo,
     resetHistory,
-  } = useHistory<ResumeData>(getInitialState());
+  } = useHistory<ResumeData>(initialActiveData);
 
   const [zoomState, setZoomState] = useState<number>(() => {
     try {
@@ -218,6 +302,17 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [pdfImportInitialFile, setPdfImportInitialFile] = useState<File | null>(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+  const [isResumesModalOpen, setIsResumesModalOpen] = useState(false);
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false);
+  const [isPreflightModalOpen, setIsPreflightModalOpen] = useState(false);
+  const [isJdMatcherModalOpen, setIsJdMatcherModalOpen] = useState(false);
+  const [rewriteTarget, setRewriteTarget] = useState<RewriteTargetState | null>(null);
+  const [isPrintPreview, setIsPrintPreview] = useState(false);
+  const [canvasPageCount, setCanvasPageCount] = useState(1);
+
+  const openRewriteModal = useCallback((target: RewriteTargetState | null) => {
+    setRewriteTarget(target);
+  }, []);
 
   const openCropModal = useCallback(
     (src?: string | null) => {
@@ -323,6 +418,26 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     root.style.setProperty('--section-marker', `"${resumeData.meta.marker}"`);
   }, [resumeData.meta.theme, resumeData.meta.font, resumeData.meta.marker]);
 
+  const profilesRef = useRef(profiles);
+  profilesRef.current = profiles;
+  const activeProfileIdRef = useRef(activeProfileId);
+  activeProfileIdRef.current = activeProfileId;
+
+  const persistActiveSnapshot = useCallback(
+    (dataToPersist: ResumeData, profileIdToSave = activeProfileIdRef.current) => {
+      const now = Date.now();
+      const updatedList = profilesRef.current.map((p) =>
+        p.id === profileIdToSave ? { ...p, updatedAt: now, data: dataToPersist } : p
+      );
+      profilesRef.current = updatedList;
+      setProfiles(updatedList);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToPersist));
+      localStorage.setItem(PROFILES_KEY, JSON.stringify(updatedList));
+      localStorage.setItem(ACTIVE_PROFILE_KEY, profileIdToSave);
+    },
+    []
+  );
+
   // Auto-save to localStorage with debounce
   const hasMountedAutoSaveRef = useRef(false);
   useEffect(() => {
@@ -333,7 +448,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setSaveStatus('saving');
     const timer = setTimeout(() => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(storedResumeData));
+        persistActiveSnapshot(storedResumeData);
         setSaveStatus('saved');
       } catch (e) {
         console.warn('Auto-save error', e);
@@ -341,7 +456,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
     }, 1500);
     return () => clearTimeout(timer);
-  }, [storedResumeData]);
+  }, [storedResumeData, persistActiveSnapshot]);
 
   // Check for URL hash import (#import=<base64>)
   useEffect(() => {
@@ -372,6 +487,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     closeConfirm,
     adjustZoom: (_delta: number) => {},
     resetZoom: () => {},
+    persist: persistActiveSnapshot,
+    triggerPrint: () => {},
   });
   shortcutStateRef.current = {
     storedResumeData,
@@ -382,6 +499,8 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     closeConfirm,
     adjustZoom: shortcutStateRef.current.adjustZoom,
     resetZoom: shortcutStateRef.current.resetZoom,
+    persist: persistActiveSnapshot,
+    triggerPrint: shortcutStateRef.current.triggerPrint,
   };
 
   // Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+F, Ctrl+H, Ctrl+S, Ctrl+Plus/Minus/0, Ctrl+Scroll, Esc)
@@ -417,10 +536,18 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      const key = e.key.toLowerCase();
+
+      if ((e.ctrlKey || e.metaKey) && key === 'p') {
+        e.preventDefault();
+        latest.triggerPrint();
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && key === 's') {
         e.preventDefault();
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(latest.storedResumeData));
+          latest.persist(latest.storedResumeData);
           setSaveStatus('saved');
           latest.showToast('Saved to browser');
         } catch {
@@ -430,7 +557,7 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return;
       }
 
-      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'f' || e.key.toLowerCase() === 'h')) {
+      if ((e.ctrlKey || e.metaKey) && (key === 'f' || key === 'h')) {
         e.preventDefault();
         setIsFindReplaceModalOpen(true);
         return;
@@ -651,6 +778,35 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             items: ['List item one', 'List item two'],
           };
           break;
+        case 'entries':
+          newSection = {
+            id,
+            type: 'entries',
+            title: 'Experience / Projects:',
+            entries: [
+              {
+                id: createUniqueId('entry'),
+                heading: '[Role / Project Title]',
+                subheading: '[Organization / Tech Stack]',
+                dateRange: '[Month Year – Month Year]',
+                location: '[Location / Link]',
+                bullets: ['[Engineered feature X resulting in measurable outcome Y]'],
+              },
+            ],
+          };
+          break;
+        case 'keyvalue':
+          newSection = {
+            id,
+            type: 'keyvalue',
+            title: 'Technical Skills:',
+            labelWidthPct: 26,
+            pairs: [
+              { id: createUniqueId('kv'), label: 'Languages', value: 'C++, TypeScript, Python' },
+              { id: createUniqueId('kv'), label: 'Frameworks & Tools', value: 'React, Node.js, Git, Docker' },
+            ],
+          };
+          break;
         case 'hr':
           newSection = {
             id,
@@ -733,6 +889,30 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       showToast('Section duplicated');
     },
     [setResumeData, showToast]
+  );
+
+  const toggleSectionHidden = useCallback(
+    (id: string) => {
+      setResumeData((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s) =>
+          s.id === id ? ({ ...s, hidden: !s.hidden } as SectionData) : s
+        ),
+      }));
+    },
+    [setResumeData]
+  );
+
+  const toggleSectionPageBreak = useCallback(
+    (id: string) => {
+      setResumeData((prev) => ({
+        ...prev,
+        sections: prev.sections.map((s) =>
+          s.id === id ? ({ ...s, pageBreakBefore: !s.pageBreakBefore } as SectionData) : s
+        ),
+      }));
+    },
+    [setResumeData]
   );
 
   const reorderSections = useCallback(
@@ -861,6 +1041,35 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [setResumeData, showAlert]
   );
 
+  const reorderTableColumn = useCallback(
+    (sectionId: string, oldIndex: number, newIndex: number) => {
+      if (oldIndex === newIndex) return;
+      setResumeData((prev) => ({
+        ...prev,
+        sections: prev.sections.map((sec) => {
+          if (sec.id !== sectionId || sec.type !== 'table') return sec;
+          const tableSec = sec as TableSectionData;
+          const reordered = reorderTableColumns(
+            tableSec.headers,
+            tableSec.rows,
+            tableSec.colWidths,
+            oldIndex,
+            newIndex,
+            tableSec.variant === 'profile'
+          );
+          return {
+            ...tableSec,
+            headers: reordered.headers,
+            rows: reordered.rows,
+            colWidths: reordered.colWidths,
+          };
+        }),
+      }));
+      showToast('Column reordered');
+    },
+    [setResumeData, showToast]
+  );
+
   const toggleTableBorders = useCallback(
     (sectionId: string) => {
       setResumeData((prev) => ({
@@ -920,35 +1129,216 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     [setResumeDataDebounced]
   );
 
+  // --- Profiles, Templates & Layout Helpers ---
+  const switchProfile = useCallback(
+    (id: string) => {
+      if (id === activeProfileIdRef.current) return;
+      // Save current snapshot before switching
+      try {
+        persistActiveSnapshot(storedResumeData, activeProfileIdRef.current);
+      } catch {
+        // ignore storage quota errors on switch
+      }
+      const target = profilesRef.current.find((p) => p.id === id);
+      if (!target) return;
+      activeProfileIdRef.current = target.id;
+      setActiveProfileId(target.id);
+      resetHistory(parseLegacyResume(target.data));
+      try {
+        localStorage.setItem(ACTIVE_PROFILE_KEY, target.id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(target.data));
+      } catch {
+        // ignore
+      }
+      showToast(`Switched to "${target.name}"`);
+    },
+    [storedResumeData, persistActiveSnapshot, resetHistory, showToast]
+  );
+
+  const createProfile = useCallback(
+    (name?: string, baseData?: ResumeData) => {
+      const id = createUniqueId('profile');
+      const finalName = name?.trim() || `Resume ${profilesRef.current.length + 1}`;
+      const newData: ResumeData = baseData
+        ? parseLegacyResume(JSON.parse(JSON.stringify(baseData)))
+        : JSON.parse(JSON.stringify(DEFAULT_RESUME_DATA));
+      const newProf: SavedResumeProfile = {
+        id,
+        name: finalName,
+        updatedAt: Date.now(),
+        data: newData,
+      };
+      const savedCurrent = profilesRef.current.map((p) =>
+        p.id === activeProfileIdRef.current
+          ? { ...p, updatedAt: Date.now(), data: storedResumeData }
+          : p
+      );
+      const nextList = [...savedCurrent, newProf];
+      profilesRef.current = nextList;
+      setProfiles(nextList);
+      activeProfileIdRef.current = id;
+      setActiveProfileId(id);
+      resetHistory(newData);
+      try {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(nextList));
+        localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+      } catch {
+        // ignore
+      }
+      showToast(`Created "${finalName}"`);
+    },
+    [storedResumeData, resetHistory, showToast]
+  );
+
+  const duplicateProfile = useCallback(
+    (id: string) => {
+      const source = profilesRef.current.find((p) => p.id === id);
+      if (!source) return;
+      const sourceData =
+        id === activeProfileIdRef.current ? storedResumeData : source.data;
+      createProfile(`${source.name} (Copy)`, sourceData);
+    },
+    [storedResumeData, createProfile]
+  );
+
+  const renameProfile = useCallback(
+    (id: string, name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      const nextList = profilesRef.current.map((p) =>
+        p.id === id ? { ...p, name: trimmed, updatedAt: Date.now() } : p
+      );
+      profilesRef.current = nextList;
+      setProfiles(nextList);
+      try {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(nextList));
+      } catch {
+        // ignore
+      }
+      showToast(`Renamed to "${trimmed}"`);
+    },
+    [showToast]
+  );
+
+  const deleteProfile = useCallback(
+    async (id: string) => {
+      if (profilesRef.current.length <= 1) {
+        showAlert('Keep at least one resume profile saved.', 'Cannot Delete Profile');
+        return;
+      }
+      const target = profilesRef.current.find((p) => p.id === id);
+      const confirmed = await showConfirm(
+        `Delete resume version "${target?.name || 'Untitled'}" permanently?`,
+        'Delete Resume Version?',
+        'Delete'
+      );
+      if (!confirmed) return;
+
+      const nextList = profilesRef.current.filter((p) => p.id !== id);
+      profilesRef.current = nextList;
+      setProfiles(nextList);
+      if (activeProfileIdRef.current === id) {
+        const fallback = nextList[0];
+        activeProfileIdRef.current = fallback.id;
+        setActiveProfileId(fallback.id);
+        resetHistory(parseLegacyResume(fallback.data));
+        try {
+          localStorage.setItem(ACTIVE_PROFILE_KEY, fallback.id);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback.data));
+        } catch {
+          // ignore
+        }
+      }
+      try {
+        localStorage.setItem(PROFILES_KEY, JSON.stringify(nextList));
+      } catch {
+        // ignore
+      }
+      showToast('Resume version deleted');
+    },
+    [showAlert, showConfirm, resetHistory, showToast]
+  );
+
+  const applyTemplate = useCallback(
+    (templateData: ResumeData, preserveHeader: boolean) => {
+      setResumeData((prev) => {
+        const cloned: ResumeData = parseLegacyResume(JSON.parse(JSON.stringify(templateData)));
+        if (!preserveHeader) return cloned;
+        return {
+          ...cloned,
+          meta: {
+            ...cloned.meta,
+            photo: prev.meta.photo,
+            showPhoto: prev.meta.showPhoto,
+          },
+          header: JSON.parse(JSON.stringify(prev.header)),
+          declaration: {
+            ...cloned.declaration,
+            signature: prev.declaration.signature,
+            signatureImage: prev.declaration.signatureImage,
+          },
+        };
+      });
+      showToast('Template applied');
+    },
+    [setResumeData, showToast]
+  );
+
+  const tightenToOnePage = useCallback(() => {
+    setResumeData((prev) => ({
+      ...prev,
+      meta: {
+        ...prev.meta,
+        margin: 'compact',
+        lineHeight: 'tight',
+        fitSignatureToPage: true,
+      },
+    }));
+    showToast('Applied compact margins & tight spacing');
+  }, [setResumeData, showToast]);
+
+  const triggerPrintWithPreflight = useCallback(() => {
+    const issues = runResumePreflight(resumeData, canvasPageCount);
+    if (issues.length === 0) {
+      window.print();
+    } else {
+      setIsPreflightModalOpen(true);
+    }
+  }, [resumeData, canvasPageCount]);
+
+  shortcutStateRef.current.triggerPrint = triggerPrintWithPreflight;
+
   // --- Storage ---
   const saveToBrowser = useCallback(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedResumeData));
+      persistActiveSnapshot(storedResumeData);
       setSaveStatus('saved');
       showToast('Saved to browser');
     } catch {
       setSaveStatus('error');
       showAlert('Could not save because browser storage is full.', 'Save failed');
     }
-  }, [storedResumeData, showToast, showAlert]);
+  }, [storedResumeData, persistActiveSnapshot, showToast, showAlert]);
 
   const clearBrowserSave = useCallback(async () => {
     const confirmed = await showConfirm(
-      'This will erase your saved resume from the browser. You cannot undo this.',
-      'Clear Browser Save?',
-      'Clear'
+      'This will reset your current resume version to the default template. You cannot undo this.',
+      'Reset Current Resume?',
+      'Reset'
     );
     if (confirmed) {
+      const fresh = JSON.parse(JSON.stringify(DEFAULT_RESUME_DATA)) as ResumeData;
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        persistActiveSnapshot(fresh);
       } catch {
         // ignore
       }
-      resetHistory(DEFAULT_RESUME_DATA);
+      resetHistory(fresh);
       setSaveStatus('saved');
-      showToast('Browser save cleared');
+      showToast('Reset to default template');
     }
-  }, [showConfirm, resetHistory, showToast]);
+  }, [showConfirm, persistActiveSnapshot, resetHistory, showToast]);
 
   const exportResume = useCallback(
     (fileName: string) => {
@@ -1116,6 +1506,31 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               headers: tableSec.headers ? tableSec.headers.map(replaceInString) : undefined,
               rows: tableSec.rows.map((row) => row.map(replaceInString)),
             };
+          } else if (sec.type === 'entries') {
+            const entriesSec = sec as EntriesSectionData;
+            return {
+              ...entriesSec,
+              title,
+              entries: entriesSec.entries.map((entry) => ({
+                ...entry,
+                heading: replaceInString(entry.heading),
+                subheading: replaceInString(entry.subheading),
+                dateRange: replaceInString(entry.dateRange),
+                location: entry.location ? replaceInString(entry.location) : undefined,
+                bullets: entry.bullets.map(replaceInString),
+              })),
+            };
+          } else if (sec.type === 'keyvalue') {
+            const kvSec = sec as KeyValueSectionData;
+            return {
+              ...kvSec,
+              title,
+              pairs: kvSec.pairs.map((p) => ({
+                ...p,
+                label: replaceInString(p.label),
+                value: replaceInString(p.value),
+              })),
+            };
           }
           return { ...sec, title };
         });
@@ -1165,14 +1580,31 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       updateListItem,
       removeSection,
       duplicateSection,
+      toggleSectionHidden,
+      toggleSectionPageBreak,
       reorderSections,
       addTableRow,
       deleteTableRow,
       addTableColumn,
       deleteTableColumn,
+      reorderTableColumn,
       toggleTableBorders,
       updateTableCell,
       updateDeclaration,
+      profiles,
+      activeProfileId,
+      switchProfile,
+      createProfile,
+      duplicateProfile,
+      renameProfile,
+      deleteProfile,
+      applyTemplate,
+      tightenToOnePage,
+      isPrintPreview,
+      setIsPrintPreview,
+      canvasPageCount,
+      setCanvasPageCount,
+      triggerPrintWithPreflight,
       saveToBrowser,
       clearBrowserSave,
       exportResume,
@@ -1201,6 +1633,16 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       cropImageSrc,
       setCropImageSrc,
       openCropModal,
+      isResumesModalOpen,
+      setIsResumesModalOpen,
+      isTemplatesModalOpen,
+      setIsTemplatesModalOpen,
+      isPreflightModalOpen,
+      setIsPreflightModalOpen,
+      isJdMatcherModalOpen,
+      setIsJdMatcherModalOpen,
+      rewriteTarget,
+      openRewriteModal,
       confirmDialog,
       showConfirm,
       closeConfirm,
@@ -1232,14 +1674,29 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       updateListItem,
       removeSection,
       duplicateSection,
+      toggleSectionHidden,
+      toggleSectionPageBreak,
       reorderSections,
       addTableRow,
       deleteTableRow,
       addTableColumn,
       deleteTableColumn,
+      reorderTableColumn,
       toggleTableBorders,
       updateTableCell,
       updateDeclaration,
+      profiles,
+      activeProfileId,
+      switchProfile,
+      createProfile,
+      duplicateProfile,
+      renameProfile,
+      deleteProfile,
+      applyTemplate,
+      tightenToOnePage,
+      isPrintPreview,
+      canvasPageCount,
+      triggerPrintWithPreflight,
       saveToBrowser,
       clearBrowserSave,
       exportResume,
@@ -1259,6 +1716,12 @@ export const ResumeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       isCropModalOpen,
       cropImageSrc,
       openCropModal,
+      isResumesModalOpen,
+      isTemplatesModalOpen,
+      isPreflightModalOpen,
+      isJdMatcherModalOpen,
+      rewriteTarget,
+      openRewriteModal,
       confirmDialog,
       showConfirm,
       closeConfirm,

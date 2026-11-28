@@ -30,3 +30,67 @@ export function normalizeColWidths(widths: number[]): number[] {
   );
   return normalized;
 }
+
+/**
+ * Moves an element from `fromIndex` to `toIndex` without mutating the source array.
+ */
+export function moveArrayItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
+  if (
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= items.length ||
+    toIndex >= items.length
+  ) {
+    return items;
+  }
+  const next = [...items];
+  const [moved] = next.splice(fromIndex, 1);
+  next.splice(toIndex, 0, moved);
+  return next;
+}
+
+/**
+ * Reorders a table column (headers, rows, and proportional colWidths) from `fromIndex` to `toIndex`.
+ */
+export function reorderTableColumns(
+  headers: string[] | undefined,
+  rows: string[][],
+  colWidths: number[] | undefined,
+  fromIndex: number,
+  toIndex: number,
+  isProfile = false
+): {
+  headers?: string[];
+  rows: string[][];
+  colWidths?: number[];
+} {
+  const colCount = headers?.length || rows[0]?.length || 0;
+  if (
+    colCount <= 1 ||
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= colCount ||
+    toIndex >= colCount
+  ) {
+    return { headers, rows, colWidths };
+  }
+
+  const nextHeaders = headers ? moveArrayItem(headers, fromIndex, toIndex) : undefined;
+  const nextRows = rows.map((row) => moveArrayItem(row, fromIndex, toIndex));
+
+  const baseWidths =
+    colWidths && colWidths.length === colCount
+      ? colWidths
+      : isProfile && colCount === 2
+      ? [35, 65]
+      : buildEqualColWidths(colCount);
+  const nextColWidths = normalizeColWidths(moveArrayItem(baseWidths, fromIndex, toIndex));
+
+  return {
+    headers: nextHeaders,
+    rows: nextRows,
+    colWidths: nextColWidths,
+  };
+}

@@ -7,21 +7,24 @@ import {
 } from '@fluentui/react-components';
 import { useResume } from '../../context/ResumeContext';
 
+const SINGLE_TOAST_ID = 'active-status-toast';
+
 export const Toast: React.FC = () => {
   const { toast } = useResume();
   const toasterId = useId();
-  const { dispatchToast } = useToastController(toasterId);
+  const { dispatchToast, dismissAllToasts } = useToastController(toasterId);
 
   useEffect(() => {
     if (toast.show && toast.message) {
+      dismissAllToasts();
       dispatchToast(
         <FluentToast>
           <ToastTitle>{toast.message}</ToastTitle>
         </FluentToast>,
-        { timeout: 2200, intent: 'info' }
+        { toastId: SINGLE_TOAST_ID, timeout: 1800, intent: 'info' }
       );
     }
-  }, [toast.id, toast.show, toast.message, dispatchToast]);
+  }, [toast.id, toast.show, toast.message, dispatchToast, dismissAllToasts]);
 
   return <Toaster toasterId={toasterId} position="bottom" />;
 };

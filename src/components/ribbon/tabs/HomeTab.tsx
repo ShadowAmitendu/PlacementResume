@@ -33,6 +33,8 @@ import {
   TextAlignRightRegular,
   TextAlignJustifyRegular,
   SearchRegular,
+  SparkleRegular,
+  TargetArrowRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { FONT_OPTIONS } from '../../../constants/themes';
@@ -297,6 +299,9 @@ export const HomeTab: React.FC = () => {
     canUndo,
     canRedo,
     setIsFindReplaceModalOpen,
+    setIsJdMatcherModalOpen,
+    openRewriteModal,
+    showToast,
   } = useResume();
 
   const [activeTextColor, setActiveTextColor] = useState('#000000');
@@ -306,6 +311,18 @@ export const HomeTab: React.FC = () => {
 
   // Preserves text selection inside contenteditable before dropdown interaction shifts focus
   const savedRangeRef = useRef<Range | null>(null);
+  const lastEditableRef = useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    const onFocusIn = (e: FocusEvent) => {
+      const editable = findEditableAncestor(e.target as Node);
+      if (editable) {
+        lastEditableRef.current = editable;
+      }
+    };
+    document.addEventListener('focusin', onFocusIn);
+    return () => document.removeEventListener('focusin', onFocusIn);
+  }, []);
 
   const captureSelection = () => {
     const sel = window.getSelection();
@@ -874,13 +891,41 @@ export const HomeTab: React.FC = () => {
         </div>
       </RibbonGroup>
 
-      {/* Editing Group */}
-      <RibbonGroup label="Editing" showDivider={false}>
+      {/* Editing & Smart Assistants */}
+      <RibbonGroup label="Editing & ATS" showDivider={false}>
         <RibbonActionButton
           icon={<SearchRegular />}
           label="Find"
           onClick={() => setIsFindReplaceModalOpen(true)}
           title="Find and replace text across the resume (Ctrl+F)"
+        />
+        <RibbonActionButton
+          icon={<SparkleRegular />}
+          label="Rewrite"
+          onMouseDown={preventBlur}
+          onClick={() => {
+            const targetEl = getActiveEditableElement() || lastEditableRef.current;
+            if (!targetEl || !document.body.contains(targetEl)) {
+              showToast('Click any paragraph, bullet, or cell first, then click Rewrite');
+              return;
+            }
+            const plain = (targetEl.textContent || '').trim();
+            openRewriteModal({
+              title: 'Rewrite & Tighten Focused Text',
+              initialText: plain,
+              onApply: (rewritten) => {
+                targetEl.textContent = rewritten;
+                targetEl.dispatchEvent(new Event('input', { bubbles: true }));
+              },
+            });
+          }}
+          title="Rewrite or tighten the selected bullet or paragraph"
+        />
+        <RibbonActionButton
+          icon={<TargetArrowRegular />}
+          label="JD Match"
+          onClick={() => setIsJdMatcherModalOpen(true)}
+          title="Compare resume against a Job Description for ATS keywords"
         />
       </RibbonGroup>
     </div>

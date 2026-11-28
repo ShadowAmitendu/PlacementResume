@@ -6,6 +6,9 @@ import {
   ArrowImportRegular,
   PrintRegular,
   DocumentPdfRegular,
+  FolderRegular,
+  DocumentSparkleRegular,
+  CheckmarkCircleRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { RibbonGroup, RibbonActionButton } from '../RibbonGroup';
@@ -17,6 +20,10 @@ export const FileTab: React.FC = () => {
     setIsExportModalOpen,
     importResume,
     setIsPdfAiModalOpen,
+    setIsResumesModalOpen,
+    setIsTemplatesModalOpen,
+    setIsPreflightModalOpen,
+    triggerPrintWithPreflight,
   } = useResume();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +38,22 @@ export const FileTab: React.FC = () => {
 
   return (
     <div className="flex items-stretch h-full gap-1 overflow-x-auto scrollbar-none flex-nowrap">
+      {/* Resumes & Templates */}
+      <RibbonGroup label="Resumes">
+        <RibbonActionButton
+          icon={<FolderRegular />}
+          label="Versions"
+          onClick={() => setIsResumesModalOpen(true)}
+          title="Manage multiple saved resume versions"
+        />
+        <RibbonActionButton
+          icon={<DocumentSparkleRegular />}
+          label="Templates"
+          onClick={() => setIsTemplatesModalOpen(true)}
+          title="Load a role-based placement or tech CV template"
+        />
+      </RibbonGroup>
+
       {/* Storage Group */}
       <RibbonGroup label="Browser storage">
         <RibbonActionButton
@@ -48,13 +71,13 @@ export const FileTab: React.FC = () => {
         />
       </RibbonGroup>
 
-      {/* Project Files Group */}
-      <RibbonGroup label="Backup & import">
+      {/* Project Files & Formats */}
+      <RibbonGroup label="Export & import">
         <RibbonActionButton
           icon={<ArrowExportRegular />}
           label="Export"
           onClick={() => setIsExportModalOpen(true)}
-          title="Download project backup (.rsbld)"
+          title="Export as .rsbld, Word (.docx), Markdown, or ATS plain text"
         />
         <RibbonActionButton
           icon={<ArrowImportRegular />}
@@ -74,11 +97,17 @@ export const FileTab: React.FC = () => {
       {/* Output Group */}
       <RibbonGroup label="Document output">
         <RibbonActionButton
+          icon={<CheckmarkCircleRegular />}
+          label="Preflight"
+          onClick={() => setIsPreflightModalOpen(true)}
+          title="Check for placeholders, sample URLs, or page overflow"
+        />
+        <RibbonActionButton
           icon={<PrintRegular />}
           label="Print / PDF"
           appearance="primary"
-          onClick={() => window.print()}
-          title="Open system print dialog to save PDF (Ctrl+P)"
+          onClick={triggerPrintWithPreflight}
+          title="Run preflight check & save PDF (Ctrl+P)"
         />
       </RibbonGroup>
 

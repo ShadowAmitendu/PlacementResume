@@ -1,4 +1,20 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { tokens } from '@fluentui/react-components';
 import {
   AddRegular,
@@ -10,6 +26,7 @@ import {
   ArrowRightRegular,
   ArrowUpRegular,
   ArrowDownRegular,
+  ReOrderDotsHorizontalRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { TableSectionData } from '../../../types/resume';
@@ -30,6 +47,9 @@ interface ContextMenuState {
 interface ColumnActionsPillProps {
   colIdx: number;
   colCount: number;
+  isDragging?: boolean;
+  dragAttributes?: Record<string, any>;
+  dragListeners?: Record<string, any>;
   onAddLeft: () => void;
   onDelete: () => void;
   onAddRight: () => void;
@@ -38,6 +58,9 @@ interface ColumnActionsPillProps {
 const ColumnActionsPill: React.FC<ColumnActionsPillProps> = ({
   colIdx,
   colCount,
+  isDragging,
+  dragAttributes,
+  dragListeners,
   onAddLeft,
   onDelete,
   onAddRight,
@@ -51,7 +74,9 @@ const ColumnActionsPill: React.FC<ColumnActionsPillProps> = ({
 
   return (
     <div
-      className={`column-actions-pill absolute -top-5.5 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px] leading-none ${alignClass}`}
+      className={`column-actions-pill absolute bottom-full mb-0.5 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px] leading-none after:content-[''] after:absolute after:inset-x-0 after:top-full after:h-1.5 ${
+        isDragging ? 'opacity-100 pointer-events-auto' : ''
+      } ${alignClass}`}
       style={{
         backgroundColor: '#ffffff',
         color: '#242424',
@@ -59,7 +84,21 @@ const ColumnActionsPill: React.FC<ColumnActionsPillProps> = ({
         boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
       }}
       onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
+      {colCount > 1 && (
+        <span
+          {...dragAttributes}
+          {...dragListeners}
+          aria-label={`Drag to move column ${colIdx + 1}`}
+          aria-roledescription="sortable"
+          title="Drag to reorder column"
+          className="col-drag-handle px-1 py-0.5 hover:bg-neutral-100 rounded inline-flex items-center cursor-grab active:cursor-grabbing touch-none"
+          style={{ color: '#525252' }}
+        >
+          <ReOrderDotsHorizontalRegular fontSize={12} />
+        </span>
+      )}
       <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
@@ -107,12 +146,222 @@ const ColumnActionsPill: React.FC<ColumnActionsPillProps> = ({
   );
 };
 
+interface SortableHeaderCellProps {
+  id: string;
+  colIdx: number;
+  colCount: number;
+  headerText: string;
+  onChangeHeader: (val: string) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onAddLeft: () => void;
+  onDelete: () => void;
+  onAddRight: () => void;
+  onResizerPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+  onResetWidths: () => void;
+}
+
+const SortableHeaderCell: React.FC<SortableHeaderCellProps> = ({
+  id,
+  colIdx,
+  colCount,
+  headerText,
+  onChangeHeader,
+  onContextMenu,
+  onAddLeft,
+  onDelete,
+  onAddRight,
+  onResizerPointerDown,
+  onResetWidths,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    opacity: isDragging ? 0.65 : 1,
+    zIndex: isDragging ? 25 : undefined,
+  };
+
+  return (
+    <th
+      ref={setNodeRef}
+      style={style}
+      className="relative"
+      onContextMenu={onContextMenu}
+    >
+      <ColumnActionsPill
+        colIdx={colIdx}
+        colCount={colCount}
+        isDragging={isDragging}
+        dragAttributes={attributes}
+        dragListeners={listeners}
+        onAddLeft={onAddLeft}
+        onDelete={onDelete}
+        onAddRight={onAddRight}
+      />
+
+      <EditableContent
+        tagName="div"
+        html={headerText}
+        onChange={onChangeHeader}
+        placeholder="[Header]"
+        className="block w-full"
+      />
+      {colIdx < colCount - 1 && (
+        <div
+          onPointerDown={onResizerPointerDown}
+          onDoubleClick={onResetWidths}
+          className="resizer no-print"
+          title="Drag to resize column (Double-click to balance)"
+        />
+      )}
+    </th>
+  );
+};
+
+interface SortableFirstRowCellProps {
+  id: string;
+  enableSortable: boolean;
+  colIdx: number;
+  colCount: number;
+  isProfile: boolean;
+  cellText: string;
+  rowLength: number;
+  onChangeCell: (val: string) => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onAddLeft: () => void;
+  onDeleteCol: () => void;
+  onAddRight: () => void;
+  onAddRowBelow: () => void;
+  onDeleteRow: () => void;
+  canDeleteRow: boolean;
+  onResizerPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+  onResetWidths: () => void;
+}
+
+const SortableFirstRowCell: React.FC<SortableFirstRowCellProps> = ({
+  id,
+  enableSortable,
+  colIdx,
+  colCount,
+  isProfile,
+  cellText,
+  rowLength,
+  onChangeCell,
+  onContextMenu,
+  onAddLeft,
+  onDeleteCol,
+  onAddRight,
+  onAddRowBelow,
+  onDeleteRow,
+  canDeleteRow,
+  onResizerPointerDown,
+  onResetWidths,
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !enableSortable,
+  });
+
+  const style: React.CSSProperties = enableSortable
+    ? {
+        transform: CSS.Translate.toString(transform),
+        transition,
+        opacity: isDragging ? 0.65 : 1,
+        zIndex: isDragging ? 25 : undefined,
+      }
+    : {};
+
+  return (
+    <td
+      ref={enableSortable ? setNodeRef : undefined}
+      style={style}
+      className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
+      onContextMenu={onContextMenu}
+    >
+      {enableSortable && (
+        <ColumnActionsPill
+          colIdx={colIdx}
+          colCount={colCount}
+          isDragging={isDragging}
+          dragAttributes={attributes}
+          dragListeners={listeners}
+          onAddLeft={onAddLeft}
+          onDelete={onDeleteCol}
+          onAddRight={onAddRight}
+        />
+      )}
+
+      <EditableContent
+        tagName="div"
+        html={cellText}
+        onChange={onChangeCell}
+        placeholder="[Data]"
+        className="block w-full"
+      />
+
+      {colIdx === rowLength - 1 && (
+        <div
+          className="row-actions-pill absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #d4d4d4',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddRowBelow();
+            }}
+            title="Insert row below"
+            className="p-1 hover:bg-neutral-100 rounded flex items-center cursor-pointer leading-none transition-colors"
+            style={{ color: '#242424' }}
+          >
+            <AddRegular fontSize={12} />
+          </button>
+          {canDeleteRow && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteRow();
+              }}
+              title="Delete row"
+              className="p-1 hover:bg-red-50 rounded flex items-center cursor-pointer leading-none transition-colors"
+              style={{ color: '#c42b1c' }}
+            >
+              <DeleteRegular fontSize={12} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {enableSortable && colIdx < colCount - 1 && (
+        <div
+          onPointerDown={onResizerPointerDown}
+          onDoubleClick={onResetWidths}
+          className="resizer no-print"
+          title="Drag to resize column (Double-click to balance)"
+        />
+      )}
+    </td>
+  );
+};
+
 export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
   const {
     addTableRow,
     deleteTableRow,
     addTableColumn,
     deleteTableColumn,
+    reorderTableColumn,
     toggleTableBorders,
     updateTableCell,
     updateSection,
@@ -123,6 +372,17 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
   const isProfile = section.variant === 'profile';
+
+  const colSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (!contextMenu) return;
@@ -151,6 +411,20 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     .join(' ');
 
   const colCount = section.headers?.length || (section.rows[0] ? section.rows[0].length : 0);
+  const columnIds = useMemo(
+    () => Array.from({ length: colCount }, (_, i) => `${section.id}-col-${i}`),
+    [section.id, colCount]
+  );
+
+  const handleColDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = columnIds.indexOf(String(active.id));
+    const newIndex = columnIds.indexOf(String(over.id));
+    if (oldIndex !== -1 && newIndex !== -1) {
+      reorderTableColumn(section.id, oldIndex, newIndex);
+    }
+  };
 
   const getActiveWidths = (): number[] => {
     if (colCount <= 0) return [];
@@ -202,7 +476,6 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       if (moveEvent.pointerId !== pointerId) return;
-      // clientX delta and table.getBoundingClientRect().width are both in zoomed screen pixels
       const deltaPercent = ((moveEvent.clientX - startX) / tableWidth) * 100;
 
       const minPercent = Math.min(6, pairTotal / 2);
@@ -247,152 +520,164 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
   };
 
   return (
-    <div className="relative pt-5 print:pt-0">
-      <table ref={tableRef} className={tableClasses}>
-        {colCount > 0 && (
-          <colgroup>
-            {activeWidths.map((widthPct, idx) => (
-              <col key={idx} style={{ width: `${widthPct}%` }} />
-            ))}
-          </colgroup>
-        )}
+    <div className="table-wrap relative pt-5 print:pt-0">
+      <DndContext
+        sensors={colSensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleColDragEnd}
+      >
+        <SortableContext items={columnIds} strategy={horizontalListSortingStrategy}>
+          <table ref={tableRef} className={tableClasses}>
+            {colCount > 0 && (
+              <colgroup>
+                {activeWidths.map((widthPct, idx) => (
+                  <col key={idx} style={{ width: `${widthPct}%` }} />
+                ))}
+              </colgroup>
+            )}
 
-        {section.headers && section.headers.length > 0 && (
-          <thead>
-            <tr>
-              {section.headers.map((headerText, colIdx) => (
-                <th
-                  key={colIdx}
-                  className="relative"
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setContextMenu({
-                      x: e.clientX,
-                      y: e.clientY,
-                      colIdx,
-                      rowIdx: -1,
-                    });
-                  }}
-                >
-                  <ColumnActionsPill
-                    colIdx={colIdx}
-                    colCount={colCount}
-                    onAddLeft={() => addTableColumn(section.id, colIdx)}
-                    onDelete={() => deleteTableColumn(section.id, colIdx)}
-                    onAddRight={() => addTableColumn(section.id, colIdx + 1)}
-                  />
-
-                  <EditableContent
-                    tagName="div"
-                    html={headerText}
-                    onChange={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
-                    placeholder="[Header]"
-                    className="block w-full"
-                  />
-                  {colIdx < colCount - 1 && (
-                    <div
-                      onPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
-                      onDoubleClick={handleResetWidths}
-                      className="resizer no-print"
-                      title="Drag to resize column (Double-click to balance)"
-                    />
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        )}
-
-        <tbody>
-          {section.rows.map((row, rowIdx) => (
-            <tr key={rowIdx}>
-              {row.map((cellText, colIdx) => (
-                <td
-                  key={colIdx}
-                  className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setContextMenu({
-                      x: e.clientX,
-                      y: e.clientY,
-                      colIdx,
-                      rowIdx,
-                    });
-                  }}
-                >
-                  {!section.headers && rowIdx === 0 && (
-                    <ColumnActionsPill
+            {section.headers && section.headers.length > 0 && (
+              <thead>
+                <tr>
+                  {section.headers.map((headerText, colIdx) => (
+                    <SortableHeaderCell
+                      key={columnIds[colIdx]}
+                      id={columnIds[colIdx]}
                       colIdx={colIdx}
                       colCount={colCount}
+                      headerText={headerText}
+                      onChangeHeader={(val) => updateTableCell(section.id, 0, colIdx, val, true)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextMenu({
+                          x: e.clientX,
+                          y: e.clientY,
+                          colIdx,
+                          rowIdx: -1,
+                        });
+                      }}
                       onAddLeft={() => addTableColumn(section.id, colIdx)}
                       onDelete={() => deleteTableColumn(section.id, colIdx)}
                       onAddRight={() => addTableColumn(section.id, colIdx + 1)}
+                      onResizerPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
+                      onResetWidths={handleResetWidths}
                     />
-                  )}
+                  ))}
+                </tr>
+              </thead>
+            )}
 
-                  <EditableContent
-                    tagName="div"
-                    html={cellText}
-                    onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
-                    placeholder="[Data]"
-                    className="block w-full"
-                  />
-
-                  {colIdx === row.length - 1 && (
-                    <div
-                      className="row-actions-pill absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
-                      style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #d4d4d4',
-                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
-                      }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addTableRow(section.id, rowIdx + 1);
-                        }}
-                        title="Insert row below"
-                        className="p-1 hover:bg-neutral-100 rounded flex items-center cursor-pointer leading-none transition-colors"
-                        style={{ color: '#242424' }}
-                      >
-                        <AddRegular fontSize={12} />
-                      </button>
-                      {section.rows.length > 1 && (
-                        <button
-                          type="button"
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteTableRow(section.id, rowIdx);
+            <tbody>
+              {section.rows.map((row, rowIdx) => (
+                <tr key={rowIdx}>
+                  {row.map((cellText, colIdx) => {
+                    const headerlessFirstRow = !section.headers && rowIdx === 0;
+                    if (headerlessFirstRow) {
+                      return (
+                        <SortableFirstRowCell
+                          key={columnIds[colIdx] || colIdx}
+                          id={columnIds[colIdx] || `${section.id}-col-${colIdx}`}
+                          enableSortable
+                          colIdx={colIdx}
+                          colCount={colCount}
+                          isProfile={isProfile}
+                          cellText={cellText}
+                          rowLength={row.length}
+                          onChangeCell={(val) =>
+                            updateTableCell(section.id, rowIdx, colIdx, val, false)
+                          }
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            setContextMenu({
+                              x: e.clientX,
+                              y: e.clientY,
+                              colIdx,
+                              rowIdx,
+                            });
                           }}
-                          title="Delete row"
-                          className="p-1 hover:bg-red-50 rounded flex items-center cursor-pointer leading-none transition-colors"
-                          style={{ color: '#c42b1c' }}
-                        >
-                          <DeleteRegular fontSize={12} />
-                        </button>
-                      )}
-                    </div>
-                  )}
+                          onAddLeft={() => addTableColumn(section.id, colIdx)}
+                          onDeleteCol={() => deleteTableColumn(section.id, colIdx)}
+                          onAddRight={() => addTableColumn(section.id, colIdx + 1)}
+                          onAddRowBelow={() => addTableRow(section.id, rowIdx + 1)}
+                          onDeleteRow={() => deleteTableRow(section.id, rowIdx)}
+                          canDeleteRow={section.rows.length > 1}
+                          onResizerPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
+                          onResetWidths={handleResetWidths}
+                        />
+                      );
+                    }
 
-                  {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
-                    <div
-                      onPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
-                      onDoubleClick={handleResetWidths}
-                      className="resizer no-print"
-                      title="Drag to resize column (Double-click to balance)"
-                    />
-                  )}
-                </td>
+                    return (
+                      <td
+                        key={colIdx}
+                        className={`${isProfile || colIdx === 0 ? 'text-left' : ''} relative`}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setContextMenu({
+                            x: e.clientX,
+                            y: e.clientY,
+                            colIdx,
+                            rowIdx,
+                          });
+                        }}
+                      >
+                        <EditableContent
+                          tagName="div"
+                          html={cellText}
+                          onChange={(val) => updateTableCell(section.id, rowIdx, colIdx, val, false)}
+                          placeholder="[Data]"
+                          className="block w-full"
+                        />
+
+                        {colIdx === row.length - 1 && (
+                          <div
+                            className="row-actions-pill absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
+                            style={{
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #d4d4d4',
+                              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addTableRow(section.id, rowIdx + 1);
+                              }}
+                              title="Insert row below"
+                              className="p-1 hover:bg-neutral-100 rounded flex items-center cursor-pointer leading-none transition-colors"
+                              style={{ color: '#242424' }}
+                            >
+                              <AddRegular fontSize={12} />
+                            </button>
+                            {section.rows.length > 1 && (
+                              <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteTableRow(section.id, rowIdx);
+                                }}
+                                title="Delete row"
+                                className="p-1 hover:bg-red-50 rounded flex items-center cursor-pointer leading-none transition-colors"
+                                style={{ color: '#c42b1c' }}
+                              >
+                                <DeleteRegular fontSize={12} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </SortableContext>
+      </DndContext>
 
       {/* Monochrome Subtle Table Controls */}
       <div className="table-controls no-print">
@@ -454,7 +739,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
         <div
           ref={contextMenuRef}
           style={{
-            top: Math.min(contextMenu.y, window.innerHeight - 260),
+            top: Math.min(contextMenu.y, window.innerHeight - 310),
             left: Math.min(contextMenu.x, window.innerWidth - 210),
             backgroundColor: tokens.colorNeutralBackground1,
             color: tokens.colorNeutralForeground1,
@@ -470,6 +755,32 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
           >
             Column {contextMenu.colIdx + 1}
           </div>
+          {contextMenu.colIdx > 0 && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                reorderTableColumn(section.id, contextMenu.colIdx, contextMenu.colIdx - 1);
+                setContextMenu(null);
+              }}
+            >
+              <ArrowLeftRegular fontSize={14} />
+              <span>Move column left</span>
+            </button>
+          )}
+          {contextMenu.colIdx < colCount - 1 && (
+            <button
+              type="button"
+              className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
+              onClick={() => {
+                reorderTableColumn(section.id, contextMenu.colIdx, contextMenu.colIdx + 1);
+                setContextMenu(null);
+              }}
+            >
+              <ArrowRightRegular fontSize={14} />
+              <span>Move column right</span>
+            </button>
+          )}
           <button
             type="button"
             className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"

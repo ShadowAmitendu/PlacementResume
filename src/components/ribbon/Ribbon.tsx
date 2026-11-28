@@ -25,6 +25,7 @@ import {
   CheckmarkCircleRegular,
   ArrowSyncRegular,
   WarningRegular,
+  FolderRegular,
 } from '@fluentui/react-icons';
 import { useResume } from '../../context/ResumeContext';
 import { HomeTab } from './tabs/HomeTab';
@@ -56,7 +57,14 @@ export const Ribbon: React.FC = () => {
     saveStatus,
     setIsPdfAiModalOpen,
     setIsFindReplaceModalOpen,
+    profiles,
+    activeProfileId,
+    setIsResumesModalOpen,
+    triggerPrintWithPreflight,
   } = useResume();
+
+  const activeProfileName =
+    profiles.find((p) => p.id === activeProfileId)?.name || 'Main Resume';
 
   const [activeTab, setActiveTab] = useState<RibbonTabType>('home');
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
@@ -115,6 +123,25 @@ export const Ribbon: React.FC = () => {
             >
               PlacementResume
             </span>
+            <div className="hidden sm:inline-flex">
+              <Button
+                size="small"
+                appearance="subtle"
+                icon={<FolderRegular fontSize={12} />}
+                onClick={() => setIsResumesModalOpen(true)}
+                title="Switch or manage resume versions"
+                style={{
+                  height: 22,
+                  padding: '0 8px',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  backgroundColor: tokens.colorNeutralBackground3,
+                  borderRadius: 999,
+                }}
+              >
+                <span className="max-w-28 truncate">{activeProfileName}</span>
+              </Button>
+            </div>
             <span
               className="hidden sm:inline-flex items-center gap-1 text-[11px] pl-1"
               style={{
@@ -172,11 +199,11 @@ export const Ribbon: React.FC = () => {
                 onClick={redo}
               />
             </Tooltip>
-            <Tooltip content="Print or save PDF (Ctrl+P)" relationship="label">
+            <Tooltip content="Preflight & save PDF (Ctrl+P)" relationship="label">
               <ToolbarButton
                 aria-label="Print"
                 icon={<PrintRegular />}
-                onClick={() => window.print()}
+                onClick={triggerPrintWithPreflight}
               />
             </Tooltip>
             <Tooltip content="Import resume PDF" relationship="label">

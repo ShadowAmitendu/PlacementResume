@@ -9,13 +9,13 @@ import {
   Label,
   tokens,
 } from '@fluentui/react-components';
-import { TextBulletListLtrRegular, TextFontRegular } from '@fluentui/react-icons';
+import { TextBulletListLtrRegular, TextFontRegular, DocumentSparkleRegular } from '@fluentui/react-icons';
 import { useResume } from '../../../context/ResumeContext';
 import { THEMES, SECTION_MARKERS, FONT_OPTIONS } from '../../../constants/themes';
-import { RibbonGroup } from '../RibbonGroup';
+import { RibbonGroup, RibbonActionButton } from '../RibbonGroup';
 
 export const DesignTab: React.FC = () => {
-  const { resumeData, setTheme, setMarker, setFont } = useResume();
+  const { resumeData, setTheme, setMarker, setFont, setIsTemplatesModalOpen } = useResume();
   const currentTheme = resumeData.meta.theme;
   const currentMarker = resumeData.meta.marker;
   const currentFont = resumeData.meta.font;
@@ -28,6 +28,16 @@ export const DesignTab: React.FC = () => {
 
   return (
     <div className="flex items-stretch h-full gap-1 overflow-x-auto scrollbar-none flex-nowrap">
+      {/* Templates */}
+      <RibbonGroup label="Layout gallery">
+        <RibbonActionButton
+          icon={<DocumentSparkleRegular />}
+          label="Templates"
+          onClick={() => setIsTemplatesModalOpen(true)}
+          title="Browse placement & developer resume templates"
+        />
+      </RibbonGroup>
+
       {/* Document Color Themes */}
       <RibbonGroup label="Accent theme">
         <SwatchPicker
