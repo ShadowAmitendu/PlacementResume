@@ -72,15 +72,16 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
 
   return (
     <footer
-      className="fixed bottom-0 left-0 right-0 z-30 h-7 px-3 sm:px-4 flex items-center justify-between text-[11px] select-none no-print gap-2"
+      className="fixed bottom-0 left-0 right-0 z-30 min-h-8 sm:min-h-7 py-0.5 px-2 sm:px-4 flex items-center justify-between text-[11px] select-none no-print gap-1.5 sm:gap-2"
       style={{
         backgroundColor: tokens.colorNeutralBackground2,
         borderTop: `1px solid ${tokens.colorNeutralStroke1}`,
         color: tokens.colorNeutralForeground2,
+        paddingBottom: 'max(2px, env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Left: Document Metrics */}
-      <div className="flex items-center gap-2.5 flex-nowrap overflow-x-auto shrink">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 flex-nowrap overflow-x-auto scrollbar-none min-w-0 shrink">
         <span
           className="flex items-center gap-1 font-medium shrink-0"
           style={{ color: tokens.colorNeutralForeground1 }}
@@ -157,14 +158,15 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
       </div>
 
       {/* Right: Find & Zoom */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <Button
           appearance="subtle"
           size="small"
+          aria-label="Find and replace"
           icon={<SearchRegular />}
           onClick={() => setIsFindReplaceModalOpen(true)}
           title="Find and replace (Ctrl+F)"
-          style={{ minWidth: 'auto', height: 22, fontSize: 11 }}
+          style={{ minWidth: 'auto', height: 24, fontSize: 11 }}
         >
           <span className="hidden sm:inline">Find</span>
         </Button>
@@ -179,7 +181,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
             icon={<ZoomOutRegular />}
             disabled={zoom <= MIN_ZOOM}
             onClick={() => handleZoomChange(-0.1)}
-            style={{ minWidth: 24, height: 22 }}
+            style={{ minWidth: 26, height: 24 }}
           />
         </Tooltip>
 
@@ -188,7 +190,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
           size="small"
           onClick={() => setZoom(1.0)}
           title="Reset zoom to 100%"
-          style={{ minWidth: 42, height: 22, fontSize: 11, fontFamily: 'monospace' }}
+          style={{ minWidth: 40, height: 24, fontSize: 11, fontFamily: 'monospace' }}
         >
           {Math.round(zoom * 100)}%
         </Button>
@@ -201,7 +203,7 @@ export const DocumentStatusBar: React.FC<DocumentStatusBarProps> = ({
             icon={<ZoomInRegular />}
             disabled={zoom >= MAX_ZOOM}
             onClick={() => handleZoomChange(0.1)}
-            style={{ minWidth: 24, height: 22 }}
+            style={{ minWidth: 26, height: 24 }}
           />
         </Tooltip>
       </div>

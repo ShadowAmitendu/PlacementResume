@@ -172,7 +172,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     updateSection(section.id, { colWidths: balanced });
   };
 
-  const handleResizerMouseDown = (colIndex: number, e: React.MouseEvent) => {
+  const handleResizerPointerDown = (colIndex: number, e: React.PointerEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -182,19 +182,26 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
     if (tableWidth <= 0) return;
 
     const startX = e.clientX;
+    const pointerId = e.pointerId;
     const currentWidths = [...activeWidths];
     const startWidthA = currentWidths[colIndex];
     const startWidthB = currentWidths[colIndex + 1];
     const pairTotal = Math.round((startWidthA + startWidthB) * 10) / 10;
 
     const resizerEl = e.currentTarget as HTMLElement;
+    try {
+      resizerEl.setPointerCapture(pointerId);
+    } catch {
+      // Ignore if synthetic event lacks active pointerId
+    }
     resizerEl.classList.add('resizing');
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
     let latestWidths = currentWidths;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
       // clientX delta and table.getBoundingClientRect().width are both in zoomed screen pixels
       const deltaPercent = ((moveEvent.clientX - startX) / tableWidth) * 100;
 
@@ -216,17 +223,27 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerEnd = (endEvent: PointerEvent) => {
+      if (endEvent.pointerId !== pointerId) return;
+      try {
+        if (resizerEl.hasPointerCapture(pointerId)) {
+          resizerEl.releasePointerCapture(pointerId);
+        }
+      } catch {
+        // Ignore
+      }
       resizerEl.classList.remove('resizing');
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerEnd);
+      document.removeEventListener('pointercancel', handlePointerEnd);
       updateSection(section.id, { colWidths: latestWidths });
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerEnd);
+    document.addEventListener('pointercancel', handlePointerEnd);
   };
 
   return (
@@ -274,7 +291,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
                   />
                   {colIdx < colCount - 1 && (
                     <div
-                      onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
+                      onPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
                       onDoubleClick={handleResetWidths}
                       className="resizer no-print"
                       title="Drag to resize column (Double-click to balance)"
@@ -323,7 +340,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
 
                   {colIdx === row.length - 1 && (
                     <div
-                      className="row-actions-pill absolute -right-10 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
+                      className="row-actions-pill absolute -right-7 sm:-right-9 top-1/2 -translate-y-1/2 rounded-md px-1 py-0.5 flex items-center gap-0.5 z-30 no-print text-[11px]"
                       style={{
                         backgroundColor: '#ffffff',
                         border: '1px solid #d4d4d4',
@@ -364,7 +381,7 @@ export const TableSection: React.FC<TableSectionProps> = ({ section }) => {
 
                   {!section.headers && rowIdx === 0 && colIdx < colCount - 1 && (
                     <div
-                      onMouseDown={(e) => handleResizerMouseDown(colIdx, e)}
+                      onPointerDown={(e) => handleResizerPointerDown(colIdx, e)}
                       onDoubleClick={handleResetWidths}
                       className="resizer no-print"
                       title="Drag to resize column (Double-click to balance)"

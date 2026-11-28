@@ -101,7 +101,7 @@ export const FindReplaceModal: React.FC = () => {
       open={isFindReplaceModalOpen}
       onOpenChange={(_, data) => setIsFindReplaceModalOpen(data.open)}
     >
-      <DialogSurface style={{ maxWidth: 440 }}>
+      <DialogSurface style={{ maxWidth: 'min(440px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={

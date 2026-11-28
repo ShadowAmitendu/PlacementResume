@@ -90,13 +90,16 @@ export const Ribbon: React.FC = () => {
     >
       {/* Top Word Title Bar & Quick Access Toolbar */}
       <div
-        className="h-10 px-3 sm:px-4 flex items-center justify-between gap-2 relative"
+        className="h-10 px-2 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-2 relative"
         style={{
           borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
         }}
       >
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div className="flex items-center gap-2 shrink-0">
+        <div
+          className="flex items-center gap-1 sm:gap-2.5 min-w-0 flex-1 overflow-x-auto scrollbar-none touch-pan-x"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div
               className="w-6 h-6 rounded flex items-center justify-center shrink-0"
               style={{
@@ -107,7 +110,7 @@ export const Ribbon: React.FC = () => {
               <DocumentTextFilled fontSize={14} />
             </div>
             <span
-              className="font-semibold text-xs sm:text-sm tracking-tight"
+              className="hidden min-[440px]:inline font-semibold text-xs sm:text-sm tracking-tight"
               style={{ color: tokens.colorNeutralForeground1 }}
             >
               PlacementResume
@@ -218,6 +221,15 @@ export const Ribbon: React.FC = () => {
 
         {/* Right: Appearance & Collapse Controls */}
         <div className="flex items-center gap-0.5 shrink-0">
+          <div className="md:hidden">
+            <Tooltip content="Find and replace (Ctrl+F)" relationship="label">
+              <ToolbarButton
+                aria-label="Find and replace"
+                icon={<SearchRegular />}
+                onClick={() => setIsFindReplaceModalOpen(true)}
+              />
+            </Tooltip>
+          </div>
           <Tooltip
             content={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             relationship="label"
@@ -244,7 +256,8 @@ export const Ribbon: React.FC = () => {
       {/* Ribbon Tab Navigation Strip */}
       <nav
         aria-label="Ribbon Tabs"
-        className="flex items-center px-2 sm:px-4 overflow-x-auto scrollbar-none flex-nowrap h-9 gap-1"
+        className="flex items-center px-2 sm:px-4 overflow-x-auto scrollbar-none touch-pan-x flex-nowrap h-9 gap-1"
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <Button
           size="small"
@@ -300,7 +313,8 @@ export const Ribbon: React.FC = () => {
       >
         <div
           key={activeTab}
-          className="h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none flex items-center"
+          className="h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none touch-pan-x flex items-center"
+          style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {activeTab === 'home' && <HomeTab />}
           {activeTab === 'insert' && <InsertTab />}

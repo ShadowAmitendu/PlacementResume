@@ -8,10 +8,8 @@
 
 /* ── RESUME CONTAINER ───────────────────────────────────── */
 #resumeContainer {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  transform-origin: top center;
+  display: block;
+  transform-origin: top left;
   overflow: visible;
 }
 
@@ -27,7 +25,6 @@
   padding: 10mm 15mm;
   box-shadow: 0 4px 40px rgba(0, 0, 0, 0.25);
   border: 2px solid var(--theme-color);
-  margin-bottom: 20px;
   position: relative;
   font-family: var(--main-font), serif;
   font-size: 11.5pt;
@@ -392,6 +389,7 @@ ol.skills-list-numbered li {
   border-radius: 4px;
   display: flex;
   align-items: center;
+  touch-action: none;
 }
 
 .block-controls .drag-handle:hover {
@@ -404,13 +402,27 @@ ol.skills-list-numbered li {
 }
 
 @media (pointer: coarse) {
-  .block-controls button {
-    min-width: 32px;
-    min-height: 32px;
+  .block-controls button,
+  .block-controls .drag-handle,
+  .column-actions-pill button,
+  .row-actions-pill button,
+  .photo-actions-pill button,
+  .sig-actions-pill button {
+    min-width: 30px;
+    min-height: 30px;
   }
   .table-controls button {
     min-height: 32px;
     padding: 6px 10px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .photo-actions-pill,
+  .sig-actions-pill,
+  .list-remove-btn {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
@@ -1087,6 +1099,7 @@ td:focus-within > .row-actions-pill,
   height: 100%;
   cursor: col-resize;
   user-select: none;
+  touch-action: none;
   z-index: 20;
   background: transparent;
 }
@@ -1111,6 +1124,16 @@ td:focus-within > .row-actions-pill,
 .resizer:hover,
 .resizer.resizing {
   background: rgba(0, 0, 0, 0.04);
+}
+
+@media (pointer: coarse) {
+  .resizer {
+    width: 18px;
+    right: -9px;
+  }
+  .resizer::after {
+    left: 8px;
+  }
 }
 
 /* Table Controls (Subtle Word-style monochrome bar below tables) */

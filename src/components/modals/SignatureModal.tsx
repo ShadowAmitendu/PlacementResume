@@ -138,7 +138,7 @@ export const SignatureModal: React.FC = () => {
       open={isSignatureModalOpen}
       onOpenChange={(_, data) => setIsSignatureModalOpen(data.open)}
     >
-      <DialogSurface style={{ maxWidth: 580 }}>
+      <DialogSurface style={{ maxWidth: 'min(580px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={

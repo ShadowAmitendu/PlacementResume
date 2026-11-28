@@ -1,7 +1,7 @@
 /** Exact A4 page height (297mm) at standard CSS 96 DPI. */
 export const A4_HEIGHT_PX = Math.round((297 / 25.4) * 96);
 
-export const MIN_ZOOM = 0.4;
+export const MIN_ZOOM = 0.3;
 export const MAX_ZOOM = 2.0;
 
 const ENTITY_MAP: Record<string, string> = {

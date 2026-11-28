@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -37,15 +37,26 @@ export const ResumeCanvas: React.FC = () => {
   const sections = resumeData.sections;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [wrapperWidth, setWrapperWidth] = useState<number>(794);
   const [wrapperHeight, setWrapperHeight] = useState<number>(0);
   const [printableHeight, setPrintableHeight] = useState<number>(0);
   const [isAutoFit, setIsAutoFit] = useState<boolean>(false);
+
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    if (wrapper.offsetWidth > 0) setWrapperWidth(wrapper.offsetWidth);
+    if (wrapper.offsetHeight > 0) setWrapperHeight(wrapper.offsetHeight);
+  }, []);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
     const updateHeightAndFit = () => {
+      if (wrapper.offsetWidth > 0) {
+        setWrapperWidth(wrapper.offsetWidth);
+      }
       setWrapperHeight(wrapper.offsetHeight);
       const measuredPrintable = measurePrintableResumeHeight(wrapper);
       setPrintableHeight(measuredPrintable);
@@ -135,21 +146,25 @@ export const ResumeCanvas: React.FC = () => {
     .filter(Boolean)
     .join(' ');
 
+  const scaledWidth = wrapperWidth && zoom ? Math.round(wrapperWidth * zoom) : undefined;
+  const scaledHeight = wrapperHeight && zoom ? Math.round(wrapperHeight * zoom) : undefined;
+
   return (
     <>
       <div
-        className="resume-zoom-stage w-full flex justify-center items-start overflow-visible px-1 py-1 print:p-0 print:m-0 print:block"
+        className="resume-zoom-stage mx-auto mb-5 overflow-visible print:p-0 print:m-0 print:block print:w-full print:h-auto"
         style={{
-          minHeight: wrapperHeight && zoom ? `${Math.round(wrapperHeight * zoom)}px` : undefined,
+          width: scaledWidth ? `${scaledWidth}px` : 'fit-content',
+          height: scaledHeight ? `${scaledHeight}px` : undefined,
         }}
       >
         <div
           id="resumeContainer"
           className="fluent-canvas-zoom"
           style={{
+            width: wrapperWidth ? `${wrapperWidth}px` : undefined,
             transform: `scale(${zoom})`,
-            transformOrigin: 'top center',
-            marginBottom: zoom < 1 && wrapperHeight ? `${wrapperHeight * (zoom - 1)}px` : undefined,
+            transformOrigin: 'top left',
           }}
         >
           <div className="print-border" />

@@ -38,7 +38,7 @@ export const ExportModal: React.FC = () => {
       open={isExportModalOpen}
       onOpenChange={(_, data) => setIsExportModalOpen(data.open)}
     >
-      <DialogSurface style={{ maxWidth: 420 }}>
+      <DialogSurface style={{ maxWidth: 'min(420px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={

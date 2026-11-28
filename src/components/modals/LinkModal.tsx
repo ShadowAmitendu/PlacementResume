@@ -98,7 +98,7 @@ export const LinkModal: React.FC = () => {
         if (!data.open) handleClose();
       }}
     >
-      <DialogSurface style={{ maxWidth: 460 }}>
+      <DialogSurface style={{ maxWidth: 'min(460px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={
@@ -120,7 +120,7 @@ export const LinkModal: React.FC = () => {
           <DialogContent>
             <div className="space-y-4 py-1">
               <Field label="Icon">
-                <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-0.5">
                   {ICON_OPTIONS.map((opt) => (
                     <Button
                       key={opt.key}
@@ -163,7 +163,7 @@ export const LinkModal: React.FC = () => {
             </div>
           </DialogContent>
 
-          <DialogActions style={{ justifyContent: 'space-between', width: '100%' }}>
+          <DialogActions style={{ justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: 8 }}>
             {editingLink ? (
               <Button
                 appearance="subtle"

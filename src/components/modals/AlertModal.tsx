@@ -22,7 +22,7 @@ export const AlertModal: React.FC = () => {
         if (!data.open) closeAlert();
       }}
     >
-      <DialogSurface style={{ maxWidth: 400 }}>
+      <DialogSurface style={{ maxWidth: 'min(400px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={

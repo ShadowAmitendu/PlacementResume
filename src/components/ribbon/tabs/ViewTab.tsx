@@ -33,7 +33,8 @@ export const ViewTab: React.FC<ViewTabProps> = ({
   };
 
   const handleAutoFit = () => {
-    const availableWidth = window.innerWidth - 32;
+    const sidePadding = window.innerWidth < 640 ? 20 : 52;
+    const availableWidth = Math.max(240, window.innerWidth - sidePadding);
     const resumeWidth = 794;
     const fitScale = Math.max(
       MIN_ZOOM,

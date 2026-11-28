@@ -329,7 +329,7 @@ export const PdfAiImportModal: React.FC = () => {
       open={isPdfAiModalOpen}
       onOpenChange={(_, data) => setIsPdfAiModalOpen(data.open)}
     >
-      <DialogSurface style={{ maxWidth: 580, maxHeight: '90vh', overflowY: 'auto' }}>
+      <DialogSurface style={{ maxWidth: 'min(580px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={

@@ -319,7 +319,7 @@ export const ImageCropModal: React.FC = () => {
       open={isCropModalOpen}
       onOpenChange={(_, data) => setIsCropModalOpen(data.open)}
     >
-      <DialogSurface style={{ maxWidth: 640 }}>
+      <DialogSurface style={{ maxWidth: 'min(640px, calc(100vw - 24px))', width: '100%', maxHeight: '90dvh', overflowY: 'auto' }}>
         <DialogBody>
           <DialogTitle
             action={
@@ -459,7 +459,7 @@ export const ImageCropModal: React.FC = () => {
             </div>
           </DialogContent>
 
-          <DialogActions style={{ justifyContent: 'space-between', width: '100%' }}>
+          <DialogActions style={{ justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: 8 }}>
             <div>
               <Button
                 appearance="outline"
