@@ -45,6 +45,15 @@ const MAIN_TABS: Array<{ id: Exclude<RibbonTabType, 'file'>; label: string }> = 
   { id: 'view', label: 'View' },
 ];
 
+const TAB_ORDER: Record<RibbonTabType, number> = {
+  file: 0,
+  home: 1,
+  insert: 2,
+  layout: 3,
+  design: 4,
+  view: 5,
+};
+
 export const Ribbon: React.FC = () => {
   const {
     saveToBrowser,
@@ -67,24 +76,28 @@ export const Ribbon: React.FC = () => {
     profiles.find((p) => p.id === activeProfileId)?.name || 'Main Resume';
 
   const [activeTab, setActiveTab] = useState<RibbonTabType>('home');
+  const [slideDir, setSlideDir] = useState<'from-right' | 'from-left' | null>(null);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
-  const handleMainTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
-    const tab = data.value as RibbonTabType;
-    setActiveTab(tab);
+  const selectTabWithDirection = (nextTab: RibbonTabType) => {
+    if (activeTab !== nextTab) {
+      setSlideDir(TAB_ORDER[nextTab] > TAB_ORDER[activeTab] ? 'from-right' : 'from-left');
+      setActiveTab(nextTab);
+    }
     if (isCollapsed) {
       setIsCollapsed(false);
     }
+  };
+
+  const handleMainTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
+    selectTabWithDirection(data.value as RibbonTabType);
   };
 
   const handleTabToggle = (tab: RibbonTabType) => {
     if (activeTab === tab) {
       setIsCollapsed((prev) => !prev);
     } else {
-      setActiveTab(tab);
-      if (isCollapsed) {
-        setIsCollapsed(false);
-      }
+      selectTabWithDirection(tab);
     }
   };
 
@@ -340,7 +353,13 @@ export const Ribbon: React.FC = () => {
       >
         <div
           key={activeTab}
-          className="h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none touch-pan-x flex items-center"
+          className={`h-[88px] px-2 sm:px-3 overflow-x-auto scrollbar-none touch-pan-x flex items-center ribbon-tab-panel ${
+            slideDir === 'from-right'
+              ? 'ribbon-slide-from-right'
+              : slideDir === 'from-left'
+              ? 'ribbon-slide-from-left'
+              : ''
+          }`}
           style={{ WebkitOverflowScrolling: 'touch' }}
         >
           {activeTab === 'home' && <HomeTab />}

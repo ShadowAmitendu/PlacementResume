@@ -63,6 +63,44 @@ html.dark body {
               opacity 160ms cubic-bezier(0.1, 0.9, 0.2, 1);
 }
 
+/* Directional sliding motion when switching ribbon tabs */
+@keyframes ribbonSlideFromRight {
+  from {
+    opacity: 0;
+    transform: translate3d(28px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ribbonSlideFromLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-28px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.ribbon-slide-from-right {
+  animation: ribbonSlideFromRight 220ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+.ribbon-slide-from-left {
+  animation: ribbonSlideFromLeft 220ms cubic-bezier(0.1, 0.9, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ribbon-slide-from-right,
+  .ribbon-slide-from-left {
+    animation: none;
+  }
+}
+
 @media print {
   :root,
   html,
